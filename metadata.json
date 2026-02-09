@@ -1,0 +1,7 @@
+{
+  "name": "K-Mirror AI",
+  "description": "A global K-Beauty stylist AI that analyzes your face and skin tone to adapt K-celeb styles for your unique beauty. Includes ethnic-inclusive tone analysis and 'Sherlock' facial structure proportions.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
