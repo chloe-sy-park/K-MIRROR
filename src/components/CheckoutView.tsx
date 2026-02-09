@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Globe, Truck, ShieldCheck, Sparkles } from 'lucide-react';
-import { AnalysisResult } from '../types';
+import { AnalysisResult, UserPreferences } from '../types';
 
-const CheckoutView: React.FC<{ result: AnalysisResult | null }> = ({ result }) => {
+const CheckoutView: React.FC<{
+  result: AnalysisResult | null;
+  prefs: UserPreferences;
+}> = ({ result, prefs }) => {
   const [shippingMethod, setShippingMethod] = useState('dhl');
 
   const subtotal =
@@ -29,6 +32,24 @@ const CheckoutView: React.FC<{ result: AnalysisResult | null }> = ({ result }) =
           <span className="italic underline decoration-1 underline-offset-8">Archive.</span>
         </h2>
       </header>
+
+      {/* Profile Context Banner (state from Onboarding persists here) */}
+      <div className="flex flex-wrap gap-4 mb-16">
+        <span className="text-[9px] font-black uppercase tracking-widest bg-gray-50 px-4 py-2 rounded-full border border-gray-100">
+          Environment: {prefs.environment}
+        </span>
+        <span className="text-[9px] font-black uppercase tracking-widest bg-gray-50 px-4 py-2 rounded-full border border-gray-100">
+          Skill: {prefs.skill}
+        </span>
+        <span className="text-[9px] font-black uppercase tracking-widest bg-gray-50 px-4 py-2 rounded-full border border-gray-100">
+          Mood: {prefs.mood}
+        </span>
+        {result && (
+          <span className="text-[9px] font-black uppercase tracking-widest bg-[#FF4D8D]/5 px-4 py-2 rounded-full border border-[#FF4D8D]/10 text-[#FF4D8D]">
+            Melanin L{result.tone.melaninIndex} &middot; {result.tone.undertone}
+          </span>
+        )}
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-20">
         {/* Left Column: Forms */}

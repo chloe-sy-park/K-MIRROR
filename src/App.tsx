@@ -364,10 +364,10 @@ export default function App() {
           )}
 
           {/* CHECKOUT */}
-          {step === AppStep.CHECKOUT && <CheckoutView result={result} />}
+          {step === AppStep.CHECKOUT && <CheckoutView result={result} prefs={prefs} />}
 
           {/* STYLIST: Expert Matching */}
-          {step === AppStep.STYLIST && <ExpertView />}
+          {step === AppStep.STYLIST && <ExpertView result={result} />}
 
           {/* SETTINGS */}
           {step === AppStep.SETTINGS && (

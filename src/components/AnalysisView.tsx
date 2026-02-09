@@ -6,29 +6,44 @@ import {
 } from 'lucide-react';
 import { AnalysisResult } from '../types';
 
-/* ── Inclusion Guard: Swatch Simulation ───────────────── */
+/* ── Inclusion Guard: Dual Swatch (Standard vs Personalized) */
 
-const SwatchPreview: React.FC<{ color: string; label: string; melaninIndex: number }> = ({
-  color,
-  label,
-  melaninIndex,
-}) => {
-  // Simulate how a product color renders on different skin tones
-  // Darker skin (higher melanin) = deeper swatch overlay
-  const opacity = Math.max(0.3, 1 - melaninIndex * 0.12);
+const DualSwatch: React.FC<{
+  originalColor: string;
+  label: string;
+  melaninIndex: number;
+}> = ({ originalColor, label, melaninIndex }) => {
+  // Layered rendering: simulate how the product's standard color
+  // appears on the user's specific Fitzpatrick-level skin tone
+  const personalizedOpacity = Math.max(0.25, 1 - melaninIndex * 0.13);
+  const skinOverlay = melaninIndex * 0.05;
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <div className="relative w-10 h-10 rounded-full border border-gray-100 shadow-sm overflow-hidden">
-        <div className="absolute inset-0" style={{ backgroundColor: color, opacity }} />
-        <div
-          className="absolute inset-0 rounded-full"
-          style={{
-            background: `radial-gradient(circle, transparent 40%, rgba(0,0,0,${melaninIndex * 0.04}) 100%)`,
-          }}
-        />
+      <div className="flex gap-1.5 items-end">
+        {/* Standard Swatch (original product color) */}
+        <div className="flex flex-col items-center">
+          <div
+            className="w-8 h-8 rounded-full border border-gray-100 shadow-sm"
+            style={{ backgroundColor: originalColor }}
+          />
+          <span className="text-[6px] font-black text-gray-300 mt-1 uppercase">Std</span>
+        </div>
+        {/* Arrow indicator */}
+        <span className="text-[8px] text-gray-200 mb-3">→</span>
+        {/* Personalized Swatch (Inclusion Guard adaptation) */}
+        <div className="flex flex-col items-center">
+          <div className="relative w-8 h-8 rounded-full border-2 border-[#FF4D8D]/30 shadow-sm overflow-hidden">
+            <div className="absolute inset-0" style={{ backgroundColor: originalColor, opacity: personalizedOpacity }} />
+            <div
+              className="absolute inset-0 rounded-full"
+              style={{ background: `radial-gradient(circle, transparent 30%, rgba(0,0,0,${skinOverlay}) 100%)` }}
+            />
+          </div>
+          <span className="text-[6px] font-black text-[#FF4D8D] mt-1 uppercase">You</span>
+        </div>
       </div>
-      <span className="text-[8px] font-black uppercase tracking-widest text-gray-400">{label}</span>
+      <span className="text-[7px] font-black uppercase tracking-widest text-gray-400">{label}</span>
     </div>
   );
 };
@@ -80,11 +95,11 @@ const ProductCard: React.FC<{
       <p className="text-[9px] font-black text-primary uppercase mb-1">{product.brand}</p>
       <h4 className="text-lg heading-font italic mb-2 uppercase leading-none">{product.name}</h4>
 
-      {/* Inclusion Guard: swatch preview based on user's melanin */}
-      <div className="flex gap-3 mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-        <SwatchPreview color="#c4544a" label="Lip" melaninIndex={melaninIndex} />
-        <SwatchPreview color="#d4917a" label="Cheek" melaninIndex={melaninIndex} />
-        <SwatchPreview color="#e8c9a0" label="Base" melaninIndex={melaninIndex} />
+      {/* Inclusion Guard: Standard vs Personalized dual swatch */}
+      <div className="flex gap-4 mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+        <DualSwatch originalColor="#c4544a" label="Lip" melaninIndex={melaninIndex} />
+        <DualSwatch originalColor="#d4917a" label="Cheek" melaninIndex={melaninIndex} />
+        <DualSwatch originalColor="#e8c9a0" label="Base" melaninIndex={melaninIndex} />
       </div>
 
       {/* Glossier-style: price & add button appear on hover */}

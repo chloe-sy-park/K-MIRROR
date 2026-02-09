@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Globe, Plus, ArrowUpRight, Send, ShoppingBag, Languages,
 } from 'lucide-react';
-import { ChatMessage, Expert, Product } from '../types';
+import { ChatMessage, Expert, Product, AnalysisResult, VideoRecommendation } from '../types';
 
 /* ── Expert Data ────────────────────────────────────────── */
 
@@ -146,9 +146,25 @@ const ChatBubble: React.FC<{
   );
 };
 
+/* ── Curated Tutorial Card (based on analysis data) ─────── */
+
+const CuratedTutorial: React.FC<{ video: VideoRecommendation }> = ({ video }) => (
+  <div className="flex items-center gap-5 p-5 bg-white border border-gray-100 rounded-2xl hover:shadow-lg transition-all cursor-pointer group">
+    <div className="w-16 h-16 bg-gray-50 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-black group-hover:text-white transition-all">
+      <Globe size={18} className="text-gray-300 group-hover:text-white" />
+    </div>
+    <div className="flex-1 min-w-0">
+      <p className="text-[9px] font-black text-[#FF4D8D] uppercase tracking-widest mb-1">{video.creator}</p>
+      <p className="text-xs font-bold truncate uppercase">{video.title}</p>
+      <p className="text-[9px] text-gray-400 font-medium mt-1">{video.tag} &middot; {video.skillLevel}</p>
+    </div>
+    <span className="text-[10px] font-black text-gray-300">{video.matchPercentage}%</span>
+  </div>
+);
+
 /* ── Main Expert View ───────────────────────────────────── */
 
-const ExpertView: React.FC = () => {
+const ExpertView: React.FC<{ result?: AnalysisResult | null }> = ({ result }) => {
   const [selectedExpert, setSelectedExpert] = useState<Expert | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>(DEMO_MESSAGES);
   const [inputText, setInputText] = useState('');
@@ -267,6 +283,33 @@ const ExpertView: React.FC = () => {
             </div>
           ))}
         </section>
+
+        {/* Curated Tutorials (connected to analysis data) */}
+        {result?.recommendations?.videos && result.recommendations.videos.length > 0 && (
+          <section className="py-20 border-t border-black/5">
+            <div className="flex items-center justify-between mb-10">
+              <div>
+                <p className="text-[10px] font-black tracking-[0.4em] text-[#FF4D8D] mb-2 uppercase">
+                  AI Curation — Based on Your DNA
+                </p>
+                <h3 className="text-2xl heading-font italic uppercase">
+                  Your Visual Study Queue
+                </h3>
+              </div>
+              <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest">
+                {result.recommendations.videos.length} Tutorials
+              </span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {result.recommendations.videos.map((video, idx) => (
+                <CuratedTutorial key={idx} video={video} />
+              ))}
+            </div>
+            <p className="text-[9px] text-gray-300 font-medium mt-6 text-center uppercase tracking-widest">
+              Curated from your aesthetic ({result.sherlock.facialVibe}) + bone structure ({result.sherlock.boneStructure})
+            </p>
+          </section>
+        )}
 
         {/* Quote Section */}
         <section className="py-32 text-center">

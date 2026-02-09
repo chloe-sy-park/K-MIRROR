@@ -104,3 +104,27 @@ export interface Expert {
   rate: string;
   tag: string;
 }
+
+/* ── UserDNA (Unified state from Onboarding → Checkout) ── */
+
+export interface UserDNA {
+  melaninIndex: 1 | 2 | 3 | 4 | 5 | 6;  // Fitzpatrick Scale
+  boneMetrics: {
+    eyeAngle: number;                     // e.g., +12
+    middleFaceRatio: number;              // e.g., 1.2
+    cheekboneDepth: 'High' | 'Low';
+  };
+  environment: 'Dry Office' | 'Humid Outdoor' | 'Studio';
+  skillLevel: 'Beginner' | 'Pro';
+  preferredAesthetic: string[];
+}
+
+/* ── AnalysisReport (extends UserDNA with results) ──────── */
+
+export interface AnalysisReport extends UserDNA {
+  recommendedPalette: {
+    originalColor: string;   // The K-Product standard swatch
+    adaptedColor: string;    // Simulation for user's tone (Inclusion Guard)
+  };
+  expertNotes?: string;
+}
