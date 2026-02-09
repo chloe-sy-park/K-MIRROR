@@ -5,11 +5,12 @@ import {
   User, Sparkles, ShoppingBag, Heart, Globe,
 } from 'lucide-react';
 import { AppStep, AnalysisResult, UserPreferences } from './types';
-import { analyzeKBeauty } from './services/geminiService';
+import { MOCK_ANALYSIS_RESULT } from './services/mockData';
 import OnboardingView from './components/OnboardingView';
 import AnalysisView from './components/AnalysisView';
 import ExpertView from './components/ExpertView';
 import CheckoutView from './components/CheckoutView';
+import MuseBoardView from './components/MuseBoardView';
 
 /* ── Shared UI Components ───────────────────────────────── */
 
@@ -84,18 +85,11 @@ const SherlockScanOverlay: React.FC = () => (
     viewBox="0 0 300 400"
     fill="none"
   >
-    {/* Horizontal scan lines */}
     <line x1="30" y1="120" x2="270" y2="120" stroke="#FF4D8D" strokeWidth="0.5" className="sherlock-line" style={{ animationDelay: '0.2s' }} />
     <line x1="30" y1="200" x2="270" y2="200" stroke="#FF4D8D" strokeWidth="0.5" className="sherlock-line" style={{ animationDelay: '0.6s' }} />
     <line x1="30" y1="280" x2="270" y2="280" stroke="#FF4D8D" strokeWidth="0.5" className="sherlock-line" style={{ animationDelay: '1.0s' }} />
-
-    {/* Eye angle lines */}
     <line x1="90" y1="155" x2="210" y2="145" stroke="#FF4D8D" strokeWidth="0.8" className="sherlock-line" style={{ animationDelay: '1.2s' }} />
-
-    {/* Face contour guides */}
     <line x1="150" y1="60" x2="150" y2="350" stroke="white" strokeWidth="0.3" opacity="0.4" className="sherlock-line" style={{ animationDelay: '0.4s' }} />
-
-    {/* Data labels */}
     <text x="275" y="123" fill="#FF4D8D" fontSize="7" fontFamily="monospace" className="sherlock-line" style={{ animationDelay: '0.5s' }}>UPPER</text>
     <text x="275" y="203" fill="#FF4D8D" fontSize="7" fontFamily="monospace" className="sherlock-line" style={{ animationDelay: '0.9s' }}>MID</text>
     <text x="275" y="283" fill="#FF4D8D" fontSize="7" fontFamily="monospace" className="sherlock-line" style={{ animationDelay: '1.3s' }}>LOWER</text>
@@ -120,17 +114,14 @@ export default function App() {
 
   /* ── Handlers ──── */
 
-  const handleAnalyze = async () => {
+  const handleAnalyze = () => {
     if (!userImage || !celebImage) return;
-    try {
-      setStep(AppStep.ANALYZING);
-      const res = await analyzeKBeauty(userImage, celebImage, isSensitive, prefs);
-      setResult(res);
+    setStep(AppStep.ANALYZING);
+    // Simulated analysis with mock data (replace with Gemini API call later)
+    setTimeout(() => {
+      setResult(MOCK_ANALYSIS_RESULT);
       setStep(AppStep.RESULT);
-    } catch (err) {
-      console.error(err);
-      setStep(AppStep.IDLE);
-    }
+    }, 3500);
   };
 
   const handleOnboardingComplete = (p: UserPreferences) => {
@@ -180,14 +171,14 @@ export default function App() {
       </AnimatePresence>
 
       {/* ── Navigation ────────────────────────────────── */}
-      <nav className="fixed top-0 w-full z-[150] bg-white/80 backdrop-blur-xl border-b border-gray-100 px-6 lg:px-12 py-5 transition-all">
+      <nav className="fixed top-0 w-full z-[150] bg-white/80 backdrop-blur-xl border-b border-gray-100 px-4 sm:px-6 lg:px-12 py-4 lg:py-5 transition-all">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           {/* Logo */}
           <div
             className="flex items-center gap-2 cursor-pointer"
             onClick={() => setStep(AppStep.IDLE)}
           >
-            <h1 className="text-2xl font-black heading-font tracking-tight italic uppercase">
+            <h1 className="text-xl sm:text-2xl font-black heading-font tracking-tight italic uppercase">
               K-MIRROR <span className="text-[#FF4D8D] not-italic">AI</span>
             </h1>
           </div>
@@ -210,15 +201,15 @@ export default function App() {
           </div>
 
           {/* Right Icons */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             <button
               className="lg:hidden p-2 cursor-pointer"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
-            <div className="w-10 h-10 md:w-11 md:h-11 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center cursor-pointer overflow-hidden shadow-sm hover:shadow-md transition-all">
-              <User size={18} className="text-gray-400" />
+            <div className="w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center cursor-pointer overflow-hidden shadow-sm hover:shadow-md transition-all">
+              <User size={16} className="text-gray-400" />
             </div>
           </div>
         </div>
@@ -230,9 +221,9 @@ export default function App() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="lg:hidden absolute top-full left-0 w-full bg-white border-b border-gray-100 p-8 shadow-2xl"
+              className="lg:hidden absolute top-full left-0 w-full bg-white border-b border-gray-100 p-6 sm:p-8 shadow-2xl"
             >
-              <div className="flex flex-col gap-10">
+              <div className="flex flex-col gap-8">
                 {mobileNavItems.map((item) => (
                   <button
                     key={item.id}
@@ -240,7 +231,7 @@ export default function App() {
                       setStep(item.id);
                       setIsMenuOpen(false);
                     }}
-                    className={`flex items-center gap-6 text-sm font-black uppercase tracking-widest cursor-pointer ${
+                    className={`flex items-center gap-5 text-sm font-black uppercase tracking-widest cursor-pointer ${
                       isActiveNav(item.id) ? 'text-[#FF4D8D]' : 'text-gray-400'
                     }`}
                   >
@@ -254,7 +245,7 @@ export default function App() {
       </nav>
 
       {/* ── Main Content ──────────────────────────────── */}
-      <main className="flex-1 pt-32 pb-24 px-6 lg:px-12 max-w-7xl mx-auto w-full min-h-screen">
+      <main className="flex-1 pt-24 sm:pt-28 lg:pt-32 pb-20 lg:pb-24 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto w-full min-h-screen">
         <AnimatePresence mode="wait">
           {/* IDLE: Upload & Scan */}
           {step === AppStep.IDLE && (
@@ -263,25 +254,25 @@ export default function App() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="flex flex-col lg:flex-row items-center gap-16 lg:py-12"
+              className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16 lg:py-12"
             >
-              <div className="flex-1 text-center lg:text-left space-y-10">
+              <div className="flex-1 text-center lg:text-left space-y-8 lg:space-y-10">
                 <div>
-                  <p className="text-[10px] font-black text-[#FF4D8D] uppercase tracking-[0.5em] mb-6">
+                  <p className="text-[10px] font-black text-[#FF4D8D] uppercase tracking-[0.5em] mb-4 lg:mb-6">
                     Biometric Style Lab
                   </p>
-                  <h2 className="text-6xl lg:text-8xl font-black heading-font leading-[0.9] tracking-tight uppercase mb-10">
+                  <h2 className="text-5xl sm:text-6xl lg:text-8xl font-black heading-font leading-[0.9] tracking-tight uppercase mb-6 lg:mb-10">
                     Reflect Your
                     <br />
                     <span className="text-gray-300">Inner Idol.</span>
                   </h2>
-                  <p className="text-base lg:text-lg text-gray-500 mb-12 max-w-md leading-relaxed mx-auto lg:mx-0 font-medium italic uppercase tracking-tight">
+                  <p className="text-sm sm:text-base lg:text-lg text-gray-500 mb-8 lg:mb-12 max-w-md leading-relaxed mx-auto lg:mx-0 font-medium italic uppercase tracking-tight">
                     Your ethnic features and bone structure decoded by AI.
                     <br />
                     For your authentic, unfiltered beauty.
                   </p>
                 </div>
-                <div className="grid grid-cols-2 gap-6 md:gap-10 mb-12">
+                <div className="grid grid-cols-2 gap-4 sm:gap-6 md:gap-10 mb-8 lg:mb-12">
                   <LuxuryFileUpload
                     label="Base Portrait"
                     preview={userImage}
@@ -295,13 +286,13 @@ export default function App() {
                     secondaryLabel="Pinterest Inspiration"
                   />
                 </div>
-                <div className="flex flex-col sm:flex-row gap-8 justify-center lg:justify-start items-center">
-                  <div className="flex items-center gap-6 bg-gray-50/50 px-8 py-5 rounded-[2.5rem] border border-gray-100 backdrop-blur-sm">
+                <div className="flex flex-col sm:flex-row gap-5 sm:gap-8 justify-center lg:justify-start items-center">
+                  <div className="flex items-center gap-4 sm:gap-6 bg-gray-50/50 px-6 sm:px-8 py-4 sm:py-5 rounded-[2.5rem] border border-gray-100 backdrop-blur-sm">
                     <div className="flex flex-col">
-                      <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 leading-none mb-1">
+                      <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-gray-400 leading-none mb-1">
                         Sensitivity
                       </span>
-                      <span className="text-[10px] font-bold text-gray-900 uppercase">
+                      <span className="text-[9px] sm:text-[10px] font-bold text-gray-900 uppercase">
                         Ingredient Filter
                       </span>
                     </div>
@@ -313,7 +304,7 @@ export default function App() {
                   <button
                     onClick={handleAnalyze}
                     disabled={!userImage || !celebImage}
-                    className="px-14 py-7 bg-black text-white rounded-[2.5rem] font-black text-xs uppercase tracking-[0.4em] hover:bg-[#FF4D8D] transition-all duration-500 disabled:opacity-20 shadow-2xl active:scale-95 flex items-center gap-4 cursor-pointer gm-hover"
+                    className="w-full sm:w-auto px-10 sm:px-14 py-5 sm:py-7 bg-black text-white rounded-[2.5rem] font-black text-xs uppercase tracking-[0.3em] sm:tracking-[0.4em] hover:bg-[#FF4D8D] transition-all duration-500 disabled:opacity-20 shadow-2xl active:scale-95 flex items-center justify-center gap-4 cursor-pointer gm-hover"
                   >
                     Neural Scan {userImage && celebImage && <Sparkles size={16} />}
                   </button>
@@ -328,9 +319,9 @@ export default function App() {
               key="analyzing"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="min-h-[60vh] flex flex-col items-center justify-center gap-16"
+              className="min-h-[60vh] flex flex-col items-center justify-center gap-10 lg:gap-16"
             >
-              <div className="relative w-80 md:w-[26rem] aspect-[3/4] bg-gray-50 rounded-[4rem] overflow-hidden scanning shadow-2xl border border-gray-100">
+              <div className="relative w-64 sm:w-80 md:w-[26rem] aspect-[3/4] bg-gray-50 rounded-[3rem] md:rounded-[4rem] overflow-hidden scanning shadow-2xl border border-gray-100">
                 {userImage && (
                   <img
                     src={`data:image/jpeg;base64,${userImage}`}
@@ -339,18 +330,17 @@ export default function App() {
                   />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-pink-500/20 to-transparent" />
-                {/* Sherlock vector overlay */}
                 <SherlockScanOverlay />
               </div>
-              <div className="text-center space-y-6">
-                <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tight heading-font animate-pulse italic">
+              <div className="text-center space-y-4 sm:space-y-6">
+                <h2 className="text-3xl sm:text-4xl md:text-6xl font-black uppercase tracking-tight heading-font animate-pulse italic">
                   Decoding DNA...
                 </h2>
                 <div className="flex flex-col gap-2">
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.5em]">
+                  <p className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] sm:tracking-[0.5em]">
                     Synchronizing Melanin Guard&trade;
                   </p>
-                  <p className="text-[10px] font-black text-[#FF4D8D] uppercase tracking-[0.5em]">
+                  <p className="text-[9px] sm:text-[10px] font-black text-[#FF4D8D] uppercase tracking-[0.3em] sm:tracking-[0.5em]">
                     Mapping Sherlock Facial Proportions
                   </p>
                 </div>
@@ -360,7 +350,12 @@ export default function App() {
 
           {/* RESULT: Analysis View */}
           {step === AppStep.RESULT && result && (
-            <AnalysisView result={result} onReset={handleReset} onCheckout={handleCheckout} />
+            <AnalysisView
+              result={result}
+              userImage={userImage}
+              onReset={handleReset}
+              onCheckout={handleCheckout}
+            />
           )}
 
           {/* CHECKOUT */}
@@ -375,15 +370,15 @@ export default function App() {
               key="settings"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="max-w-xl mx-auto space-y-16 py-12"
+              className="max-w-xl mx-auto space-y-12 lg:space-y-16 py-8 lg:py-12"
             >
               <div className="text-center">
-                <h2 className="text-4xl font-black heading-font tracking-tight uppercase italic">
+                <h2 className="text-3xl sm:text-4xl font-black heading-font tracking-tight uppercase italic">
                   System <span className="text-[#FF4D8D] not-italic">Settings</span>
                 </h2>
               </div>
-              <div className="p-12 bg-white border border-gray-100 rounded-[3.5rem] shadow-xl space-y-12">
-                <div className="flex items-center justify-between">
+              <div className="p-8 sm:p-12 bg-white border border-gray-100 rounded-[2.5rem] lg:rounded-[3.5rem] shadow-xl space-y-10 sm:space-y-12">
+                <div className="flex items-center justify-between gap-4">
                   <div>
                     <p className="text-xs font-black uppercase tracking-widest">
                       Inclusion Guard&trade;
@@ -394,7 +389,7 @@ export default function App() {
                   </div>
                   <Toggle checked={true} onChange={() => {}} />
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-4">
                   <div>
                     <p className="text-xs font-black uppercase tracking-widest">
                       Neural Safety Filter
@@ -418,29 +413,22 @@ export default function App() {
             </motion.div>
           )}
 
-          {/* MUSEBOARD: Placeholder */}
+          {/* MUSEBOARD */}
           {step === AppStep.MUSEBOARD && (
-            <motion.div
-              key="muse"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="py-32 text-center border-2 border-dashed border-gray-100 rounded-[4rem] bg-gray-50/20"
-            >
-              <LayoutGrid size={64} className="mx-auto text-gray-200 mb-10" />
-              <p className="text-gray-400 font-black uppercase tracking-[0.6em]">
-                Neural Muse Board Coming Soon
-              </p>
-            </motion.div>
+            <MuseBoardView
+              result={result}
+              onNavigateToScan={() => setStep(AppStep.IDLE)}
+            />
           )}
         </AnimatePresence>
       </main>
 
       {/* ── Footer ────────────────────────────────────── */}
-      <footer className="py-20 border-t border-gray-50 text-center bg-white">
-        <p className="text-[10px] font-black text-gray-200 uppercase tracking-[0.7em] mb-6">
+      <footer className="py-12 lg:py-20 border-t border-gray-50 text-center bg-white">
+        <p className="text-[9px] sm:text-[10px] font-black text-gray-200 uppercase tracking-[0.5em] lg:tracking-[0.7em] mb-4 lg:mb-6">
           K-MIRROR Neural Beauty Intelligence
         </p>
-        <div className="flex justify-center gap-10">
+        <div className="flex justify-center gap-8 lg:gap-10">
           <Globe
             size={18}
             className="text-gray-300 hover:text-black transition-colors cursor-pointer"

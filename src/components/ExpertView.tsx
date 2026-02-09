@@ -74,7 +74,7 @@ const ChatBubble: React.FC<{
   if (isSystem) {
     return (
       <div className="text-center py-4">
-        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-300 bg-gray-50 px-4 py-2 rounded-full">
+        <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.3em] text-gray-300 bg-gray-50 px-3 sm:px-4 py-2 rounded-full">
           {message.text}
         </span>
       </div>
@@ -85,18 +85,18 @@ const ChatBubble: React.FC<{
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-6`}
+      className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4 sm:mb-6`}
     >
-      <div className={`max-w-[75%] ${isUser ? 'order-2' : 'order-1'}`}>
+      <div className={`max-w-[85%] sm:max-w-[75%] ${isUser ? 'order-2' : 'order-1'}`}>
         {/* Main translation (large) */}
         <div
-          className={`px-6 py-4 rounded-3xl ${
+          className={`px-4 sm:px-6 py-3 sm:py-4 rounded-2xl sm:rounded-3xl ${
             isUser
               ? 'bg-black text-white rounded-br-lg'
               : 'bg-white border border-gray-100 text-deep rounded-bl-lg shadow-sm'
           }`}
         >
-          <p className="text-sm font-medium leading-relaxed">
+          <p className="text-xs sm:text-sm font-medium leading-relaxed">
             {message.translatedText || message.text}
           </p>
         </div>
@@ -104,7 +104,7 @@ const ChatBubble: React.FC<{
         {/* Original text (small italic below) */}
         {message.translatedText && (
           <p
-            className={`mt-2 text-[10px] italic text-gray-300 font-medium px-2 ${
+            className={`mt-1.5 sm:mt-2 text-[9px] sm:text-[10px] italic text-gray-300 font-medium px-2 ${
               isUser ? 'text-right' : 'text-left'
             }`}
           >
@@ -117,24 +117,24 @@ const ChatBubble: React.FC<{
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="mt-3 p-5 bg-white border border-gray-100 rounded-2xl shadow-sm"
+            className="mt-3 p-4 sm:p-5 bg-white border border-gray-100 rounded-xl sm:rounded-2xl shadow-sm"
           >
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
               <div>
-                <p className="text-[9px] font-black text-[#FF4D8D] uppercase">
+                <p className="text-[8px] sm:text-[9px] font-black text-[#FF4D8D] uppercase">
                   {message.productRecommendation.brand}
                 </p>
-                <p className="text-sm font-bold">{message.productRecommendation.name}</p>
+                <p className="text-xs sm:text-sm font-bold">{message.productRecommendation.name}</p>
               </div>
               <span className="text-sm font-black">{message.productRecommendation.price}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-[9px] font-bold text-green-500 uppercase">
+              <span className="text-[8px] sm:text-[9px] font-bold text-green-500 uppercase">
                 {message.productRecommendation.safetyRating}
               </span>
               <button
                 onClick={() => onAddToCart?.(message.productRecommendation!)}
-                className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-[#FF4D8D] transition-colors cursor-pointer"
+                className="flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-black text-white rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-[#FF4D8D] transition-colors cursor-pointer"
               >
                 <ShoppingBag size={12} /> Add to Archive
               </button>
@@ -149,16 +149,16 @@ const ChatBubble: React.FC<{
 /* ── Curated Tutorial Card (based on analysis data) ─────── */
 
 const CuratedTutorial: React.FC<{ video: VideoRecommendation }> = ({ video }) => (
-  <div className="flex items-center gap-5 p-5 bg-white border border-gray-100 rounded-2xl hover:shadow-lg transition-all cursor-pointer group">
-    <div className="w-16 h-16 bg-gray-50 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-black group-hover:text-white transition-all">
-      <Globe size={18} className="text-gray-300 group-hover:text-white" />
+  <div className="flex items-center gap-4 sm:gap-5 p-4 sm:p-5 bg-white border border-gray-100 rounded-xl sm:rounded-2xl hover:shadow-lg transition-all cursor-pointer group">
+    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-50 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 group-hover:bg-black group-hover:text-white transition-all">
+      <Globe size={16} className="text-gray-300 group-hover:text-white" />
     </div>
     <div className="flex-1 min-w-0">
-      <p className="text-[9px] font-black text-[#FF4D8D] uppercase tracking-widest mb-1">{video.creator}</p>
-      <p className="text-xs font-bold truncate uppercase">{video.title}</p>
-      <p className="text-[9px] text-gray-400 font-medium mt-1">{video.tag} &middot; {video.skillLevel}</p>
+      <p className="text-[8px] sm:text-[9px] font-black text-[#FF4D8D] uppercase tracking-widest mb-1">{video.creator}</p>
+      <p className="text-[10px] sm:text-xs font-bold truncate uppercase">{video.title}</p>
+      <p className="text-[8px] sm:text-[9px] text-gray-400 font-medium mt-1">{video.tag} &middot; {video.skillLevel}</p>
     </div>
-    <span className="text-[10px] font-black text-gray-300">{video.matchPercentage}%</span>
+    <span className="text-[9px] sm:text-[10px] font-black text-gray-300 shrink-0">{video.matchPercentage}%</span>
   </div>
 );
 
@@ -180,7 +180,7 @@ const ExpertView: React.FC<{ result?: AnalysisResult | null }> = ({ result }) =>
       id: String(Date.now()),
       sender: 'user',
       text: inputText,
-      translatedText: inputText,  // In production, this would call a translation API
+      translatedText: inputText,
       timestamp: new Date(),
     };
     setMessages((prev) => [...prev, newMsg]);
@@ -203,24 +203,24 @@ const ExpertView: React.FC<{ result?: AnalysisResult | null }> = ({ result }) =>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="bg-[#F9F9F9] -mx-6 lg:-mx-12 -mt-10 px-6 lg:px-12"
+        className="bg-[#F9F9F9] -mx-4 sm:-mx-6 lg:-mx-12 -mt-10 px-4 sm:px-6 lg:px-12"
       >
         {/* Header */}
-        <section className="py-24 border-b border-black/5">
-          <p className="text-[10px] font-black tracking-[0.6em] text-[#FF4D8D] mb-6 uppercase">
+        <section className="py-16 sm:py-20 lg:py-24 border-b border-black/5">
+          <p className="text-[10px] font-black tracking-[0.4em] sm:tracking-[0.6em] text-[#FF4D8D] mb-4 sm:mb-6 uppercase">
             Selected Artists
           </p>
-          <h2 className="text-[60px] lg:text-[100px] heading-font leading-[0.85] tracking-tight mb-12 uppercase">
+          <h2 className="text-[48px] sm:text-[60px] lg:text-[100px] heading-font leading-[0.85] tracking-tight mb-8 sm:mb-12 uppercase">
             Meet Your <br />
             <span className="italic">Director.</span>
           </h2>
-          <div className="flex flex-col lg:flex-row justify-between items-start gap-8">
-            <p className="max-w-md text-sm text-gray-400 leading-relaxed font-medium">
-              We don't just match you with a stylist. We connect you with a director who
+          <div className="flex flex-col lg:flex-row justify-between items-start gap-6 sm:gap-8">
+            <p className="max-w-md text-xs sm:text-sm text-gray-400 leading-relaxed font-medium">
+              We don&rsquo;t just match you with a stylist. We connect you with a director who
               redefines your identity through the Seoul lens.
             </p>
             <div className="flex items-center gap-2 group cursor-pointer">
-              <span className="text-xs font-black border-b border-black pb-1 uppercase">
+              <span className="text-[10px] sm:text-xs font-black border-b border-black pb-1 uppercase">
                 View All Curators
               </span>
               <Plus size={14} className="group-hover:rotate-90 transition-transform" />
@@ -229,12 +229,12 @@ const ExpertView: React.FC<{ result?: AnalysisResult | null }> = ({ result }) =>
         </section>
 
         {/* Expert Cards */}
-        <section className="py-20 grid grid-cols-1 lg:grid-cols-2 gap-[2px] bg-black/5">
+        <section className="py-12 sm:py-16 lg:py-20 grid grid-cols-1 lg:grid-cols-2 gap-[2px] bg-black/5">
           {EXPERTS.map((expert) => (
             <div
               key={expert.id}
               onClick={() => setSelectedExpert(expert)}
-              className="group relative bg-[#F9F9F9] p-8 lg:p-16 flex flex-col justify-between h-[700px] transition-colors hover:bg-white overflow-hidden cursor-pointer"
+              className="group relative bg-[#F9F9F9] p-6 sm:p-8 lg:p-16 flex flex-col justify-between h-[400px] sm:h-[500px] lg:h-[700px] transition-colors hover:bg-white overflow-hidden cursor-pointer"
             >
               {/* Top info */}
               <div className="flex justify-between items-start z-10">
@@ -242,15 +242,15 @@ const ExpertView: React.FC<{ result?: AnalysisResult | null }> = ({ result }) =>
                   <span className="text-[10px] font-black text-gray-300 block mb-2">
                     {expert.id}
                   </span>
-                  <h3 className="text-4xl heading-font italic tracking-tight uppercase">
+                  <h3 className="text-2xl sm:text-3xl lg:text-4xl heading-font italic tracking-tight uppercase">
                     {expert.name}
                   </h3>
-                  <p className="text-[11px] font-black uppercase tracking-widest mt-2">
+                  <p className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest mt-2">
                     {expert.specialty}
                   </p>
                 </div>
-                <div className="w-12 h-12 rounded-full border border-black flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all">
-                  <ArrowUpRight size={20} />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-black flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all">
+                  <ArrowUpRight size={18} />
                 </div>
               </div>
 
@@ -258,25 +258,25 @@ const ExpertView: React.FC<{ result?: AnalysisResult | null }> = ({ result }) =>
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <img
                   src={expert.img}
-                  className="w-[60%] h-[50%] object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-[1.5s] ease-out shadow-2xl"
+                  className="w-[70%] sm:w-[60%] h-[50%] object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-[1.5s] ease-out shadow-2xl"
                   alt={expert.name}
                 />
               </div>
 
               {/* Bottom info */}
               <div className="z-10 flex justify-between items-end">
-                <p className="max-w-[200px] text-[11px] text-gray-400 font-bold leading-relaxed uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                <p className="max-w-[160px] sm:max-w-[200px] text-[10px] sm:text-[11px] text-gray-400 font-bold leading-relaxed uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                   {expert.desc}
                 </p>
                 <div className="text-right">
                   <div className="flex items-center justify-end gap-1 mb-1">
                     <Globe size={10} className="text-[#FF4D8D]" />
-                    <span className="text-[9px] font-black tracking-widest text-[#FF4D8D] uppercase">
+                    <span className="text-[8px] sm:text-[9px] font-black tracking-widest text-[#FF4D8D] uppercase">
                       {expert.tag}
                     </span>
                   </div>
-                  <button className="text-2xl heading-font hover:italic transition-all uppercase">
-                    Book Session — {expert.rate}
+                  <button className="text-lg sm:text-xl lg:text-2xl heading-font hover:italic transition-all uppercase">
+                    Book — {expert.rate}
                   </button>
                 </div>
               </div>
@@ -286,13 +286,13 @@ const ExpertView: React.FC<{ result?: AnalysisResult | null }> = ({ result }) =>
 
         {/* Curated Tutorials (connected to analysis data) */}
         {result?.recommendations?.videos && result.recommendations.videos.length > 0 && (
-          <section className="py-20 border-t border-black/5">
-            <div className="flex items-center justify-between mb-10">
+          <section className="py-12 sm:py-16 lg:py-20 border-t border-black/5">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 sm:mb-10 gap-4">
               <div>
                 <p className="text-[10px] font-black tracking-[0.4em] text-[#FF4D8D] mb-2 uppercase">
                   AI Curation — Based on Your DNA
                 </p>
-                <h3 className="text-2xl heading-font italic uppercase">
+                <h3 className="text-xl sm:text-2xl heading-font italic uppercase">
                   Your Visual Study Queue
                 </h3>
               </div>
@@ -300,24 +300,24 @@ const ExpertView: React.FC<{ result?: AnalysisResult | null }> = ({ result }) =>
                 {result.recommendations.videos.length} Tutorials
               </span>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               {result.recommendations.videos.map((video, idx) => (
                 <CuratedTutorial key={idx} video={video} />
               ))}
             </div>
-            <p className="text-[9px] text-gray-300 font-medium mt-6 text-center uppercase tracking-widest">
+            <p className="text-[8px] sm:text-[9px] text-gray-300 font-medium mt-4 sm:mt-6 text-center uppercase tracking-widest">
               Curated from your aesthetic ({result.sherlock.facialVibe}) + bone structure ({result.sherlock.boneStructure})
             </p>
           </section>
         )}
 
         {/* Quote Section */}
-        <section className="py-32 text-center">
-          <h4 className="text-[11px] font-black tracking-[0.5em] text-gray-300 mb-8 uppercase">
+        <section className="py-20 sm:py-28 lg:py-32 text-center">
+          <h4 className="text-[10px] sm:text-[11px] font-black tracking-[0.3em] sm:tracking-[0.5em] text-gray-300 mb-6 sm:mb-8 uppercase">
             Intelligence meets Artistry
           </h4>
           <div className="inline-block relative">
-            <p className="text-4xl lg:text-5xl heading-font italic tracking-tight leading-tight max-w-2xl mx-auto uppercase">
+            <p className="text-3xl sm:text-4xl lg:text-5xl heading-font italic tracking-tight leading-tight max-w-2xl mx-auto uppercase">
               &ldquo;Your skeletal structure is the canvas,
               <br />
               Seoul is the palette.&rdquo;
@@ -334,35 +334,35 @@ const ExpertView: React.FC<{ result?: AnalysisResult | null }> = ({ result }) =>
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="flex flex-col h-[calc(100vh-10rem)]"
+      className="flex flex-col h-[calc(100vh-8rem)] sm:h-[calc(100vh-10rem)]"
     >
       {/* Chat Header */}
-      <div className="flex items-center justify-between pb-6 border-b border-gray-100 mb-6">
-        <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between pb-4 sm:pb-6 border-b border-gray-100 mb-4 sm:mb-6">
+        <div className="flex items-center gap-3 sm:gap-4">
           <button
             onClick={() => setSelectedExpert(null)}
             className="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-black transition-colors cursor-pointer"
           >
             Back
           </button>
-          <div className="w-px h-6 bg-gray-100" />
+          <div className="w-px h-5 sm:h-6 bg-gray-100" />
           <div>
-            <h3 className="text-lg font-black heading-font italic uppercase">{selectedExpert.name}</h3>
-            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+            <h3 className="text-base sm:text-lg font-black heading-font italic uppercase">{selectedExpert.name}</h3>
+            <p className="text-[8px] sm:text-[9px] font-bold text-gray-400 uppercase tracking-widest">
               {selectedExpert.specialty}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 bg-[#F9F9F9] rounded-full border border-gray-100">
-          <Languages size={14} className="text-[#FF4D8D]" />
-          <span className="text-[9px] font-black uppercase tracking-widest text-gray-500">
+        <div className="flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-[#F9F9F9] rounded-full border border-gray-100">
+          <Languages size={12} className="text-[#FF4D8D]" />
+          <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-gray-500 hidden sm:inline">
             Live Translation Active
           </span>
         </div>
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto px-2 py-4 space-y-2">
+      <div className="flex-1 overflow-y-auto px-1 sm:px-2 py-2 sm:py-4 space-y-1 sm:space-y-2">
         <AnimatePresence>
           {messages.map((msg) => (
             <ChatBubble key={msg.id} message={msg} onAddToCart={handleAddToCart} />
@@ -372,25 +372,25 @@ const ExpertView: React.FC<{ result?: AnalysisResult | null }> = ({ result }) =>
       </div>
 
       {/* Input Area */}
-      <div className="pt-6 border-t border-gray-100 mt-auto">
-        <div className="flex items-center gap-4">
+      <div className="pt-4 sm:pt-6 border-t border-gray-100 mt-auto">
+        <div className="flex items-center gap-3 sm:gap-4">
           <input
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Type your message in any language..."
-            className="flex-1 bg-[#F9F9F9] border border-gray-100 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:ring-1 focus:ring-black transition-all"
+            placeholder="Type your message..."
+            className="flex-1 bg-[#F9F9F9] border border-gray-100 rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-4 text-sm focus:outline-none focus:ring-1 focus:ring-black transition-all"
           />
           <button
             onClick={handleSend}
             disabled={!inputText.trim()}
-            className="w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center hover:bg-[#FF4D8D] transition-colors disabled:opacity-20 cursor-pointer"
+            className="w-12 h-12 sm:w-14 sm:h-14 bg-black text-white rounded-xl sm:rounded-2xl flex items-center justify-center hover:bg-[#FF4D8D] transition-colors disabled:opacity-20 cursor-pointer shrink-0"
           >
-            <Send size={18} />
+            <Send size={16} />
           </button>
         </div>
-        <p className="text-[9px] text-gray-300 font-bold text-center mt-3 uppercase tracking-widest">
+        <p className="text-[8px] sm:text-[9px] text-gray-300 font-bold text-center mt-2 sm:mt-3 uppercase tracking-widest">
           Messages are auto-translated between Korean and your language
         </p>
       </div>

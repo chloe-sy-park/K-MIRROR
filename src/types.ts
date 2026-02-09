@@ -66,6 +66,12 @@ export interface AnalysisResult {
     videos: VideoRecommendation[];
     sensitiveSafe: boolean;
   };
+  palette?: {
+    lip: string;
+    cheek: string;
+    base: string;
+    eye: string;
+  };
 }
 
 /* ── App Navigation ─────────────────────────────────────── */
