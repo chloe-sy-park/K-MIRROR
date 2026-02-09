@@ -20,6 +20,12 @@ export interface VideoRecommendation {
   skillLevel: string;
 }
 
+export interface UserPreferences {
+  environment: 'Office' | 'Outdoor' | 'Night-out';
+  skill: 'Beginner' | 'Intermediate' | 'Pro';
+  mood: 'Natural' | 'Elegant' | 'Powerful';
+}
+
 export interface AnalysisResult {
   tone: {
     melaninIndex: number; // 1-6
@@ -45,6 +51,7 @@ export interface AnalysisResult {
       point: string;
     };
     styleExplanation: string;
+    aiStylePoints: string[]; // Key takeaways for the card hover
   };
   recommendations: {
     ingredients: string[];
@@ -55,10 +62,22 @@ export interface AnalysisResult {
 }
 
 export enum AppStep {
+  ONBOARDING,
   IDLE,
   ANALYZING,
   RESULT,
-  MUSEBOARD
+  MUSEBOARD,
+  SETTINGS,
+  STYLIST,
+  PARTNER_DASHBOARD
+}
+
+export interface MuseBoard {
+  id: string;
+  name: string;
+  icon: string;
+  count: number;
+  aiSummary: string;
 }
 
 export interface SavedMuse {
@@ -68,4 +87,6 @@ export interface SavedMuse {
   celebName: string;
   date: string;
   vibe: string;
+  boardId?: string;
+  aiStylePoints: string[];
 }

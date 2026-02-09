@@ -19,6 +19,7 @@
             background-color: white;
             color: var(--brand-dark);
             -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
         }
         .heading-font {
             font-family: 'Outfit', sans-serif;
@@ -30,15 +31,6 @@
         }
         .luxury-card:hover {
             border-color: var(--brand-dark);
-        }
-        .btn-luxury {
-            background: var(--brand-dark);
-            color: white;
-            transition: all 0.3s ease;
-        }
-        .btn-luxury:hover {
-            background: #2a2a2a;
-            transform: translateY(-1px);
         }
         .accent-gradient {
             background: linear-gradient(90deg, #FF4D8D, #FF8E53);
@@ -59,6 +51,20 @@
             left: 0;
             z-index: 10;
         }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #e5e5e5;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d1d1d1;
+        }
     </style>
 <script type="importmap">
 {
@@ -66,7 +72,8 @@
     "react": "https://esm.sh/react@^19.2.4",
     "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
     "react/": "https://esm.sh/react@^19.2.4/",
-    "@google/genai": "https://esm.sh/@google/genai@^1.40.0"
+    "@google/genai": "https://esm.sh/@google/genai@^1.40.0",
+    "framer-motion": "https://esm.sh/framer-motion@^11.0.0"
   }
 }
 </script>

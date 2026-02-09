@@ -1,18 +1,36 @@
 
 import React, { useState, useEffect } from 'react';
-import { AppStep, AnalysisResult, Product, VideoRecommendation, SavedMuse } from './types';
+import { motion, AnimatePresence } from 'framer-motion';
+import { AppStep, AnalysisResult, SavedMuse, MuseBoard, UserPreferences } from './types';
 import { analyzeKBeauty } from './services/geminiService';
 
-// --- Shared Luxury UI Components ---
+// --- Shared Components ---
 
-const StageBadge: React.FC<{ number: string; title: string }> = ({ number, title }) => (
-  <div className="flex items-center gap-4 mb-10 group">
-    <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center text-[10px] font-black tracking-widest group-hover:bg-pink-500 transition-colors">
-      {number}
+const NavIcon: React.FC<{ 
+  icon: string; 
+  active: boolean; 
+  onClick: () => void; 
+  label: string;
+  isMobile?: boolean;
+}> = ({ icon, active, onClick, label, isMobile }) => (
+  <button 
+    onClick={onClick}
+    className={`flex ${isMobile ? 'flex-col flex-1 py-3' : 'flex-col mb-10'} items-center gap-1 group transition-all ${active ? 'text-[#FF4D8D]' : 'text-gray-300 hover:text-black'}`}
+  >
+    <div className={`${isMobile ? 'w-8 h-8' : 'w-12 h-12'} flex items-center justify-center rounded-2xl transition-all ${active ? 'bg-pink-50' : 'group-hover:bg-gray-50'}`}>
+      <i className={`fa-light ${icon} ${isMobile ? 'text-base' : 'text-lg'}`}></i>
     </div>
-    <h3 className="text-sm font-black uppercase tracking-[0.4em] text-gray-900">{title}</h3>
-    <div className="flex-1 h-[1px] bg-gray-100"></div>
-  </div>
+    <span className={`${isMobile ? 'text-[8px]' : 'text-[9px]'} font-black uppercase tracking-widest`}>{label}</span>
+  </button>
+);
+
+const Toggle: React.FC<{ checked: boolean; onChange: () => void }> = ({ checked, onChange }) => (
+  <button 
+    onClick={onChange}
+    className={`w-10 md:w-12 h-5 md:h-6 rounded-full transition-all relative ${checked ? 'bg-[#FF4D8D]' : 'bg-gray-200'}`}
+  >
+    <div className={`absolute top-0.5 md:top-1 w-4 h-4 bg-white rounded-full transition-all shadow-sm ${checked ? 'left-5 md:left-7' : 'left-0.5 md:left-1'}`} />
+  </button>
 );
 
 const LuxuryFileUpload: React.FC<{
@@ -33,19 +51,19 @@ const LuxuryFileUpload: React.FC<{
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <label className="text-[11px] font-black uppercase tracking-[0.3em] text-gray-400">
+    <div className="flex flex-col gap-3 md:gap-4">
+      <label className="text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-gray-400">
         {label}
       </label>
-      <div className="relative group aspect-[3/4] bg-gray-50 border border-gray-100 luxury-card rounded-[2.5rem] overflow-hidden cursor-pointer shadow-sm hover:shadow-2xl transition-all">
+      <div className="relative group aspect-[3/4] bg-gray-50 border border-gray-100 rounded-[2rem] md:rounded-[2.5rem] overflow-hidden cursor-pointer shadow-sm hover:shadow-2xl transition-all">
         {preview ? (
           <img src={`data:image/jpeg;base64,${preview}`} alt="Preview" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
         ) : (
-          <div className="flex flex-col items-center justify-center w-full h-full p-8 text-center">
-            <div className="w-14 h-14 bg-white rounded-full shadow-lg flex items-center justify-center mb-6 group-hover:bg-black group-hover:text-white transition-all">
+          <div className="flex flex-col items-center justify-center w-full h-full p-6 md:p-8 text-center">
+            <div className="w-12 h-12 md:w-14 md:h-14 bg-white rounded-full shadow-lg flex items-center justify-center mb-4 md:mb-6 group-hover:bg-black group-hover:text-white transition-all">
               <i className="fa-light fa-plus text-gray-300"></i>
             </div>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{secondaryLabel || 'Upload Image'}</p>
+            <p className="text-[9px] md:text-[10px] font-black text-gray-400 uppercase tracking-[0.1em] md:tracking-[0.2em]">{secondaryLabel || 'Upload'}</p>
           </div>
         )}
         <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" onChange={handleFileChange} />
@@ -54,433 +72,394 @@ const LuxuryFileUpload: React.FC<{
   );
 };
 
-// --- View: Muse Board ---
+// --- View Components ---
 
-const MyMuseBoard: React.FC<{ onBack: () => void; savedMuses: SavedMuse[] }> = ({ onBack, savedMuses }) => {
-  const myBoards = [
-    { id: 'b1', name: 'Office Glow', count: 12, aiSummary: 'Clean & Professional' },
-    { id: 'b2', name: 'K-Pop Stage', count: 8, aiSummary: 'Glitter & Bold' },
-    { id: 'b3', name: 'Daily Natural', count: 24, aiSummary: 'Minimalist Tone' },
-  ];
+const OnboardingView: React.FC<{ onComplete: (prefs: UserPreferences) => void }> = ({ onComplete }) => {
+  const [step, setStep] = useState(1);
+  const [subStep, setSubStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [prefs, setPrefs] = useState<UserPreferences>({
+    environment: 'Office',
+    skill: 'Beginner',
+    mood: 'Natural'
+  });
+
+  const nextStep = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      if (step === 2) {
+         if (subStep < 3) {
+            setSubStep(subStep + 1);
+         } else {
+            setStep(step + 1);
+         }
+      } else if (step < 3) {
+        setStep(step + 1);
+      } else {
+        onComplete(prefs);
+      }
+    }, 800);
+  };
 
   return (
-    <div className="animate-fadeIn min-h-screen">
-      <div className="flex justify-between items-end mb-16">
-        <div>
-          <p className="text-[10px] font-black text-pink-500 uppercase tracking-[0.4em] mb-3">Identity Archive</p>
-          <h2 className="text-6xl font-black heading-font tracking-tighter uppercase">My Muse <span className="font-light italic text-gray-300 lowercase">Board</span></h2>
-        </div>
-        <button onClick={onBack} className="px-10 py-4 bg-black text-white text-[10px] font-black uppercase tracking-widest rounded-full hover:bg-pink-500 transition-all shadow-xl">
-          New Analysis
-        </button>
-      </div>
-
-      {/* 1. Board Selection Section */}
-      <div className="mb-16">
-        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mb-6">Collections</h3>
-        <div className="flex gap-6 overflow-x-auto pb-6 no-scrollbar">
-          <button className="flex-shrink-0 w-64 h-36 border-2 border-dashed border-gray-100 rounded-[2.5rem] flex flex-col items-center justify-center hover:border-black transition-all group bg-gray-50/30">
-            <i className="fa-light fa-plus text-gray-300 group-hover:text-black mb-2 text-xl"></i>
-            <span className="text-[10px] font-black text-gray-400 group-hover:text-black uppercase tracking-widest">Create Board</span>
-          </button>
-          
-          {myBoards.map(board => (
-            <div key={board.id} className="flex-shrink-0 w-72 h-36 bg-white border border-gray-100 rounded-[2.5rem] p-7 shadow-sm hover:shadow-xl hover:border-pink-200 transition-all cursor-pointer group relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-pink-500/5 blur-3xl rounded-full"></div>
-              <div className="flex justify-between items-start mb-4 relative z-10">
-                <h4 className="font-black text-lg uppercase tracking-tight">{board.name}</h4>
-                <span className="text-[9px] font-black text-pink-500 bg-pink-50 px-3 py-1.5 rounded-full uppercase tracking-widest border border-pink-100">{board.count} Pins</span>
-              </div>
-              <p className="text-[9px] text-gray-300 font-black uppercase tracking-[0.2em] mb-1">AI INSIGHT</p>
-              <p className="text-sm font-medium text-gray-500 truncate">{board.aiSummary}</p>
+    <div className="fixed inset-0 bg-white z-[200] flex flex-col items-center justify-center p-6 md:p-10 overflow-hidden">
+      <AnimatePresence mode="wait">
+        {step === 1 && (
+          <motion.div 
+            key="step1" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, x: -50 }}
+            className="text-center max-w-xs md:max-w-md mx-auto"
+          >
+            <div className="w-20 h-20 md:w-24 md:h-24 bg-pink-50 rounded-[2rem] md:rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 md:mb-10 text-[#FF4D8D] shadow-xl shadow-pink-100">
+              <i className="fa-light fa-camera text-2xl md:text-3xl"></i>
             </div>
-          ))}
-        </div>
-      </div>
+            <h2 className="text-3xl md:text-4xl font-black heading-font tracking-tighter uppercase mb-4 md:mb-6">Scan Your<br/>Beauty DNA</h2>
+            <p className="text-gray-400 text-xs md:text-sm font-medium leading-relaxed mb-10 md:mb-12">
+              정확한 분석을 위해 보정되지 않은 정면 사진이 필요합니다.<br/>
+              당신의 고유한 톤과 골격을 AI가 실시간으로 학습합니다.
+            </p>
+            <button onClick={nextStep} className="w-full py-5 md:py-6 bg-black text-white rounded-[2rem] font-black text-xs md:text-sm uppercase tracking-widest hover:bg-[#FF4D8D] transition-all shadow-2xl">
+              {loading ? "Initializing..." : "Get Started"}
+            </button>
+          </motion.div>
+        )}
 
-      <div className="mb-10 flex items-center gap-4">
-        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em]">Personal Feed</h3>
-        <div className="flex-1 h-[1px] bg-gray-100"></div>
-      </div>
+        {step === 2 && (
+          <motion.div 
+            key={`step2-sub${subStep}`} initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }}
+            className="max-w-xl w-full text-left"
+          >
+            <div className="mb-10">
+              <div className="flex gap-2 mb-6">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className={`h-1.5 w-16 rounded-full transition-all duration-500 ${i <= subStep ? 'bg-[#FF4D8D]' : 'bg-gray-100'}`} />
+                ))}
+              </div>
+              <h2 className="text-4xl font-black font-['Outfit'] tracking-tighter uppercase mb-2">Deep Profiling</h2>
+              <p className="text-gray-400 text-sm font-medium">더 정교한 분석을 위해 당신의 환경을 알려주세요.</p>
+            </div>
 
-      {savedMuses.length === 0 ? (
-        <div className="py-40 text-center border-2 border-dashed border-gray-100 rounded-[3rem] bg-gray-50/30">
-          <i className="fa-light fa-images text-6xl text-gray-200 mb-6"></i>
-          <p className="text-gray-400 font-black uppercase tracking-widest">No saved profiles yet.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {savedMuses.map((muse) => (
-            <div key={muse.id} className="group relative bg-white border border-gray-100 rounded-[2.5rem] overflow-hidden hover:shadow-2xl transition-all duration-700 hover:-translate-y-2 flex flex-col">
-              <div className="flex h-72 overflow-hidden border-b border-gray-50 relative">
-                <img src={`data:image/jpeg;base64,${muse.userImage}`} className="w-1/2 h-full object-cover" />
-                <img src={`data:image/jpeg;base64,${muse.celebImage}`} className="w-1/2 h-full object-cover" />
-                
-                {/* 2. Enhanced Hover Overlay with AI Style Points */}
-                <div className="absolute inset-0 bg-black/90 opacity-0 group-hover:opacity-100 transition-all duration-500 p-8 flex flex-col justify-between backdrop-blur-sm">
-                  <div className="animate-fadeIn">
-                    <p className="text-[10px] font-black text-pink-400 uppercase tracking-[0.3em] mb-4 border-b border-white/10 pb-2">AI Style Points</p>
-                    <ul className="space-y-3">
-                      <li className="text-[11px] text-white/90 font-bold flex items-center gap-3">
-                        <i className="fa-solid fa-circle-check text-pink-500 text-[10px]"></i> Glass-skin adaptation
-                      </li>
-                      <li className="text-[11px] text-white/90 font-bold flex items-center gap-3">
-                        <i className="fa-solid fa-circle-check text-pink-500 text-[10px]"></i> Blurry lip technique
-                      </li>
-                      <li className="text-[11px] text-white/90 font-bold flex items-center gap-3">
-                        <i className="fa-solid fa-circle-check text-pink-500 text-[10px]"></i> Heritage-preserved tones
-                      </li>
-                    </ul>
-                  </div>
-                  <button className="w-full py-4 bg-pink-500 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-white hover:text-black transition-all shadow-xl">
-                    View Full Report
+            {subStep === 1 && (
+              <div className="space-y-4">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 mb-6">Main Environment</p>
+                {[
+                  { id: 'Office', label: 'Air-conditioned Office', icon: '🏢' },
+                  { id: 'Outdoor', label: 'Active Outdoors', icon: '☀️' },
+                  { id: 'Night-out', label: 'Night-out / Party', icon: '✨' }
+                ].map(opt => (
+                  <button 
+                    key={opt.id}
+                    onClick={() => { setPrefs({...prefs, environment: opt.id as any}); nextStep(); }}
+                    className="w-full p-6 md:p-8 border-2 border-gray-100 rounded-[2rem] text-left font-black uppercase text-xs tracking-widest hover:border-black hover:bg-gray-50 transition-all flex justify-between items-center group shadow-sm"
+                  >
+                    <div className="flex items-center gap-4">
+                      <span className="text-xl">{opt.icon}</span>
+                      <span>{opt.label}</span>
+                    </div>
+                    <i className="fa-light fa-arrow-right opacity-0 group-hover:opacity-100 transition-all text-pink-500"></i>
                   </button>
-                </div>
+                ))}
               </div>
-              <div className="p-7 bg-white">
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="text-sm font-black uppercase tracking-tight">{muse.celebName}</h4>
-                  <span className="text-[9px] font-black text-pink-500 uppercase tracking-widest bg-pink-50 px-3 py-1 rounded-full">{muse.vibe}</span>
-                </div>
-                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{muse.date}</p>
+            )}
+
+            {subStep === 2 && (
+              <div className="space-y-4">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 mb-6">Your Skill Level</p>
+                {[
+                  { id: 'Beginner', label: 'Beginner (Basic items)', icon: '🌱' },
+                  { id: 'Intermediate', label: 'Intermediate (Multi-step)', icon: '🌿' },
+                  { id: 'Pro', label: 'Professional (Artistry)', icon: '🎭' }
+                ].map(opt => (
+                  <button 
+                    key={opt.id}
+                    onClick={() => { setPrefs({...prefs, skill: opt.id as any}); nextStep(); }}
+                    className="w-full p-6 md:p-8 border-2 border-gray-100 rounded-[2rem] text-left font-black uppercase text-xs tracking-widest hover:border-black hover:bg-gray-50 transition-all flex justify-between items-center group shadow-sm"
+                  >
+                    <div className="flex items-center gap-4">
+                      <span className="text-xl">{opt.icon}</span>
+                      <span>{opt.label}</span>
+                    </div>
+                    <i className="fa-light fa-arrow-right opacity-0 group-hover:opacity-100 transition-all text-pink-500"></i>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {subStep === 3 && (
+              <div className="space-y-4">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 mb-6">Desired Mood</p>
+                {[
+                  { id: 'Natural', label: 'Natural Glow', icon: '💧' },
+                  { id: 'Elegant', label: 'Elegant & Classic', icon: '💎' },
+                  { id: 'Powerful', label: 'Powerful K-Idol', icon: '⚡' }
+                ].map(opt => (
+                  <button 
+                    key={opt.id}
+                    onClick={() => { setPrefs({...prefs, mood: opt.id as any}); nextStep(); }}
+                    className="w-full p-6 md:p-8 border-2 border-gray-100 rounded-[2rem] text-left font-black uppercase text-xs tracking-widest hover:border-black hover:bg-gray-50 transition-all flex justify-between items-center group shadow-sm"
+                  >
+                    <div className="flex items-center gap-4">
+                      <span className="text-xl">{opt.icon}</span>
+                      <span>{opt.label}</span>
+                    </div>
+                    <i className="fa-light fa-arrow-right opacity-0 group-hover:opacity-100 transition-all text-pink-500"></i>
+                  </button>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {step === 3 && (
+          <motion.div 
+            key="step3" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+            className="text-center max-w-xs md:max-w-md mx-auto"
+          >
+            <div className="w-20 h-20 md:w-24 md:h-24 bg-blue-50 rounded-[2rem] md:rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 md:mb-10 text-blue-500 shadow-xl shadow-blue-50">
+              <i className="fa-light fa-shield-check text-2xl md:text-3xl"></i>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-black heading-font tracking-tighter uppercase mb-6">Secure Settings</h2>
+            <div className="space-y-4 mb-12 text-left">
+              <div className="p-6 bg-gray-50 rounded-[2rem] flex justify-between items-center border border-gray-100">
+                <span className="text-xs font-black uppercase tracking-tight">Inclusion Guard™</span>
+                <div className="w-10 h-6 bg-[#FF4D8D] rounded-full relative"><div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm"/></div>
               </div>
             </div>
-          ))}
-        </div>
-      )}
+            <button onClick={nextStep} className="w-full py-6 bg-[#FF4D8D] text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.2em] shadow-2xl">
+              {loading ? "Starting..." : "Enter K-Mirror AI"}
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
 
-// --- View: App Root ---
+// --- Main App ---
 
 export default function App() {
-  const [step, setStep] = useState<AppStep>(AppStep.IDLE);
+  const [step, setStep] = useState<AppStep>(AppStep.ONBOARDING);
   const [userImage, setUserImage] = useState<string | null>(null);
   const [celebImage, setCelebImage] = useState<string | null>(null);
   const [isSensitive, setIsSensitive] = useState(false);
+  const [prefs, setPrefs] = useState<UserPreferences>({ environment: 'Office', skill: 'Beginner', mood: 'Natural' });
   const [result, setResult] = useState<AnalysisResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [savedMuses, setSavedMuses] = useState<SavedMuse[]>([]);
 
   useEffect(() => {
-    const stored = localStorage.getItem('k_mirror_muses');
-    if (stored) setSavedMuses(JSON.parse(stored));
+    const m = localStorage.getItem('k_mirror_muses_v4');
+    if (m) setSavedMuses(JSON.parse(m));
   }, []);
 
   const handleAnalyze = async () => {
     if (!userImage || !celebImage) return;
     try {
       setStep(AppStep.ANALYZING);
-      setError(null);
-      const res = await analyzeKBeauty(userImage, celebImage, isSensitive);
+      const res = await analyzeKBeauty(userImage, celebImage, isSensitive, prefs);
       setResult(res);
       setStep(AppStep.RESULT);
     } catch (err) {
       console.error(err);
-      setError("Analysis failed. Please try a different portrait.");
       setStep(AppStep.IDLE);
     }
   };
 
-  const saveMuse = () => {
-    if (!result || !userImage || !celebImage) return;
-    const newMuse: SavedMuse = {
-      id: Date.now().toString(),
-      userImage,
-      celebImage,
-      celebName: result.kMatch.celebName,
-      date: new Date().toLocaleDateString(),
-      vibe: result.sherlock.facialVibe,
-    };
-    const updated = [newMuse, ...savedMuses];
-    setSavedMuses(updated);
-    localStorage.setItem('k_mirror_muses', JSON.stringify(updated));
-    alert("Saved to your Muse Board!");
-  };
-
-  const reset = () => {
+  const handleOnboardingComplete = (p: UserPreferences) => {
+    setPrefs(p);
     setStep(AppStep.IDLE);
-    setUserImage(null);
-    setCelebImage(null);
-    setResult(null);
   };
 
   return (
-    <div className="min-h-screen bg-white pb-20 overflow-x-hidden">
-      {/* Navigation Header */}
-      <nav className="px-10 py-10 border-b border-gray-100 flex flex-col md:flex-row justify-between items-center gap-10 sticky top-0 bg-white/90 backdrop-blur-xl z-50">
-        <div onClick={reset} className="cursor-pointer group">
-          <h1 className="text-4xl font-black tracking-tighter heading-font uppercase group-hover:text-pink-500 transition-colors">
-            K-Mirror <span className="font-light italic text-gray-400 lowercase">studio</span>
-          </h1>
-          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-400 mt-2">Personalized Beauty Laboratory</p>
+    <div className="min-h-screen bg-[#FBFBFB] flex flex-col md:flex-row font-['Plus_Jakarta_Sans'] text-[#0F0F0F] relative">
+      <AnimatePresence>
+        {step === AppStep.ONBOARDING && <OnboardingView onComplete={handleOnboardingComplete} />}
+      </AnimatePresence>
+
+      {/* Navigation (Desktop) */}
+      <nav className="hidden md:flex w-24 bg-white border-r border-gray-100 flex-col items-center py-10 sticky top-0 h-screen z-[150]">
+        <div className="mb-12 cursor-pointer" onClick={() => setStep(AppStep.IDLE)}>
+          <h1 className="text-3xl font-black font-['Outfit'] text-[#FF4D8D]">K</h1>
         </div>
-        <div className="flex items-center gap-10">
-          <div className="hidden lg:flex gap-12 text-[11px] font-black uppercase tracking-widest text-gray-400">
-            <button onClick={() => setStep(AppStep.IDLE)} className={`hover:text-black transition-colors ${step === AppStep.IDLE ? 'text-black' : ''}`}>Studio</button>
-            <button onClick={() => setStep(AppStep.MUSEBOARD)} className={`hover:text-black transition-colors ${step === AppStep.MUSEBOARD ? 'text-black' : ''}`}>My Board</button>
-            <a href="#" className="hover:text-black transition-colors">Philosophy</a>
-          </div>
-          <button onClick={reset} className="px-8 py-3 bg-gray-50 text-[10px] font-black uppercase tracking-widest rounded-full hover:bg-black hover:text-white transition-all">
-            Reset
-          </button>
+        <div className="flex-1 flex flex-col gap-6">
+          <NavIcon icon="fa-camera" active={step === AppStep.IDLE || step === AppStep.ANALYZING || step === AppStep.RESULT} onClick={() => setStep(AppStep.IDLE)} label="Scan" />
+          <NavIcon icon="fa-grid-2" active={step === AppStep.MUSEBOARD} onClick={() => setStep(AppStep.MUSEBOARD)} label="Muse" />
+          <NavIcon icon="fa-comment-dots" active={step === AppStep.STYLIST} onClick={() => setStep(AppStep.STYLIST)} label="Match" />
+          <NavIcon icon="fa-cog" active={step === AppStep.SETTINGS} onClick={() => setStep(AppStep.SETTINGS)} label="Set" />
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-10 py-20">
-        
-        {step === AppStep.IDLE && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-20 animate-fadeIn">
-            <div className="lg:col-span-5 space-y-12">
-              <div className="space-y-6">
-                <h2 className="text-7xl font-black heading-font leading-[0.85] tracking-tighter uppercase">
-                  Inclusive<br/>K-Beauty<br/>Neural Glow.
-                </h2>
-                <p className="text-base text-gray-500 font-medium leading-relaxed max-sm">
-                  Our neural laboratory adapts Seoul’s high-performance aesthetics specifically for your unique bone structure and heritage.
-                </p>
+      {/* Navigation (Mobile) */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-gray-100 flex justify-around items-center px-4 py-1 z-[150] shadow-lg">
+        <NavIcon icon="fa-camera" isMobile active={step === AppStep.IDLE || step === AppStep.ANALYZING || step === AppStep.RESULT} onClick={() => setStep(AppStep.IDLE)} label="Scan" />
+        <NavIcon icon="fa-grid-2" isMobile active={step === AppStep.MUSEBOARD} onClick={() => setStep(AppStep.MUSEBOARD)} label="Muse" />
+        <NavIcon icon="fa-comment-dots" isMobile active={step === AppStep.STYLIST} onClick={() => setStep(AppStep.STYLIST)} label="Match" />
+        <NavIcon icon="fa-cog" isMobile active={step === AppStep.SETTINGS} onClick={() => setStep(AppStep.SETTINGS)} label="Set" />
+      </nav>
+
+      {/* Main Container */}
+      <main className="flex-1 relative pb-24 md:pb-0 min-h-screen">
+        <header className="px-6 md:px-12 py-6 md:py-8 flex justify-between items-center bg-white/60 backdrop-blur-xl sticky top-0 z-[140] border-b border-gray-50/50">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.4)]"></div>
+            <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">Stylist Engine Active</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="text-right hidden sm:block">
+              <p className="text-[9px] font-black uppercase text-gray-900 tracking-tighter leading-none mb-1">Sarah Jenkins</p>
+              <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">{prefs.mood} Mode</p>
+            </div>
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-gray-100 border border-gray-200 overflow-hidden shadow-sm">
+               <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80" className="w-full h-full object-cover" />
+            </div>
+          </div>
+        </header>
+
+        <div className="p-6 md:p-16 max-w-7xl mx-auto">
+          {step === AppStep.IDLE && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 md:gap-20 animate-fadeIn">
+              <div className="lg:col-span-5 space-y-10 md:space-y-14 py-4 md:py-10">
+                <div className="space-y-4">
+                  <h2 className="text-5xl md:text-8xl font-black heading-font leading-[0.85] tracking-tighter uppercase">Mirror<br/>Inner<br/><span className="text-[#FF4D8D]">Idol.</span></h2>
+                  <p className="text-sm md:text-lg text-gray-500 font-medium leading-relaxed max-w-md">당신의 고유한 아름다움을 정교한 AI로 재발견하세요.</p>
+                </div>
+                
+                <div className="space-y-6">
+                  <div className="p-6 md:p-8 bg-gray-50 rounded-[2rem] border border-gray-100 shadow-sm flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center text-pink-500 shadow-sm"><i className="fa-light fa-shield-check"></i></div>
+                      <div>
+                        <h3 className="text-[10px] md:text-xs font-black uppercase tracking-widest">Sensitivity Guard</h3>
+                        <p className="text-[8px] md:text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Ingredient Safety Scan</p>
+                      </div>
+                    </div>
+                    <Toggle checked={isSensitive} onChange={() => setIsSensitive(!isSensitive)} />
+                  </div>
+                  
+                  <button 
+                    onClick={handleAnalyze} disabled={!userImage || !celebImage}
+                    className="w-full py-6 md:py-8 bg-black text-white text-[11px] font-black uppercase tracking-[0.4em] rounded-[2rem] md:rounded-[2.5rem] shadow-2xl hover:bg-[#FF4D8D] transition-all disabled:opacity-20 active:scale-95"
+                  >
+                    Start Neural Scan
+                  </button>
+                </div>
               </div>
 
-              <div className="p-10 bg-gray-50 rounded-[3rem] space-y-8 border border-gray-100 shadow-sm">
+              <div className="lg:col-span-7 grid grid-cols-2 gap-4 md:gap-10">
+                <LuxuryFileUpload label="Base Portrait" preview={userImage} onImageSelect={setUserImage} secondaryLabel="Bare-Face / 정면" />
+                <LuxuryFileUpload label="Style Muse" preview={celebImage} onImageSelect={setCelebImage} secondaryLabel="Reference Image" />
+              </div>
+            </div>
+          )}
+
+          {step === AppStep.ANALYZING && (
+            <div className="min-h-[60vh] flex flex-col items-center justify-center gap-10">
+              <div className="relative w-64 md:w-80 aspect-[3/4] bg-gray-50 rounded-[2.5rem] md:rounded-[3rem] overflow-hidden scanning shadow-2xl border border-gray-100">
+                {userImage && <img src={`data:image/jpeg;base64,${userImage}`} className="w-full h-full object-cover opacity-60 grayscale transition-all duration-1000" />}
+              </div>
+              <div className="text-center space-y-4">
+                <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter heading-font animate-pulse">Analyzing...</h2>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Decoding facial architecture & tone DNA</p>
+              </div>
+            </div>
+          )}
+
+          {step === AppStep.RESULT && result && (
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="space-y-16 md:space-y-24">
+              <div className="border-b-4 md:border-b-8 border-black pb-8 md:pb-12 relative">
+                 <span className="text-[8px] md:text-[10px] font-black text-pink-500 bg-pink-50 px-4 py-1.5 rounded-full uppercase tracking-widest border border-pink-100 mb-6 inline-block">Analysis Ready</span>
+                 <h2 className="text-5xl md:text-8xl font-black heading-font tracking-tighter uppercase leading-[0.85]">{result.kMatch.celebName}<br/><span className="font-light italic text-gray-300 lowercase">style translation</span></h2>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 md:gap-20">
+                <aside className="lg:col-span-4 space-y-8">
+                  <div className="p-8 md:p-10 border border-gray-100 rounded-[2.5rem] md:rounded-[3rem] bg-white shadow-lg space-y-10">
+                    <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-gray-300 border-b border-gray-50 pb-6">Tone profile</h3>
+                    <div className="space-y-6">
+                      <div className="flex justify-between items-end"><span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Melanin Level</span><span className="text-2xl font-black heading-font">{result.tone.melaninIndex}</span></div>
+                      <div className="flex gap-1.5 h-3 md:h-4">{[1,2,3,4,5,6].map(i => <div key={i} className={`flex-1 rounded-full ${result.tone.melaninIndex === i ? 'bg-black' : 'bg-gray-100 opacity-40'}`}></div>)}</div>
+                      <p className="text-[11px] text-gray-500 leading-relaxed font-medium">{result.tone.description}</p>
+                    </div>
+                  </div>
+                </aside>
+
+                <div className="lg:col-span-8 space-y-20">
+                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      {[{l:'Base Pivot',v:result.kMatch.adaptationLogic.base,i:'fa-sparkles'},{l:'Lip Focus',v:result.kMatch.adaptationLogic.lip,i:'fa-palette'},{l:'Point Focus',v:result.kMatch.adaptationLogic.point,i:'fa-eye'}].map((item, idx) => (
+                        <div key={idx} className="p-8 border border-gray-100 rounded-[2.5rem] bg-gray-50/20 flex flex-col gap-6 hover:bg-white hover:shadow-xl transition-all">
+                           <i className={`fa-light ${item.i} text-xl text-pink-500`}></i>
+                           <div>
+                             <p className="text-[9px] font-black uppercase text-gray-400 tracking-widest mb-2">{item.l}</p>
+                             <p className="text-sm font-black leading-snug">{item.v}</p>
+                           </div>
+                        </div>
+                      ))}
+                   </div>
+                   
+                   <div className="p-10 bg-black text-white rounded-[3rem] shadow-2xl">
+                      <h4 className="text-[11px] font-black uppercase tracking-[0.5em] text-[#FF4D8D] mb-6">Stylist's Note</h4>
+                      <p className="text-lg font-medium leading-relaxed italic">"{result.kMatch.styleExplanation}"</p>
+                   </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Placeholder for other views */}
+          {step === AppStep.MUSEBOARD && (
+            <div className="animate-fadeIn py-20 text-center border-2 border-dashed border-gray-100 rounded-[3rem] bg-gray-50/20">
+              <i className="fa-light fa-images text-6xl text-gray-200 mb-6"></i>
+              <p className="text-gray-400 font-black uppercase tracking-widest">Muse board is coming soon</p>
+            </div>
+          )}
+          
+          {step === AppStep.STYLIST && (
+            <div className="animate-fadeIn py-20 text-center border-2 border-dashed border-gray-100 rounded-[3rem] bg-gray-50/20">
+              <i className="fa-light fa-comment-dots text-6xl text-gray-200 mb-6"></i>
+              <p className="text-gray-400 font-black uppercase tracking-widest">Expert match is coming soon</p>
+            </div>
+          )}
+          
+          {step === AppStep.SETTINGS && (
+            <div className="max-w-xl mx-auto space-y-12">
+              <h2 className="text-4xl font-black heading-font tracking-tighter uppercase text-center">Settings</h2>
+              <div className="p-10 bg-white border border-gray-100 rounded-[3rem] shadow-sm space-y-10">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-xs font-black uppercase tracking-widest mb-1.5">Sensitivity Guard</h3>
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Exclude irritants for your skin</p>
+                    <p className="text-xs font-black uppercase tracking-widest">Inclusion Guard™</p>
+                    <p className="text-[10px] text-gray-400 mt-1">Adaptive ethnic tone rebalancing</p>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" checked={isSensitive} onChange={(e) => setIsSensitive(e.target.checked)} />
-                    <div className="w-14 h-7 bg-gray-200 rounded-full peer peer-checked:bg-black transition-all"></div>
-                    <div className="absolute left-[5px] top-[5px] w-4.5 h-4.5 bg-white rounded-full transition-transform peer-checked:translate-x-7"></div>
-                  </label>
+                  <Toggle checked={true} onChange={() => {}} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-widest">Sensitivity Guard</p>
+                    <p className="text-[10px] text-gray-400 mt-1">EWG ingredient safety filtering</p>
+                  </div>
+                  <Toggle checked={isSensitive} onChange={() => setIsSensitive(!isSensitive)} />
                 </div>
               </div>
-
-              <button 
-                onClick={handleAnalyze}
-                disabled={!userImage || !celebImage}
-                className="w-full py-8 bg-black text-white text-[11px] font-black uppercase tracking-[0.5em] rounded-[2.5rem] shadow-2xl hover:bg-pink-500 hover:scale-[1.02] active:scale-95 disabled:opacity-20 transition-all"
-              >
-                Initiate Biometric Scan
-              </button>
-              {error && <p className="text-center text-[11px] font-black text-red-500 uppercase">{error}</p>}
+              <button onClick={() => setStep(AppStep.ONBOARDING)} className="w-full py-5 text-[10px] font-black uppercase tracking-widest text-gray-300 hover:text-red-500 transition-colors">Reset Stylist Data</button>
             </div>
-
-            <div className="lg:col-span-7 grid grid-cols-2 gap-10">
-              <LuxuryFileUpload label="Base Profile" preview={userImage} onImageSelect={setUserImage} secondaryLabel="Bare Face / Natural Light" />
-              <LuxuryFileUpload label="K-Muse Muse" preview={celebImage} onImageSelect={setCelebImage} secondaryLabel="Style Inspiration" />
-            </div>
-          </div>
-        )}
-
-        {step === AppStep.ANALYZING && (
-          <div className="min-h-[50vh] flex flex-col items-center justify-center gap-12">
-            <div className="relative w-80 aspect-[3/4] bg-gray-50 rounded-[3rem] overflow-hidden scanning shadow-2xl ring-1 ring-gray-100">
-              {userImage && <img src={`data:image/jpeg;base64,${userImage}`} className="w-full h-full object-cover opacity-60 grayscale" />}
-            </div>
-            <div className="text-center space-y-4">
-              <h2 className="text-3xl font-black uppercase tracking-tighter heading-font">Mapping Heritage...</h2>
-              <p className="text-[11px] text-gray-400 font-black uppercase tracking-[0.6em]">Neural Stylist Engine v4.2 PRO</p>
-            </div>
-          </div>
-        )}
-
-        {step === AppStep.MUSEBOARD && (
-          <MyMuseBoard savedMuses={savedMuses} onBack={() => setStep(AppStep.IDLE)} />
-        )}
-
-        {step === AppStep.RESULT && result && (
-          <div className="animate-fadeIn max-w-6xl mx-auto">
-            {/* Report Header */}
-            <div className="mb-24 flex flex-col md:flex-row justify-between items-end gap-10 border-b-8 border-black pb-12">
-              <div className="space-y-6">
-                <span className="text-[10px] font-black text-pink-500 bg-pink-50 px-5 py-2 rounded-full uppercase tracking-widest border border-pink-100">Neural Report: {result.kMatch.celebName}</span>
-                <h2 className="text-7xl font-black heading-font tracking-tighter uppercase leading-[0.85]">
-                  {result.kMatch.celebName}<br/>
-                  <span className="font-light italic text-gray-300 lowercase">adapted for your heritage</span>
-                </h2>
-              </div>
-              <div className="flex flex-col items-end gap-6">
-                 <button onClick={saveMuse} className="px-10 py-4 border-2 border-black rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all shadow-xl">
-                    Save to Muse Board
-                 </button>
-                 <div className="text-right">
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mb-2">Analysis Verdict</p>
-                    <p className="text-2xl font-black heading-font uppercase text-pink-500">{result.sherlock.facialVibe}</p>
-                 </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-20">
-              {/* STAGE 1 & 2: Biometrics */}
-              <aside className="lg:col-span-4 space-y-12 lg:sticky lg:top-40 h-fit">
-                <div className="p-10 border border-gray-100 rounded-[3rem] bg-white shadow-lg space-y-12">
-                  <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-50 pb-6">01 Visual Analysis</h3>
-                  
-                  <div className="space-y-6">
-                    <div className="flex justify-between items-end">
-                      <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Fitzpatrick Level</span>
-                      <span className="text-2xl font-black heading-font">Type {result.tone.melaninIndex}</span>
-                    </div>
-                    <div className="flex gap-2 h-4">
-                      {[1,2,3,4,5,6].map(i => (
-                        <div key={i} className={`flex-1 rounded-full transition-all duration-1000 ${result.tone.melaninIndex === i ? 'bg-black shadow-xl ring-2 ring-black scale-y-125' : 'bg-gray-100 opacity-40'}`}></div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="space-y-6 pt-4">
-                    <div className="flex justify-between items-center text-[11px] font-black uppercase">
-                      <span className="text-gray-400 tracking-widest">Undertone</span>
-                      <span className="px-4 py-1.5 bg-gray-50 rounded-full">{result.tone.undertone}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-[11px] font-black uppercase">
-                      <span className="text-gray-400 tracking-widest">Proportions</span>
-                      <span className="italic">{result.sherlock.proportions.middle} Focus</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-10 bg-black text-white rounded-[3rem] shadow-2xl relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/10 blur-3xl rounded-full group-hover:scale-150 transition-transform duration-1000"></div>
-                  <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-pink-400 mb-6">02 Identity Integrity</h3>
-                  <p className="text-sm font-medium leading-relaxed italic opacity-80">
-                    "Our K-Style engine strictly maintains your Type {result.tone.melaninIndex} depth. We ensure no 'tone-up' logic is applied, preserving the rich integrity of your ethnic profile."
-                  </p>
-                </div>
-              </aside>
-
-              {/* STAGE 3, 4, 5: Stylist Insights */}
-              <div className="lg:col-span-8 space-y-32">
-                
-                {/* 03 K-Style Translation */}
-                <section>
-                  <StageBadge number="03" title="Style Translation" />
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-                    {[
-                      { l: 'Pigment Shift', v: result.kMatch.adaptationLogic.lip, i: 'fa-palette' },
-                      { l: 'Base Finish', v: result.kMatch.adaptationLogic.base, i: 'fa-sparkles' },
-                      { l: 'Detail Focal', v: result.kMatch.adaptationLogic.point, i: 'fa-eye' },
-                    ].map((it, idx) => (
-                      <div key={idx} className="p-8 border border-gray-100 rounded-[2.5rem] bg-gray-50/30 flex flex-col gap-6 shadow-sm">
-                        <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-md text-pink-500">
-                          <i className={`fa-light ${it.i} text-lg`}></i>
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-2">{it.l}</p>
-                          <p className="text-sm font-black leading-snug">{it.v}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="p-14 bg-gray-50 rounded-[4rem] border border-gray-100 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-40 h-40 bg-pink-100/30 blur-3xl rounded-full transition-all group-hover:scale-150"></div>
-                    <p className="text-3xl font-light italic leading-snug text-gray-800 relative z-10">
-                      "{result.kMatch.styleExplanation}"
-                    </p>
-                  </div>
-                </section>
-
-                {/* 04 Ingredient Check */}
-                <section>
-                  <StageBadge number="04" title="Ingredient Check" />
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                    {result.recommendations.products.map((p, i) => (
-                      <div key={i} className="group p-8 border border-gray-100 rounded-[3rem] bg-white hover:border-black transition-all shadow-sm hover:shadow-2xl">
-                        <div className="flex justify-between items-start mb-8">
-                           <div className="w-20 h-20 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-300 group-hover:text-pink-500 transition-colors">
-                             <i className="fa-light fa-bottle-droplet text-3xl"></i>
-                           </div>
-                           <div className="text-right">
-                             <span className="text-[10px] font-black text-blue-500 bg-blue-50 px-3 py-1.5 rounded-full uppercase tracking-widest">{p.safetyRating}</span>
-                             <p className="text-xl font-black mt-4 tracking-tighter">{p.price}</p>
-                           </div>
-                        </div>
-                        <h4 className="text-base font-black uppercase tracking-tight mb-1">{p.name}</h4>
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-6">{p.brand}</p>
-                        <p className="text-xs text-gray-500 leading-relaxed italic mb-8 opacity-80">{p.desc}</p>
-                        <div className="flex flex-wrap gap-2 pt-6 border-t border-gray-50">
-                           {p.ingredients.map((ing, k) => (
-                             <span key={k} className="px-3 py-1.5 bg-gray-50 text-[9px] font-black uppercase tracking-widest rounded-full">{ing}</span>
-                           ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-
-                {/* 05 Tutorial Masterclass */}
-                <section>
-                  <StageBadge number="05" title="Tutorial Adaptation" />
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
-                    {result.recommendations.videos.map((v, i) => (
-                      <div key={i} className="space-y-8 group">
-                         <div className="relative aspect-video rounded-[3rem] overflow-hidden shadow-xl hover:shadow-2xl transition-all cursor-pointer group-hover:scale-[1.03]">
-                            <div className="absolute inset-0 bg-black/5 group-hover:bg-black/20 transition-all flex items-center justify-center">
-                               <div className="w-16 h-16 bg-white/20 backdrop-blur-xl border border-white/40 rounded-full flex items-center justify-center shadow-2xl">
-                                  <i className="fa-solid fa-play text-white text-lg"></i>
-                               </div>
-                            </div>
-                            <div className="absolute top-6 left-6">
-                               <span className="px-4 py-1.5 bg-black/40 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest rounded-full">{v.tag}</span>
-                            </div>
-                         </div>
-                         <div className="px-4 space-y-4">
-                            <h4 className="text-xl font-black leading-tight uppercase tracking-tight group-hover:text-pink-500 transition-colors">{v.title}</h4>
-                            <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest">{v.creator} • {v.views} views</p>
-                         </div>
-                         <div className="p-8 bg-gray-900 text-white rounded-[3rem] border-l-[12px] border-pink-500 shadow-2xl relative overflow-hidden">
-                            <div className="absolute -top-10 -right-10 w-40 h-40 bg-pink-500/10 blur-[60px] rounded-full"></div>
-                            <div className="flex items-center gap-3 mb-4">
-                               <i className="fa-solid fa-sparkles text-pink-400 text-sm"></i>
-                               <span className="text-[10px] font-black text-pink-400 uppercase tracking-[0.4em]">AI Coaching Adaptation</span>
-                            </div>
-                            <p className="text-sm font-medium leading-relaxed italic opacity-90">
-                               "{v.aiCoaching}"
-                            </p>
-                            <div className="mt-8 flex gap-4">
-                               <span className="px-4 py-2 bg-white/10 text-[9px] font-black uppercase tracking-widest rounded-full border border-white/5">Match {v.matchPercentage}%</span>
-                               <span className="px-4 py-2 bg-white/10 text-[9px] font-black uppercase tracking-widest rounded-full border border-white/5">Level: {v.skillLevel}</span>
-                            </div>
-                         </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-
-                {/* Report Footer Actions */}
-                <div className="pt-24 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-12">
-                  <button onClick={reset} className="px-20 py-8 bg-black text-white text-[11px] font-black uppercase tracking-[0.5em] rounded-full shadow-2xl hover:bg-pink-500 hover:scale-105 active:scale-95 transition-all">
-                    Start New Analysis
-                  </button>
-                  <div className="text-center sm:text-right">
-                    <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.6em] mb-3">Authentic Verification</p>
-                    <p className="text-2xl font-black heading-font uppercase tracking-tighter">K-Mirror <span className="text-pink-500 italic">Neural v4.2</span></p>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </div>
-        )}
-      </main>
-
-      <footer className="mt-40 py-32 border-t border-gray-100 bg-gray-50/50">
-        <div className="max-w-4xl mx-auto flex flex-col items-center gap-16 px-10">
-          <div className="text-center space-y-4">
-            <h2 className="text-4xl font-black heading-font uppercase tracking-tighter">K-Mirror Neural lab</h2>
-            <p className="text-[11px] text-gray-400 uppercase font-black tracking-[0.5em] leading-loose max-w-2xl">
-              Celebrating ethnic diversity through neural beauty intelligence. We bridge heritage with Seoul’s aesthetic performance.
-            </p>
-          </div>
-          <div className="flex gap-20 text-gray-300">
-            <a href="#" className="hover:text-black transition-all hover:scale-150"><i className="fa-brands fa-instagram text-2xl"></i></a>
-            <a href="#" className="hover:text-black transition-all hover:scale-150"><i className="fa-brands fa-tiktok text-2xl"></i></a>
-            <a href="#" className="hover:text-black transition-all hover:scale-150"><i className="fa-brands fa-pinterest text-2xl"></i></a>
-          </div>
-          <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.6em]">2024 © All Rights Reserved</p>
+          )}
         </div>
-      </footer>
+      </main>
+      
+      {/* Global Toast Notification */}
+      <AnimatePresence>
+        {result && (
+          <motion.div 
+            initial={{ y: 100, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 100, opacity: 0 }}
+            className="fixed bottom-24 md:bottom-8 right-4 md:right-8 bg-black text-white p-5 md:p-6 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl flex items-center gap-4 z-[100] border border-white/10 backdrop-blur-xl bg-black/90 max-w-[calc(100vw-2rem)] md:max-w-xs"
+          >
+            <div className="w-10 h-10 md:w-12 md:h-12 flex-shrink-0 bg-[#FF4D8D] rounded-xl md:rounded-2xl flex items-center justify-center text-white shadow-lg">
+              <i className="fa-solid fa-sparkles text-xs md:text-sm"></i>
+            </div>
+            <p className="text-[10px] md:text-[11px] font-bold leading-relaxed tracking-tight">
+              당신의 <span className="text-[#FF4D8D]">골격 구조</span>에 맞는 새로운 룩이 추천되었습니다.
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
