@@ -66,6 +66,7 @@ export enum AppStep {
   IDLE,
   ANALYZING,
   RESULT,
+  CHECKOUT,
   MUSEBOARD,
   SETTINGS,
   STYLIST,

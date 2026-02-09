@@ -17,9 +17,9 @@ export const analyzeKBeauty = async (
 - Desired Impression: ${preferences.mood}
 
 위 정보를 바탕으로:
-1. 환경이 ${preferences.environment === 'Office' ? '건조한 사무실' : preferences.environment === 'Outdoor' ? '활동적인 야외' : '조명이 강한 파티'}라면 그에 맞는 제형(수분 앰플 함유 또는 롱래스팅)을 추천하세요. 특히 건조하다면 픽서보다는 수분 앰플 함유 제형을 추천하세요.
-2. 메이크업 숙련도가 ${preferences.skill}임을 고려하여, 숙련도가 낮다면 브러시 대신 퍼프를 활용한 기법을 설명하고, 전문가라면 정교한 레이어링 기법을 제안하세요.
-3. 인상이 '${preferences.mood}'하길 원한다는 점을 스타일링에 적극 반영하세요. 특히 'Powerful'을 원한다면 눈매를 더 선명하게 강조하는 K-아이돌 테크닉을 적용하고, 'Natural'을 원한다면 투명한 광채 위주로 설명하세요.
+1. 환경이 건조하다면(예: Office) 픽서보다는 수분 앰플 함유 제형을 추천하세요.
+2. 숙련도가 낮다면 브러시 대신 퍼프를 활용한 기법을 설명하세요.
+3. 인상이 'Powerful'하길 원한다면 눈매를 더 선명하게 강조하는 K-아이돌 테크닉을 적용하세요.
 `;
 
   const systemInstruction = `
