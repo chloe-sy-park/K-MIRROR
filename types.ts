@@ -21,7 +21,7 @@ export interface VideoRecommendation {
 }
 
 export interface UserPreferences {
-  environment: 'Office' | 'Outdoor' | 'Night-out';
+  environment: 'Office' | 'Outdoor' | 'Studio';
   skill: 'Beginner' | 'Intermediate' | 'Pro';
   mood: 'Natural' | 'Elegant' | 'Powerful';
 }
@@ -70,6 +70,7 @@ export enum AppStep {
   MUSEBOARD,
   SETTINGS,
   STYLIST,
+  METHODOLOGY,
   PARTNER_DASHBOARD
 }
 

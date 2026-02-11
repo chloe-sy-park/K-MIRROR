@@ -1,15 +1,79 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>K-MIRROR AI | Global K-Beauty Intelligence</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>K-MIRROR AI | Global K-Beauty Stylist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-pink: #FF4D8D;
+            --brand-dark: #0F0F0F;
+            --brand-gray: #F5F5F7;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: white;
+            color: var(--brand-dark);
+            -webkit-font-smoothing: antialiased;
+        }
+        .heading-font {
+            font-family: 'Outfit', sans-serif;
+        }
+        .luxury-card {
+            background: white;
+            border: 1px solid #E5E5E5;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        .luxury-card:hover {
+            border-color: var(--brand-dark);
+        }
+        .btn-luxury {
+            background: var(--brand-dark);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-luxury:hover {
+            background: #2a2a2a;
+            transform: translateY(-1px);
+        }
+        .accent-gradient {
+            background: linear-gradient(90deg, #FF4D8D, #FF8E53);
+        }
+        @keyframes scan {
+            0% { top: 0%; opacity: 0; }
+            50% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+        .scanning::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: var(--brand-pink);
+            box-shadow: 0 0 15px var(--brand-pink);
+            animation: scan 2s infinite ease-in-out;
+            left: 0;
+            z-index: 10;
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.40.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
+    "framer-motion": "https://esm.sh/framer-motion@^12.34.0"
+  }
+}
+</script>
 </head>
 <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>

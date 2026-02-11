@@ -2,53 +2,49 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { AnalysisResult, UserPreferences } from "../types";
 
+// Fix: Updated function signature to accept 4 arguments as expected by App.tsx
 export const analyzeKBeauty = async (
   userImageBase64: string,
   celebImageBase64: string,
   isSensitive: boolean,
-  preferences: UserPreferences
+  prefs: UserPreferences
 ): Promise<AnalysisResult> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
-  const sophisticatedContext = `
-[User Profile Expansion]
-- Environment: ${preferences.environment}
-- Skill Level: ${preferences.skill}
-- Desired Impression: ${preferences.mood}
-
-위 정보를 바탕으로:
-1. 환경이 건조하다면(예: Office) 픽서보다는 수분 앰플 함유 제형을 추천하세요.
-2. 숙련도가 낮다면 브러시 대신 퍼프를 활용한 기법을 설명하세요.
-3. 인상이 'Powerful'하길 원한다면 눈매를 더 선명하게 강조하는 K-아이돌 테크닉을 적용하세요.
-`;
-
   const systemInstruction = `
-    You are the Senior AI Stylist for K-Mirror, a global K-Beauty laboratory.
-    Your mission is to analyze the user's portrait and a K-Celeb inspiration photo.
-    
-    ${sophisticatedContext}
+    You are a Global K-Beauty Stylist and Face Analysis Expert. 
+    Analyze the two images provided:
+    1. The user's bare face.
+    2. A K-Celeb inspiration photo.
 
-    Strictly follow this analysis logic:
-    1. [Visual Analysis]: Use Fitzpatrick scale (1-6) for melanin index, determine undertone, and facial proportions.
-    2. [Identity Preservation]: Preserve and celebrate the user's natural melanin level. Suggest ethnic-inclusive K-beauty adaptations.
-    3. [K-Style Translation]: Reinterpret the celeb look based on the user's specific context provided in the User Profile Expansion.
-    4. [Ingredient Check]: Recommend K-beauty ingredients based on sensitivity: ${isSensitive}.
+    User Profile & Preferences:
+    - Environment: ${prefs.environment} (Tailor makeup longevity and finish for this environment)
+    - Skill Level: ${prefs.skill} (Suggest techniques appropriate for this skill)
+    - Desired Mood: ${prefs.mood} (Influence the overall aesthetic direction)
+    - Sensitive Skin: ${isSensitive ? 'Yes' : 'No'}
 
-    CRITICAL: Output 'aiStylePoints' in 'kMatch' as exactly 3 short strings.
-    Response must be valid JSON only.
+    Perform the following analysis:
+    - Tone Analysis: Melanin index (1-6), Undertone (Warm/Cool/Neutral), and primary skin concerns.
+    - Sherlock Face Analysis: Evaluate facial proportions (Upper/Mid/Lower), Eye Angle (Cat/Puppy/Doe), and Bone Structure (Sculpted/Soft).
+    - Style Transfer Logic: Reinterpret the K-celeb's makeup/style for the user's unique ethnicity and skin tone. Suggest inclusive K-beauty techniques.
+    - Sensitivity Filter: If the user is sensitive, recommend soothing K-beauty ingredients.
+    - Product Curation (Hwahae Style): Recommend 3-4 specific K-beauty products with match scores and safety ratings.
+    - Video Curation: Suggest 2 relevant YouTube-style tutorial topics that specifically teach how to achieve this adapted look.
+
+    Output MUST be in valid JSON format only.
   `;
 
   const response = await ai.models.generateContent({
+    // Using gemini-3-pro-preview for complex facial analysis and style transfer tasks
     model: 'gemini-3-pro-preview',
     contents: {
       parts: [
+        { text: systemInstruction },
         { inlineData: { mimeType: 'image/jpeg', data: userImageBase64 } },
-        { inlineData: { mimeType: 'image/jpeg', data: celebImageBase64 } },
-        { text: "Analyze the facial architecture and skin tone. Reinterpret the celebrity look for this user's specific environment, skill level, and desired mood." }
+        { inlineData: { mimeType: 'image/jpeg', data: celebImageBase64 } }
       ]
     },
     config: {
-      systemInstruction: systemInstruction,
       responseMimeType: "application/json",
       responseSchema: {
         type: Type.OBJECT,
@@ -57,7 +53,7 @@ export const analyzeKBeauty = async (
             type: Type.OBJECT,
             properties: {
               melaninIndex: { type: Type.NUMBER },
-              undertone: { type: Type.STRING },
+              undertone: { type: Type.STRING, description: "Warm, Cool, or Neutral" },
               skinConcerns: { type: Type.ARRAY, items: { type: Type.STRING } },
               description: { type: Type.STRING }
             },
@@ -103,9 +99,9 @@ export const analyzeKBeauty = async (
             type: Type.OBJECT,
             properties: {
               ingredients: { type: Type.ARRAY, items: { type: Type.STRING } },
-              products: {
-                type: Type.ARRAY,
-                items: {
+              products: { 
+                type: Type.ARRAY, 
+                items: { 
                   type: Type.OBJECT,
                   properties: {
                     name: { type: Type.STRING },
@@ -119,9 +115,26 @@ export const analyzeKBeauty = async (
                   required: ['name', 'brand', 'price', 'desc', 'matchScore', 'ingredients', 'safetyRating']
                 }
               },
+              videos: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    title: { type: Type.STRING },
+                    creator: { type: Type.STRING },
+                    views: { type: Type.STRING },
+                    duration: { type: Type.STRING },
+                    tag: { type: Type.STRING },
+                    aiCoaching: { type: Type.STRING },
+                    matchPercentage: { type: Type.NUMBER },
+                    skillLevel: { type: Type.STRING }
+                  },
+                  required: ['title', 'creator', 'views', 'duration', 'tag', 'aiCoaching', 'matchPercentage', 'skillLevel']
+                }
+              },
               sensitiveSafe: { type: Type.BOOLEAN }
             },
-            required: ['ingredients', 'products', 'sensitiveSafe']
+            required: ['ingredients', 'products', 'videos', 'sensitiveSafe']
           }
         },
         required: ['tone', 'sherlock', 'kMatch', 'recommendations']
@@ -129,5 +142,8 @@ export const analyzeKBeauty = async (
     }
   });
 
-  return JSON.parse(response.text);
+  // Correctly accessing text property from the response
+  const text = response.text;
+  if (!text) throw new Error("Empty response from AI");
+  return JSON.parse(text) as AnalysisResult;
 };
