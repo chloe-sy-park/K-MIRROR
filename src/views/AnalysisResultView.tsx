@@ -1,16 +1,23 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   RotateCcw, Cpu, Palette, Droplets, Eye, Activity,
-  Check, Sparkles, Plus, Play, ExternalLink, Lightbulb
+  Check, Sparkles, Plus, Play, ExternalLink, Lightbulb,
+  Bookmark, X
 } from 'lucide-react';
 import { containerVariants, itemVariants } from '@/constants/animations';
 import { useScanStore } from '@/store/scanStore';
+import { useMuseStore } from '@/store/museStore';
 import SherlockProportionVisualizer from '@/components/sherlock/ProportionVisualizer';
 
 const AnalysisResultView = () => {
   const navigate = useNavigate();
-  const { result, reset } = useScanStore();
+  const { result, userImage, celebImage, reset } = useScanStore();
+  const { boards, saveMuse, fetchBoards } = useMuseStore();
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [selectedBoardId, setSelectedBoardId] = useState<string | undefined>();
+  const [isSaved, setIsSaved] = useState(false);
 
   if (!result) return null;
 
@@ -20,6 +27,25 @@ const AnalysisResultView = () => {
 
   const handleCheckout = () => {
     navigate('/checkout');
+  };
+
+  const handleOpenSave = async () => {
+    await fetchBoards();
+    setShowSaveModal(true);
+  };
+
+  const handleSaveMuse = async () => {
+    await saveMuse({
+      userImage: userImage || '',
+      celebImage: celebImage || '',
+      celebName: result.kMatch.celebName,
+      date: new Date().toLocaleDateString(),
+      vibe: result.sherlock.facialVibe,
+      boardId: selectedBoardId,
+      aiStylePoints: result.kMatch.aiStylePoints,
+    });
+    setIsSaved(true);
+    setShowSaveModal(false);
   };
 
   return (
@@ -35,9 +61,21 @@ const AnalysisResultView = () => {
               <Cpu size={10} /> Neural Stylist v4.2.1-stable
             </div>
           </div>
-          <button onClick={handleReset} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-black transition-colors uppercase">
-            <RotateCcw size={12} /> New Scan
-          </button>
+          <div className="flex items-center gap-4">
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={handleOpenSave}
+              disabled={isSaved}
+              className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-colors ${
+                isSaved ? 'text-[#FF4D8D]' : 'text-gray-400 hover:text-[#FF4D8D]'
+              }`}
+            >
+              <Bookmark size={12} fill={isSaved ? 'currentColor' : 'none'} /> {isSaved ? 'Saved' : 'Save'}
+            </motion.button>
+            <button onClick={handleReset} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-black transition-colors">
+              <RotateCcw size={12} /> New Scan
+            </button>
+          </div>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-end">
           <h2 className="text-[60px] lg:text-[100px] heading-font leading-[0.85] tracking-[-0.05em] uppercase text-balance">
@@ -238,6 +276,74 @@ const AnalysisResultView = () => {
           ))}
         </div>
       </motion.section>
+      {/* Save to Muse Board Modal */}
+      <AnimatePresence>
+        {showSaveModal && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[250] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+            onClick={() => setShowSaveModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-[3rem] p-10 max-w-md w-full shadow-2xl relative"
+            >
+              <button
+                onClick={() => setShowSaveModal(false)}
+                className="absolute top-6 right-6 p-2 text-gray-300 hover:text-black transition-colors"
+              >
+                <X size={20} />
+              </button>
+
+              <div className="text-center mb-10">
+                <h2 className="text-3xl heading-font uppercase tracking-tight">
+                  Save to <span className="italic text-[#FF4D8D]">Muse Board</span>
+                </h2>
+                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-3">
+                  {result.kMatch.celebName} — {result.sherlock.facialVibe}
+                </p>
+              </div>
+
+              <div className="space-y-3 mb-8 max-h-60 overflow-y-auto">
+                <button
+                  onClick={() => setSelectedBoardId(undefined)}
+                  className={`w-full flex items-center gap-4 p-4 rounded-2xl text-left transition-all ${
+                    !selectedBoardId ? 'bg-black text-white' : 'bg-gray-50 hover:bg-gray-100'
+                  }`}
+                >
+                  <Bookmark size={16} />
+                  <span className="text-[10px] font-black uppercase tracking-widest">No board (general)</span>
+                </button>
+                {boards.map((board) => (
+                  <button
+                    key={board.id}
+                    onClick={() => setSelectedBoardId(board.id)}
+                    className={`w-full flex items-center gap-4 p-4 rounded-2xl text-left transition-all ${
+                      selectedBoardId === board.id ? 'bg-black text-white' : 'bg-gray-50 hover:bg-gray-100'
+                    }`}
+                  >
+                    <span className="text-lg">{board.icon}</span>
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-widest">{board.name}</span>
+                      <span className={`ml-2 text-[8px] ${selectedBoardId === board.id ? 'text-gray-400' : 'text-gray-300'}`}>
+                        {board.count} muses
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={handleSaveMuse}
+                className="w-full py-5 bg-black text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] hover:bg-[#FF4D8D] transition-all"
+              >
+                Save Muse
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };
