@@ -3,15 +3,17 @@ import { NavLink, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Camera, LayoutGrid, MessageCircle, Settings, Menu, X,
-  User, Scan, LogOut
+  User, Scan, LogOut, ShoppingBag
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
+import { useCartStore } from '@/store/cartStore';
 
 const navItems = [
   { to: '/', label: 'Scan' },
   { to: '/muse', label: 'Muse Board' },
   { to: '/match', label: 'Match' },
   { to: '/methodology', label: 'Sherlock' },
+  { to: '/shop', label: 'Shop' },
   { to: '/settings', label: 'Settings' }
 ];
 
@@ -20,6 +22,7 @@ const mobileNavItems = [
   { to: '/muse', label: 'Muse Board', icon: <LayoutGrid size={20}/> },
   { to: '/match', label: 'Expert Match', icon: <MessageCircle size={20}/> },
   { to: '/methodology', label: 'Sherlock Methodology', icon: <Scan size={20}/> },
+  { to: '/shop', label: 'K-Beauty Shop', icon: <ShoppingBag size={20}/> },
   { to: '/settings', label: 'Settings', icon: <Settings size={20}/> }
 ];
 
@@ -27,6 +30,7 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const { user, openAuthModal, signOut } = useAuthStore();
+  const cartCount = useCartStore((s) => s.itemCount);
 
   const isActive = (to: string) => {
     if (to === '/') {
@@ -63,6 +67,14 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-4">
+          <Link to="/checkout" className="relative p-2 text-gray-400 hover:text-black transition-colors">
+            <ShoppingBag size={18} />
+            {cartCount() > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#FF4D8D] text-white text-[8px] font-black rounded-full flex items-center justify-center">
+                {cartCount()}
+              </span>
+            )}
+          </Link>
           <button className="lg:hidden p-2" onClick={() => setIsMenuOpen(!isMenuOpen)}>
             {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>

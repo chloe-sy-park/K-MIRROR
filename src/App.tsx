@@ -19,6 +19,9 @@ import ExpertMatchingView from '@/views/ExpertMatchingView';
 import MethodologyView from '@/views/MethodologyView';
 import SettingsView from '@/views/SettingsView';
 import MuseBoardView from '@/views/MuseBoardView';
+import ShopView from '@/views/ShopView';
+import ProductDetailView from '@/views/ProductDetailView';
+import OrdersView from '@/views/OrdersView';
 
 const ScanRoute = () => {
   const { phase, result } = useScanStore();
@@ -61,6 +64,9 @@ const App = () => {
             <Route path="/methodology" element={<MethodologyView onBookSession={() => navigate('/match')} />} />
             <Route path="/settings" element={<SettingsView />} />
             <Route path="/muse" element={<MuseBoardView />} />
+            <Route path="/shop" element={<ShopView />} />
+            <Route path="/shop/:id" element={<ProductDetailView />} />
+            <Route path="/orders" element={<OrdersView />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </AnimatePresence>
