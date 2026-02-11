@@ -9,6 +9,7 @@ import {
 import { containerVariants, itemVariants } from '@/constants/animations';
 import { useScanStore } from '@/store/scanStore';
 import { useMuseStore } from '@/store/museStore';
+import { renderColorOnSkin } from '@/services/colorService';
 import SherlockProportionVisualizer from '@/components/sherlock/ProportionVisualizer';
 
 const AnalysisResultView = () => {
@@ -58,7 +59,7 @@ const AnalysisResultView = () => {
           <div className="flex flex-col gap-1">
             <p className="text-[10px] font-black tracking-[0.5em] text-[#FF4D8D] uppercase italic">Diagnostic Report — ID:{Math.floor(Math.random() * 10000)}</p>
             <div className="flex items-center gap-2 text-[8px] font-bold text-gray-400 uppercase tracking-widest">
-              <Cpu size={10} /> Neural Stylist v4.2.1-stable
+              <Cpu size={10} /> Neural Stylist v5.0-inclusive
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -85,8 +86,9 @@ const AnalysisResultView = () => {
             <div className="flex justify-between border-b border-gray-100 pb-4 items-center">
               <span className="text-[10px] font-black uppercase text-gray-300">Tone Mapping</span>
               <div className="flex items-center gap-2">
-                <div className={`w-3 h-3 rounded-full ${result.tone.undertone === 'Warm' ? 'bg-[#D4A373]' : result.tone.undertone === 'Cool' ? 'bg-[#4A3B31]' : 'bg-[#C6A48E]'}`} />
+                <div className="w-3 h-3 rounded-full border border-gray-200" style={{ backgroundColor: result.tone.skinHexCode }} />
                 <span className="text-xs font-bold uppercase">{result.tone.undertone} / L{result.tone.melaninIndex}</span>
+                <span className="text-[8px] text-gray-400 font-mono">{result.tone.skinHexCode}</span>
               </div>
             </div>
             <div className="flex justify-between border-b border-gray-100 pb-4">
@@ -188,6 +190,19 @@ const AnalysisResultView = () => {
                 <Sparkles size={24} className="text-gray-100 absolute" />
                 <div className="w-full h-full bg-gray-100/50 mix-blend-multiply rounded-lg group-hover:scale-110 transition-transform duration-700" />
               </div>
+              {result.tone.skinHexCode && (
+                <div className="flex items-center gap-2 mb-6">
+                  <span className="text-[8px] font-black text-gray-300 uppercase tracking-widest">Swatch</span>
+                  {(['tint', 'matte', 'cushion'] as const).map((type) => (
+                    <div
+                      key={type}
+                      className="w-5 h-5 rounded-full border border-gray-200 shadow-sm"
+                      style={{ backgroundColor: renderColorOnSkin(result.tone.skinHexCode, '#FF4D8D', type) }}
+                      title={type}
+                    />
+                  ))}
+                </div>
+              )}
               <div className="flex flex-col flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <p className="text-[9px] font-black text-[#FF4D8D] uppercase">{product.brand}</p>

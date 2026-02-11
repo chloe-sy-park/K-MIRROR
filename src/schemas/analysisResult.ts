@@ -25,6 +25,7 @@ export const analysisResultSchema = z.object({
   tone: z.object({
     melaninIndex: z.number().min(1).max(6),
     undertone: z.enum(['Warm', 'Cool', 'Neutral']),
+    skinHexCode: z.string().regex(/^#[0-9A-Fa-f]{6}$/).default('#C8A98B'),
     skinConcerns: z.array(z.string()),
     description: z.string(),
   }),

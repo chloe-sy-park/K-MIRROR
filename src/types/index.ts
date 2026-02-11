@@ -30,6 +30,7 @@ export interface AnalysisResult {
   tone: {
     melaninIndex: number; // 1-6
     undertone: 'Warm' | 'Cool' | 'Neutral';
+    skinHexCode: string; // e.g. "#C8A98B"
     skinConcerns: string[];
     description: string;
   };

@@ -4,6 +4,7 @@ export const DEMO_RESULT: AnalysisResult = {
   tone: {
     melaninIndex: 5,
     undertone: 'Cool',
+    skinHexCode: '#6B4226',
     skinConcerns: ['Hyper-pigmentation', 'Inner Dryness', 'Structural Shadowing'],
     description: "Your complexion exhibits a rich, cool-ebony depth (Melanin L5) with subtle sapphire undertones. K-Beauty standards for this tone shift from 'whitening' to 'luminosity optimization,' focusing on high-chroma berry pigments and moisture-locked glass finishes."
   },
