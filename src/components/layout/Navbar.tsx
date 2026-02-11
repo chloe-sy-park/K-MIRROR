@@ -1,62 +1,67 @@
+import { useState } from 'react';
+import { NavLink, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Camera, LayoutGrid, MessageCircle, Settings, Menu, X,
   User, Scan
 } from 'lucide-react';
-import { AppStep } from '@/types';
 
-interface NavbarProps {
-  step: AppStep;
-  isMenuOpen: boolean;
-  onSetStep: (step: AppStep) => void;
-  onToggleMenu: () => void;
-}
+const navItems = [
+  { to: '/', label: 'Scan' },
+  { to: '/muse', label: 'Muse Board' },
+  { to: '/match', label: 'Match' },
+  { to: '/methodology', label: 'Sherlock' },
+  { to: '/settings', label: 'Settings' }
+];
 
-const Navbar = ({ step, isMenuOpen, onSetStep, onToggleMenu }: NavbarProps) => {
-  const navItems = [
-    { id: AppStep.IDLE, label: 'Scan' },
-    { id: AppStep.MUSEBOARD, label: 'Muse Board' },
-    { id: AppStep.STYLIST, label: 'Match' },
-    { id: AppStep.METHODOLOGY, label: 'Sherlock' },
-    { id: AppStep.SETTINGS, label: 'Settings' }
-  ];
+const mobileNavItems = [
+  { to: '/', label: 'Scan Laboratory', icon: <Camera size={20}/> },
+  { to: '/muse', label: 'Muse Board', icon: <LayoutGrid size={20}/> },
+  { to: '/match', label: 'Expert Match', icon: <MessageCircle size={20}/> },
+  { to: '/methodology', label: 'Sherlock Methodology', icon: <Scan size={20}/> },
+  { to: '/settings', label: 'Settings', icon: <Settings size={20}/> }
+];
 
-  const mobileNavItems = [
-    { id: AppStep.IDLE, label: 'Scan Laboratory', icon: <Camera size={20}/> },
-    { id: AppStep.MUSEBOARD, label: 'Muse Board', icon: <LayoutGrid size={20}/> },
-    { id: AppStep.STYLIST, label: 'Expert Match', icon: <MessageCircle size={20}/> },
-    { id: AppStep.METHODOLOGY, label: 'Sherlock Methodology', icon: <Scan size={20}/> },
-    { id: AppStep.SETTINGS, label: 'Settings', icon: <Settings size={20}/> }
-  ];
+const Navbar = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
+
+  const isActive = (to: string) => {
+    if (to === '/') {
+      return location.pathname === '/' || location.pathname === '/checkout';
+    }
+    return location.pathname === to;
+  };
 
   return (
     <nav className="fixed top-0 w-full z-[150] bg-white/80 backdrop-blur-xl border-b border-gray-100 px-6 lg:px-12 py-5 transition-all">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          className="flex items-center gap-2 cursor-pointer"
-          onClick={() => onSetStep(AppStep.IDLE)}
-        >
-          <h1 className="text-2xl font-black heading-font tracking-tighter italic uppercase text-balance">
-            K-MIRROR <span className="text-[#FF4D8D] not-italic">AI</span>
-          </h1>
+        <motion.div whileHover={{ scale: 1.05 }}>
+          <Link to="/" className="flex items-center gap-2">
+            <h1 className="text-2xl font-black heading-font tracking-tighter italic uppercase text-balance">
+              K-MIRROR <span className="text-[#FF4D8D] not-italic">AI</span>
+            </h1>
+          </Link>
         </motion.div>
 
         <div className="hidden lg:flex items-center gap-12">
           {navItems.map(item => (
-            <button
-              key={item.id}
-              onClick={() => onSetStep(item.id)}
-              className={`text-[10px] font-black uppercase tracking-[0.3em] transition-all hover:text-[#FF4D8D]
-                ${(step === item.id || (item.id === AppStep.IDLE && (step === AppStep.ANALYZING || step === AppStep.RESULT || step === AppStep.CHECKOUT))) ? 'text-black border-b-2 border-[#FF4D8D] pb-1' : 'text-gray-400'}`}
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={() =>
+                `text-[10px] font-black uppercase tracking-[0.3em] transition-all hover:text-[#FF4D8D] ${
+                  isActive(item.to) ? 'text-black border-b-2 border-[#FF4D8D] pb-1' : 'text-gray-400'
+                }`
+              }
             >
               {item.label}
-            </button>
+            </NavLink>
           ))}
         </div>
 
         <div className="flex items-center gap-4">
-          <button className="lg:hidden p-2" onClick={onToggleMenu}>
+          <button className="lg:hidden p-2" onClick={() => setIsMenuOpen(!isMenuOpen)}>
             {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
           <motion.div
@@ -76,13 +81,18 @@ const Navbar = ({ step, isMenuOpen, onSetStep, onToggleMenu }: NavbarProps) => {
           >
             <div className="flex flex-col gap-10">
               {mobileNavItems.map(item => (
-                <button
-                  key={item.id}
-                  onClick={() => { onSetStep(item.id); onToggleMenu(); }}
-                  className={`flex items-center gap-6 text-sm font-black uppercase tracking-widest ${step === item.id ? 'text-[#FF4D8D]' : 'text-gray-400'}`}
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  onClick={() => setIsMenuOpen(false)}
+                  className={() =>
+                    `flex items-center gap-6 text-sm font-black uppercase tracking-widest ${
+                      isActive(item.to) ? 'text-[#FF4D8D]' : 'text-gray-400'
+                    }`
+                  }
                 >
                   {item.icon} {item.label}
-                </button>
+                </NavLink>
               ))}
             </div>
           </motion.div>

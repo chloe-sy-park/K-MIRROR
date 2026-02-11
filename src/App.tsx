@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
-import { AppStep, AnalysisResult, UserPreferences } from '@/types';
+import { AnalysisResult, UserPreferences } from '@/types';
 import { analyzeKBeauty } from '@/services/geminiService';
 import { DEMO_RESULT } from '@/data/demoResult';
 
@@ -17,109 +18,108 @@ import MethodologyView from '@/views/MethodologyView';
 import SettingsView from '@/views/SettingsView';
 import MuseBoardView from '@/views/MuseBoardView';
 
+type ScanPhase = 'idle' | 'analyzing' | 'result';
+
 const App = () => {
-  const [step, setStep] = useState<AppStep>(AppStep.ONBOARDING);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const [scanPhase, setScanPhase] = useState<ScanPhase>('idle');
   const [userImage, setUserImage] = useState<string | null>(null);
   const [celebImage, setCelebImage] = useState<string | null>(null);
   const [isSensitive, setIsSensitive] = useState(false);
   const [prefs, setPrefs] = useState<UserPreferences>({ environment: 'Office', skill: 'Beginner', mood: 'Natural' });
   const [result, setResult] = useState<AnalysisResult | null>(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isOnboarded, setIsOnboarded] = useState(false);
 
   const handleAnalyze = async () => {
     if (!userImage || !celebImage) return;
     try {
-      setStep(AppStep.ANALYZING);
+      setScanPhase('analyzing');
       const res = await analyzeKBeauty(userImage, celebImage, isSensitive, prefs);
       setResult(res);
-      setStep(AppStep.RESULT);
+      setScanPhase('result');
     } catch (err) {
       console.error(err);
-      setStep(AppStep.IDLE);
+      setScanPhase('idle');
     }
   };
 
   const handleDemoMode = () => {
-    setStep(AppStep.ANALYZING);
+    setScanPhase('analyzing');
     setTimeout(() => {
       setResult(DEMO_RESULT);
-      setStep(AppStep.RESULT);
+      setScanPhase('result');
     }, 2000);
   };
 
   const handleOnboardingComplete = (p: UserPreferences) => {
     setPrefs(p);
-    setStep(AppStep.IDLE);
+    setIsOnboarded(true);
+    navigate('/');
   };
 
   const handleReset = () => {
     setResult(null);
-    setStep(AppStep.IDLE);
+    setScanPhase('idle');
   };
 
   const handleCheckout = () => {
-    setStep(AppStep.CHECKOUT);
+    navigate('/checkout');
+  };
+
+  const handleResetData = () => {
+    setIsOnboarded(false);
+    navigate('/onboarding');
   };
 
   return (
     <div className="min-h-screen bg-white flex flex-col font-['Plus_Jakarta_Sans'] text-[#0F0F0F] relative selection:bg-[#FF4D8D] selection:text-white">
       <AnimatePresence>
-        {step === AppStep.ONBOARDING && <OnboardingView onComplete={handleOnboardingComplete} />}
+        {!isOnboarded && location.pathname === '/onboarding' && (
+          <OnboardingView onComplete={handleOnboardingComplete} />
+        )}
       </AnimatePresence>
 
-      <Navbar
-        step={step}
-        isMenuOpen={isMenuOpen}
-        onSetStep={setStep}
-        onToggleMenu={() => setIsMenuOpen(!isMenuOpen)}
-      />
+      <Navbar />
 
       <main className="flex-1 pt-32 pb-24 px-6 lg:px-12 max-w-7xl mx-auto w-full min-h-screen">
         <AnimatePresence mode="wait">
-          {step === AppStep.IDLE && (
-            <ScanView
-              userImage={userImage}
-              celebImage={celebImage}
-              isSensitive={isSensitive}
-              onUserImageSelect={setUserImage}
-              onCelebImageSelect={setCelebImage}
-              onToggleSensitive={() => setIsSensitive(!isSensitive)}
-              onAnalyze={handleAnalyze}
-              onDemoMode={handleDemoMode}
-            />
-          )}
-
-          {step === AppStep.ANALYZING && (
-            <AnalyzingView userImage={userImage} />
-          )}
-
-          {step === AppStep.RESULT && result && (
-            <AnalysisResultView result={result} onReset={handleReset} onCheckout={handleCheckout} />
-          )}
-
-          {step === AppStep.CHECKOUT && (
-            <GlobalCheckoutView result={result} />
-          )}
-
-          {step === AppStep.STYLIST && (
-            <ExpertMatchingView />
-          )}
-
-          {step === AppStep.METHODOLOGY && (
-            <MethodologyView onBookSession={() => setStep(AppStep.STYLIST)} />
-          )}
-
-          {step === AppStep.SETTINGS && (
-            <SettingsView
-              isSensitive={isSensitive}
-              onToggleSensitive={() => setIsSensitive(!isSensitive)}
-              onResetData={() => setStep(AppStep.ONBOARDING)}
-            />
-          )}
-
-          {step === AppStep.MUSEBOARD && (
-            <MuseBoardView />
-          )}
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={
+              scanPhase === 'analyzing' ? (
+                <AnalyzingView userImage={userImage} />
+              ) : scanPhase === 'result' && result ? (
+                <AnalysisResultView result={result} onReset={handleReset} onCheckout={handleCheckout} />
+              ) : (
+                <ScanView
+                  userImage={userImage}
+                  celebImage={celebImage}
+                  isSensitive={isSensitive}
+                  onUserImageSelect={setUserImage}
+                  onCelebImageSelect={setCelebImage}
+                  onToggleSensitive={() => setIsSensitive(!isSensitive)}
+                  onAnalyze={handleAnalyze}
+                  onDemoMode={handleDemoMode}
+                />
+              )
+            } />
+            <Route path="/onboarding" element={
+              isOnboarded ? <Navigate to="/" replace /> : <OnboardingView onComplete={handleOnboardingComplete} />
+            } />
+            <Route path="/checkout" element={<GlobalCheckoutView result={result} />} />
+            <Route path="/match" element={<ExpertMatchingView />} />
+            <Route path="/methodology" element={<MethodologyView onBookSession={() => navigate('/match')} />} />
+            <Route path="/settings" element={
+              <SettingsView
+                isSensitive={isSensitive}
+                onToggleSensitive={() => setIsSensitive(!isSensitive)}
+                onResetData={handleResetData}
+              />
+            } />
+            <Route path="/muse" element={<MuseBoardView />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
         </AnimatePresence>
       </main>
 

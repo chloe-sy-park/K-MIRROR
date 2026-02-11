@@ -61,18 +61,6 @@ export interface AnalysisResult {
   };
 }
 
-export enum AppStep {
-  ONBOARDING,
-  IDLE,
-  ANALYZING,
-  RESULT,
-  CHECKOUT,
-  MUSEBOARD,
-  SETTINGS,
-  STYLIST,
-  METHODOLOGY,
-  PARTNER_DASHBOARD
-}
 
 export interface MuseBoard {
   id: string;
