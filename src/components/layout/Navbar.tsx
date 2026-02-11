@@ -3,8 +3,9 @@ import { NavLink, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Camera, LayoutGrid, MessageCircle, Settings, Menu, X,
-  User, Scan
+  User, Scan, LogOut
 } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
 
 const navItems = [
   { to: '/', label: 'Scan' },
@@ -25,6 +26,7 @@ const mobileNavItems = [
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, openAuthModal, signOut } = useAuthStore();
 
   const isActive = (to: string) => {
     if (to === '/') {
@@ -64,12 +66,29 @@ const Navbar = () => {
           <button className="lg:hidden p-2" onClick={() => setIsMenuOpen(!isMenuOpen)}>
             {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
-          <motion.div
-            whileHover={{ scale: 1.1 }}
-            className="w-10 h-10 md:w-11 md:h-11 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center cursor-pointer overflow-hidden shadow-sm hover:shadow-md transition-all"
-          >
-            <User size={18} className="text-gray-400" />
-          </motion.div>
+          {user ? (
+            <div className="flex items-center gap-2">
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                className="w-10 h-10 md:w-11 md:h-11 rounded-2xl bg-[#FF4D8D] flex items-center justify-center cursor-pointer overflow-hidden shadow-sm hover:shadow-md transition-all"
+              >
+                <span className="text-white text-xs font-black uppercase">
+                  {user.email?.charAt(0) ?? 'U'}
+                </span>
+              </motion.div>
+              <button onClick={signOut} className="p-2 text-gray-300 hover:text-red-500 transition-colors">
+                <LogOut size={16} />
+              </button>
+            </div>
+          ) : (
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              onClick={openAuthModal}
+              className="w-10 h-10 md:w-11 md:h-11 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center cursor-pointer overflow-hidden shadow-sm hover:shadow-md transition-all"
+            >
+              <User size={18} className="text-gray-400" />
+            </motion.button>
+          )}
         </div>
       </div>
 

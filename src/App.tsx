@@ -1,11 +1,14 @@
+import { useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { useScanStore } from '@/store/scanStore';
 import { useSettingsStore } from '@/store/settingsStore';
+import { useAuthStore } from '@/store/authStore';
 
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import ErrorToast from '@/components/ui/ErrorToast';
+import AuthModal from '@/components/ui/AuthModal';
 
 import OnboardingView from '@/views/OnboardingView';
 import ScanView from '@/views/ScanView';
@@ -30,6 +33,11 @@ const App = () => {
   const navigate = useNavigate();
   const isOnboarded = useSettingsStore((s) => s.isOnboarded);
   const { error, clearError } = useScanStore();
+  const initializeAuth = useAuthStore((s) => s.initialize);
+
+  useEffect(() => {
+    initializeAuth();
+  }, [initializeAuth]);
 
   return (
     <div className="min-h-screen bg-white flex flex-col font-['Plus_Jakarta_Sans'] text-[#0F0F0F] relative selection:bg-[#FF4D8D] selection:text-white">
@@ -60,6 +68,7 @@ const App = () => {
 
       <Footer />
       <ErrorToast message={error} onDismiss={clearError} />
+      <AuthModal />
     </div>
   );
 };
