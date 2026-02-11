@@ -1,28 +1,44 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Camera } from 'lucide-react';
+import { Camera, AlertCircle } from 'lucide-react';
 import { pulseVariants } from '@/constants/animations';
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 interface LuxuryFileUploadProps {
   label: string;
   secondaryLabel: string;
   preview: string | null;
   onImageSelect: (base64: string) => void;
+  capture?: 'user' | 'environment';
 }
 
-const LuxuryFileUpload = ({ label, secondaryLabel, preview, onImageSelect }: LuxuryFileUploadProps) => {
+const LuxuryFileUpload = ({ label, secondaryLabel, preview, onImageSelect, capture }: LuxuryFileUploadProps) => {
+  const [fileError, setFileError] = useState<string | null>(null);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFileError(null);
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = (reader.result as string).split(',')[1];
-        if (base64String) {
-          onImageSelect(base64String);
-        }
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setFileError('Use JPEG, PNG, or WebP');
+      return;
     }
+    if (file.size > MAX_FILE_SIZE) {
+      setFileError('Image must be under 10 MB');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = (reader.result as string).split(',')[1];
+      if (base64String) {
+        onImageSelect(base64String);
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -52,9 +68,15 @@ const LuxuryFileUpload = ({ label, secondaryLabel, preview, onImageSelect }: Lux
               <Camera size={24} />
             </motion.div>
             <p className="text-[10px] font-black uppercase tracking-widest text-gray-300 group-hover:text-black transition-colors">{secondaryLabel}</p>
+            {fileError && (
+              <div className="flex items-center gap-1 mt-3 text-red-500">
+                <AlertCircle size={10} />
+                <span className="text-[9px] font-bold">{fileError}</span>
+              </div>
+            )}
           </div>
         )}
-        <input type="file" className="hidden" accept="image/*" onChange={handleChange} />
+        <input type="file" className="hidden" accept="image/jpeg,image/png,image/webp" onChange={handleChange} capture={capture} />
       </label>
     </motion.div>
   );

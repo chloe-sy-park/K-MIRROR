@@ -36,7 +36,7 @@ const ScanView = () => {
           <p className="text-base lg:text-lg text-gray-500 mb-12 max-w-md leading-relaxed mx-auto lg:mx-0 font-medium italic uppercase tracking-tighter text-balance">당신의 인종적 특성과 골격을 AI가 학습합니다.<br/>보정 없는 본연의 아름다움을 위해.</p>
         </div>
         <div className="grid grid-cols-2 gap-6 md:gap-10 mb-12">
-          <LuxuryFileUpload label="Base Portrait" preview={userImage} onImageSelect={setUserImage} secondaryLabel="Bare-Face / No Makeup" />
+          <LuxuryFileUpload label="Base Portrait" preview={userImage} onImageSelect={setUserImage} secondaryLabel="Bare-Face / No Makeup" capture="user" />
           <LuxuryFileUpload label="Style Muse" preview={celebImage} onImageSelect={setCelebImage} secondaryLabel="Pinterest Inspiration" />
         </div>
         <div className="flex flex-col sm:flex-row gap-8 justify-center lg:justify-start items-center">

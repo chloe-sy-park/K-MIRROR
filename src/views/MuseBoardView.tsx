@@ -155,10 +155,16 @@ const MuseBoardView = () => {
             >
               {/* Images */}
               <div className="relative h-52 bg-gray-50 overflow-hidden">
-                {muse.userImage && muse.userImage.startsWith('data:') ? (
-                  <img src={muse.userImage} alt="Your photo" className="w-full h-full object-cover" />
-                ) : muse.userImage ? (
-                  <img src={muse.userImage} alt="Your photo" className="w-full h-full object-cover" />
+                {muse.userImage ? (
+                  <img
+                    src={
+                      muse.userImage.startsWith('data:') || muse.userImage.startsWith('http')
+                        ? muse.userImage
+                        : `data:image/jpeg;base64,${muse.userImage}`
+                    }
+                    alt="Your photo"
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <User size={40} className="text-gray-200" />
