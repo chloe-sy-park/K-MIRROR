@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { AnalysisResult, UserPreferences } from "../types";
+import { AnalysisResult, UserPreferences } from "@/types";
 
 // Fix: Updated function signature to accept 4 arguments as expected by App.tsx
 export const analyzeKBeauty = async (

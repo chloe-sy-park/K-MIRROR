@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { 
   Camera, LayoutGrid, MessageCircle, Settings, Menu, X, 
@@ -9,8 +9,8 @@ import {
   Fingerprint, Ruler, Box, Scan, Layers, Target, Briefcase, Sun, Monitor,
   Activity, Command, Cpu, Star, Award, Lightbulb
 } from 'lucide-react';
-import { AppStep, AnalysisResult, UserPreferences, Product, VideoRecommendation } from './types';
-import { analyzeKBeauty } from './services/geminiService';
+import { AppStep, AnalysisResult, UserPreferences, Product, VideoRecommendation } from '@/types';
+import { analyzeKBeauty } from '@/services/geminiService';
 
 // --- Animation Variants ---
 
@@ -116,7 +116,7 @@ const LuxuryFileUpload = ({ label, secondaryLabel, preview, onImageSelect }: { l
 
 // --- Sherlock Proportion Visualizer ---
 
-const SherlockProportionVisualizer = ({ proportions }: { proportions: any }) => {
+const SherlockProportionVisualizer = ({ proportions }: { proportions: { upper: string; middle: string; lower: string } }) => {
   return (
     <motion.div 
       initial={{ opacity: 0, scale: 0.9 }}
