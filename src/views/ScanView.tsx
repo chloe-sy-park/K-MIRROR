@@ -1,25 +1,19 @@
 import { motion } from 'framer-motion';
 import { Sparkles, Beaker } from 'lucide-react';
 import { containerVariants, itemVariants } from '@/constants/animations';
+import { useScanStore } from '@/store/scanStore';
+import { useSettingsStore } from '@/store/settingsStore';
 import LuxuryFileUpload from '@/components/ui/LuxuryFileUpload';
 import Toggle from '@/components/ui/Toggle';
 
-interface ScanViewProps {
-  userImage: string | null;
-  celebImage: string | null;
-  isSensitive: boolean;
-  onUserImageSelect: (base64: string) => void;
-  onCelebImageSelect: (base64: string) => void;
-  onToggleSensitive: () => void;
-  onAnalyze: () => void;
-  onDemoMode: () => void;
-}
+const ScanView = () => {
+  const { userImage, celebImage, setUserImage, setCelebImage, analyze, demoMode } = useScanStore();
+  const { isSensitive, toggleSensitive, prefs } = useSettingsStore();
 
-const ScanView = ({
-  userImage, celebImage, isSensitive,
-  onUserImageSelect, onCelebImageSelect,
-  onToggleSensitive, onAnalyze, onDemoMode
-}: ScanViewProps) => {
+  const handleAnalyze = () => {
+    analyze(isSensitive, prefs);
+  };
+
   return (
     <motion.div
       key="idle" initial="hidden" animate="visible" variants={containerVariants}
@@ -28,7 +22,7 @@ const ScanView = ({
       <motion.div variants={itemVariants} className="flex-1 text-center lg:text-left space-y-10">
         <div className="relative inline-block">
           <p className="text-[10px] font-black text-[#FF4D8D] uppercase tracking-[0.5em] mb-6 uppercase">Biometric Style Lab</p>
-          <button onClick={onDemoMode} className="absolute -top-12 -right-12 group">
+          <button onClick={demoMode} className="absolute -top-12 -right-12 group">
             <motion.div
               animate={{ scale: [1, 1.2, 1], rotate: [0, 5, -5, 0] }}
               transition={{ duration: 4, repeat: Infinity }}
@@ -42,8 +36,8 @@ const ScanView = ({
           <p className="text-base lg:text-lg text-gray-500 mb-12 max-w-md leading-relaxed mx-auto lg:mx-0 font-medium italic uppercase tracking-tighter text-balance">당신의 인종적 특성과 골격을 AI가 학습합니다.<br/>보정 없는 본연의 아름다움을 위해.</p>
         </div>
         <div className="grid grid-cols-2 gap-6 md:gap-10 mb-12">
-          <LuxuryFileUpload label="Base Portrait" preview={userImage} onImageSelect={onUserImageSelect} secondaryLabel="Bare-Face / No Makeup" />
-          <LuxuryFileUpload label="Style Muse" preview={celebImage} onImageSelect={onCelebImageSelect} secondaryLabel="Pinterest Inspiration" />
+          <LuxuryFileUpload label="Base Portrait" preview={userImage} onImageSelect={setUserImage} secondaryLabel="Bare-Face / No Makeup" />
+          <LuxuryFileUpload label="Style Muse" preview={celebImage} onImageSelect={setCelebImage} secondaryLabel="Pinterest Inspiration" />
         </div>
         <div className="flex flex-col sm:flex-row gap-8 justify-center lg:justify-start items-center">
           <motion.div
@@ -54,13 +48,13 @@ const ScanView = ({
               <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 leading-none mb-1 uppercase">Sensitivity</span>
               <span className="text-[10px] font-bold text-gray-900 uppercase uppercase">Ingredient Filter</span>
             </div>
-            <Toggle checked={isSensitive} onChange={onToggleSensitive} />
+            <Toggle checked={isSensitive} onChange={toggleSensitive} />
           </motion.div>
           <motion.button
             variants={itemVariants}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={onAnalyze}
+            onClick={handleAnalyze}
             disabled={!userImage || !celebImage}
             className="px-14 py-7 bg-black text-white rounded-[2.5rem] font-black text-xs uppercase tracking-[0.4em] hover:bg-[#FF4D8D] transition-all duration-500 disabled:opacity-20 shadow-2xl flex items-center gap-4 uppercase"
           >

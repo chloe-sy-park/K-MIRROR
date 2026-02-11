@@ -1,19 +1,27 @@
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   RotateCcw, Cpu, Palette, Droplets, Eye, Activity,
   Check, Sparkles, Plus, Play, ExternalLink, Lightbulb
 } from 'lucide-react';
-import { AnalysisResult } from '@/types';
 import { containerVariants, itemVariants } from '@/constants/animations';
+import { useScanStore } from '@/store/scanStore';
 import SherlockProportionVisualizer from '@/components/sherlock/ProportionVisualizer';
 
-interface AnalysisResultViewProps {
-  result: AnalysisResult;
-  onReset: () => void;
-  onCheckout: () => void;
-}
+const AnalysisResultView = () => {
+  const navigate = useNavigate();
+  const { result, reset } = useScanStore();
 
-const AnalysisResultView = ({ result, onReset, onCheckout }: AnalysisResultViewProps) => {
+  if (!result) return null;
+
+  const handleReset = () => {
+    reset();
+  };
+
+  const handleCheckout = () => {
+    navigate('/checkout');
+  };
+
   return (
     <motion.div
       initial="hidden" animate="visible" variants={containerVariants}
@@ -27,7 +35,7 @@ const AnalysisResultView = ({ result, onReset, onCheckout }: AnalysisResultViewP
               <Cpu size={10} /> Neural Stylist v4.2.1-stable
             </div>
           </div>
-          <button onClick={onReset} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-black transition-colors uppercase">
+          <button onClick={handleReset} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-black transition-colors uppercase">
             <RotateCcw size={12} /> New Scan
           </button>
         </div>
@@ -125,7 +133,7 @@ const AnalysisResultView = ({ result, onReset, onCheckout }: AnalysisResultViewP
       <motion.section variants={itemVariants}>
         <div className="flex justify-between items-end mb-16">
           <h3 className="text-[40px] heading-font italic uppercase">Recommended Objects</h3>
-          <button onClick={onCheckout} className="text-[10px] font-black border-b border-black pb-1 cursor-pointer uppercase tracking-widest hover:text-[#FF4D8D] hover:border-[#FF4D8D] transition-all uppercase">Shop the collection</button>
+          <button onClick={handleCheckout} className="text-[10px] font-black border-b border-black pb-1 cursor-pointer uppercase tracking-widest hover:text-[#FF4D8D] hover:border-[#FF4D8D] transition-all uppercase">Shop the collection</button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[2px] bg-black/5 border border-black/5 overflow-hidden rounded-[2.5rem]">
@@ -153,7 +161,7 @@ const AnalysisResultView = ({ result, onReset, onCheckout }: AnalysisResultViewP
                   <p className="text-sm font-black">{product.price}</p>
                   <motion.button
                     whileTap={{ scale: 0.9 }}
-                    onClick={onCheckout}
+                    onClick={handleCheckout}
                     className="p-3 bg-black text-white rounded-full hover:bg-[#FF4D8D] transition-colors"
                   >
                     <Plus size={16} />

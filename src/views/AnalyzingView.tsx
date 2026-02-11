@@ -1,10 +1,9 @@
 import { motion } from 'framer-motion';
+import { useScanStore } from '@/store/scanStore';
 
-interface AnalyzingViewProps {
-  userImage: string | null;
-}
+const AnalyzingView = () => {
+  const userImage = useScanStore((s) => s.userImage);
 
-const AnalyzingView = ({ userImage }: AnalyzingViewProps) => {
   return (
     <motion.div key="analyzing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="min-h-[60vh] flex flex-col items-center justify-center gap-16">
       <div className="relative w-80 md:w-[26rem] aspect-[3/4] bg-gray-50 rounded-[4rem] overflow-hidden scanning shadow-2xl border border-gray-100">

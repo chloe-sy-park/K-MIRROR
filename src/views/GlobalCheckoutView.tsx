@@ -1,14 +1,11 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Globe, Truck, ShieldCheck, Sparkles } from 'lucide-react';
-import { AnalysisResult } from '@/types';
 import { containerVariants, itemVariants } from '@/constants/animations';
+import { useScanStore } from '@/store/scanStore';
 
-interface GlobalCheckoutViewProps {
-  result: AnalysisResult | null;
-}
-
-const GlobalCheckoutView = ({ result }: GlobalCheckoutViewProps) => {
+const GlobalCheckoutView = () => {
+  const result = useScanStore((s) => s.result);
   const [shippingMethod, setShippingMethod] = useState('dhl');
   const subtotal = result?.recommendations.products.reduce((acc, p) => acc + parseFloat(p.price.replace('$', '')), 0) || 45;
   const shippingCost = shippingMethod === 'dhl' ? 18 : 12;

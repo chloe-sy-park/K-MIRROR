@@ -1,19 +1,24 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { UserPreferences } from '@/types';
+import { useSettingsStore } from '@/store/settingsStore';
 import { containerVariants, itemVariants } from '@/constants/animations';
 
-interface OnboardingViewProps {
-  onComplete: (prefs: UserPreferences) => void;
-}
-
-const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
+const OnboardingView = () => {
+  const navigate = useNavigate();
+  const completeOnboarding = useSettingsStore((s) => s.completeOnboarding);
   const [prefs, setPrefs] = useState<UserPreferences>({
     environment: 'Office',
     skill: 'Beginner',
     mood: 'Natural'
   });
+
+  const handleComplete = () => {
+    completeOnboarding(prefs);
+    navigate('/');
+  };
 
   return (
     <motion.div
@@ -82,7 +87,7 @@ const OnboardingView = ({ onComplete }: OnboardingViewProps) => {
 
         <motion.button
           variants={itemVariants}
-          onClick={() => onComplete(prefs)}
+          onClick={handleComplete}
           className="group flex items-center gap-4 px-12 py-6 bg-black text-white rounded-full font-black text-[10px] tracking-[0.4em] uppercase hover:bg-[#FF4D8D] transition-all"
         >
           Initialize Engine <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
