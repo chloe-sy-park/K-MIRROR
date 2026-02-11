@@ -3,7 +3,7 @@ import { NavLink, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Camera, LayoutGrid, MessageCircle, Settings, Menu, X,
-  User, Scan, LogOut, ShoppingBag
+  User, Scan, LogOut, ShoppingBag, Star
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useCartStore } from '@/store/cartStore';
@@ -13,6 +13,7 @@ const navItems = [
   { to: '/muse', label: 'Muse Board' },
   { to: '/match', label: 'Match' },
   { to: '/methodology', label: 'Sherlock' },
+  { to: '/celebs', label: 'Celebs' },
   { to: '/shop', label: 'Shop' },
   { to: '/settings', label: 'Settings' }
 ];
@@ -22,6 +23,7 @@ const mobileNavItems = [
   { to: '/muse', label: 'Muse Board', icon: <LayoutGrid size={20}/> },
   { to: '/match', label: 'Expert Match', icon: <MessageCircle size={20}/> },
   { to: '/methodology', label: 'Sherlock Methodology', icon: <Scan size={20}/> },
+  { to: '/celebs', label: 'K-Celeb Gallery', icon: <Star size={20}/> },
   { to: '/shop', label: 'K-Beauty Shop', icon: <ShoppingBag size={20}/> },
   { to: '/settings', label: 'Settings', icon: <Settings size={20}/> }
 ];

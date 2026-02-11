@@ -1,10 +1,17 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useSettingsStore } from '@/store/settingsStore';
 import Toggle from '@/components/ui/Toggle';
 
+const LANGUAGES = [
+  { code: 'en', label: 'English' },
+  { code: 'ko', label: '한국어' },
+];
+
 const SettingsView = () => {
   const navigate = useNavigate();
+  const { i18n } = useTranslation();
   const { isSensitive, toggleSensitive, resetData } = useSettingsStore();
 
   const handleResetData = () => {
@@ -33,7 +40,25 @@ const SettingsView = () => {
           <Toggle checked={isSensitive} onChange={toggleSensitive} />
         </div>
       </div>
-      <button onClick={handleResetData} className="w-full py-6 text-[10px] font-black uppercase tracking-widest text-gray-200 hover:text-red-500 transition-colors uppercase uppercase">Reset Neural Stylist Data</button>
+      <div className="p-12 bg-white border border-gray-100 rounded-[3.5rem] shadow-xl space-y-6">
+        <p className="text-xs font-black uppercase tracking-widest">Language</p>
+        <div className="flex gap-3">
+          {LANGUAGES.map((lang) => (
+            <button
+              key={lang.code}
+              onClick={() => i18n.changeLanguage(lang.code)}
+              className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                i18n.language === lang.code
+                  ? 'bg-black text-white shadow-lg'
+                  : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
+              }`}
+            >
+              {lang.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <button onClick={handleResetData} className="w-full py-6 text-[10px] font-black uppercase tracking-widest text-gray-200 hover:text-red-500 transition-colors">Reset Neural Stylist Data</button>
     </motion.div>
   );
 };

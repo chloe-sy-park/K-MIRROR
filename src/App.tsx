@@ -22,6 +22,7 @@ import MuseBoardView from '@/views/MuseBoardView';
 import ShopView from '@/views/ShopView';
 import ProductDetailView from '@/views/ProductDetailView';
 import OrdersView from '@/views/OrdersView';
+import CelebGalleryView from '@/views/CelebGalleryView';
 
 const ScanRoute = () => {
   const { phase, result } = useScanStore();
@@ -67,6 +68,7 @@ const App = () => {
             <Route path="/shop" element={<ShopView />} />
             <Route path="/shop/:id" element={<ProductDetailView />} />
             <Route path="/orders" element={<OrdersView />} />
+            <Route path="/celebs" element={<CelebGalleryView />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </AnimatePresence>
