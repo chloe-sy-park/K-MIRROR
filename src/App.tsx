@@ -5,6 +5,7 @@ import { useSettingsStore } from '@/store/settingsStore';
 
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import ErrorToast from '@/components/ui/ErrorToast';
 
 import OnboardingView from '@/views/OnboardingView';
 import ScanView from '@/views/ScanView';
@@ -28,6 +29,7 @@ const App = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const isOnboarded = useSettingsStore((s) => s.isOnboarded);
+  const { error, clearError } = useScanStore();
 
   return (
     <div className="min-h-screen bg-white flex flex-col font-['Plus_Jakarta_Sans'] text-[#0F0F0F] relative selection:bg-[#FF4D8D] selection:text-white">
@@ -57,6 +59,7 @@ const App = () => {
       </main>
 
       <Footer />
+      <ErrorToast message={error} onDismiss={clearError} />
     </div>
   );
 };
