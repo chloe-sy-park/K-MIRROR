@@ -1,6 +1,6 @@
 # K-MIRROR Architecture Decision Records
 
-> 기술 선택의 근거와 향후 방향을 기록하는 문서.
+> 기술 선택의 근거와 현재 상태를 기록하는 문서.
 > 개발자 온보딩, 기술 전환 시 참조한다.
 
 ---
@@ -9,23 +9,20 @@
 
 ### 결정
 
-React 19 + Vite 6 + TypeScript
+React 19 + Vite 6 + TypeScript 5.8
 
 ### 근거
 
-- Google AI Studio 배포 환경과 호환
-- esm.sh CDN import 방식으로 빌드 없이 프로토타이핑 가능
-- Framer Motion 등 React 생태계 활용
+- 성숙한 생태계, 풍부한 라이브러리 (Framer Motion, Zustand 등)
+- Vite의 빠른 HMR, 최적화된 프로덕션 빌드
+- TypeScript로 타입 안전성 확보
 
-### 현재 상태
+### 현재 상태 ✅
 
-- CDN import (`esm.sh`) 기반 — 빌드 프로세스 없이 동작
-- Vite config이 있으나, 실제로는 `index.html`의 importmap이 우선 사용됨
-
-### 향후 고려
-
-- 프로덕션 전환 시 CDN → npm 패키지 번들링으로 전환 필요
-- Next.js / Remix 마이그레이션 여부 (SSR, SEO 필요 시)
+- Vite 빌드 파이프라인으로 프로덕션 번들 생성
+- `@vitejs/plugin-react`로 Fast Refresh
+- `vite-plugin-pwa`로 PWA + Service Worker 지원
+- Vercel에 자동 배포
 
 ---
 
@@ -39,12 +36,14 @@ React 19 + Vite 6 + TypeScript
 
 - 멀티모달 (이미지 + 텍스트) 분석 지원
 - Structured JSON output (responseSchema) 지원
-- Google AI Studio 배포 환경과 자연스러운 연동
+- 무료 티어로 프로토타이핑 가능
 
-### 현재 상태
+### 현재 상태 ✅
 
-- 단일 API 호출로 전체 분석 수행 (tone + sherlock + kMatch + recommendations)
-- API Key를 환경변수로 관리 (`process.env.API_KEY`)
+- 프롬프트 v5.1: 멜라닌 포용적 분석, 셀럽 컨텍스트, temperature 0.4
+- Zod v4 스키마로 AI 응답 런타임 검증
+- `AnalysisError` 클래스로 에러 분류 (EMPTY_RESPONSE, VALIDATION, API, NETWORK)
+- `selectedCelebName` 파라미터로 셀럽 갤러리 연동
 
 ### 한계
 
@@ -58,44 +57,91 @@ React 19 + Vite 6 + TypeScript
 | 얼굴 분석 (현재) | Gemini 3 Pro | 유지 |
 | 가상 피팅 이미지 생성 | Gemini Imagen 4 | Google 생태계 통일 |
 | 정체성 보존 피팅 | InstantID (ComfyUI) | 얼굴 특징 보존 최강 |
-| 발색 렌더링 | 자체 Canvas/WebGL 모듈 | AI 불필요, 수학적 블렌딩 |
+| 발색 렌더링 | colorService.ts | ✅ 구현 완료 (Multiply/Screen 블렌드) |
 | 랜드마크 감지 | MediaPipe Face Mesh | 브라우저 내 실시간 |
 
 ---
 
-## ADR-003: Styling — Tailwind CSS (CDN)
+## ADR-003: Styling — Tailwind CSS v4 (Build Pipeline)
 
 ### 결정
 
-Tailwind CSS v4 (CDN script 태그)
+Tailwind CSS v4 + `@tailwindcss/vite` 플러그인
 
 ### 근거
 
-- 빌드 없이 즉시 사용 가능
-- 유틸리티 기반으로 디자인 시스템의 일관성 유지 용이
-- 임의값 (`text-[10px]`, `rounded-[3rem]`) 으로 커스텀 디자인 표현
+- 빌드 파이프라인으로 프로덕션에서 사용 클래스만 포함
+- v4의 새 엔진으로 빌드 속도 대폭 개선
+- CSS 변수 기반 디자인 토큰 자연스럽게 지원
 
-### 현재 상태
+### 현재 상태 ✅
 
-- `index.html`에서 `cdn.tailwindcss.com` 로드
-- CSS 변수 (`--brand-pink` 등)와 Tailwind 클래스 혼용
-- 커스텀 클래스: `.heading-font`, `.luxury-card`, `.btn-luxury`, `.accent-gradient`, `.scanning`
+- CDN 방식에서 빌드 파이프라인으로 완전 전환
+- `src/index.css`에서 `@import "tailwindcss"` + 커스텀 클래스 정의
+- `.heading-font`, `.luxury-card`, `.btn-luxury`, `.accent-gradient`, `.scanning` 커스텀 클래스
+- 프로덕션 CSS: ~50KB (gzip ~9KB)
 
-### 문제점
+### 이전 상태 (해소됨)
 
-- CDN 방식은 프로덕션에서 성능 저하 (전체 CSS 로드)
-- Tailwind config 파일 없음 — 커스텀 토큰이 코드에만 존재
-- 디자인 토큰이 `index.html`의 `<style>`과 인라인 클래스에 분산
-
-### 향후 고려
-
-- `tailwind.config.ts`에 디자인 토큰 등록 (01-design-system.md 기반)
-- CDN → PostCSS 빌드 파이프라인 전환
-- 컴포넌트 라이브러리화 (Storybook 고려)
+- ~~CDN 방식은 프로덕션에서 성능 저하~~ → 빌드 파이프라인 전환 완료
+- ~~Tailwind config 파일 없음~~ → v4에서는 CSS 기반 설정
 
 ---
 
-## ADR-004: Animation — Framer Motion
+## ADR-004: State Management — Zustand v5
+
+### 결정
+
+Zustand v5 + `persist` 미들웨어
+
+### 근거
+
+- 보일러플레이트 최소, 직관적 API
+- React 외부에서도 `getState()`로 접근 가능 (테스트에 유리)
+- `persist` 미들웨어로 localStorage 영속화 간단
+
+### 현재 상태 ✅
+
+| 스토어 | 역할 | persist |
+|--------|------|---------|
+| `scanStore` | 스캔 phase, 이미지, AI 결과, 에러 | No |
+| `settingsStore` | 온보딩, 선호도, 민감피부, 언어 | Yes (`kmirror_settings`) |
+| `cartStore` | 장바구니 CRUD, 주문 | No |
+| `authStore` | 인증 상태 | No |
+| `museStore` | Muse Board | No |
+
+### 이전 상태 (해소됨)
+
+- ~~useState 7개가 App 최상위에 집중~~ → Zustand 5개 스토어로 분리
+- ~~페이지 새로고침 시 온보딩 초기화~~ → `persist` 미들웨어로 해결
+
+---
+
+## ADR-005: Routing — React Router v7
+
+### 결정
+
+React Router v7 (`react-router-dom`)
+
+### 근거
+
+- 표준 URL 기반 라우팅 (뒤로가기, 북마크, 공유 가능)
+- AnimatePresence와 `location` 키로 페이지 전환 애니메이션
+- 타입 안전한 `useNavigate`, `useLocation`
+
+### 현재 상태 ✅
+
+12개 라우트 정의 (`App.tsx`):
+`/`, `/onboarding`, `/celebs`, `/match`, `/methodology`, `/settings`, `/muse`, `/shop`, `/shop/:id`, `/checkout`, `/orders`, `*`
+
+### 이전 상태 (해소됨)
+
+- ~~AppStep enum으로 수동 전환~~ → URL 기반 라우팅
+- ~~URL 변경 없음~~ → 모든 뷰가 고유 URL
+
+---
+
+## ADR-006: Animation — Framer Motion 12
 
 ### 결정
 
@@ -107,193 +153,143 @@ Framer Motion 12
 - `AnimatePresence`로 페이지 전환 처리
 - Spring physics로 자연스러운 인터랙션
 
-### 현재 상태
+### 현재 상태 ✅
 
-- 3개의 전역 Variant 정의 (`containerVariants`, `itemVariants`, `pulseVariants`)
-- 모든 뷰 전환에 `AnimatePresence mode="wait"` 적용
-- hover/tap 인터랙션에 `whileHover`, `whileTap` 사용
-
-### 향후 고려
-
-- 가상 피팅 비포/애프터 전환 애니메이션
-- 이미지 생성 로딩 시 Skeleton + Progressive reveal
-- Shared layout animation (셀럽 선택 → 결과 전환)
+- `containerVariants` + `itemVariants`로 staggered 페이지 진입
+- `AnimatePresence mode="wait"`로 라우트 전환
+- 모든 뷰에서 일관된 애니메이션 패턴 적용
 
 ---
 
-## ADR-005: App Architecture — 단일 컴포넌트 (현재) → 분리 (예정)
+## ADR-007: Testing — Vitest + Testing Library
 
-### 현재 상태
+### 결정
 
-```
-App.tsx (1107줄)
-├── Toggle (helper)
-├── LuxuryFileUpload (helper)
-├── SherlockProportionVisualizer
-├── MethodologyView
-├── OnboardingView
-├── ExpertMatchingView
-├── GlobalCheckoutView
-├── AnalysisResultView
-├── App (main) ← 모든 상태, 모든 라우팅 로직
-└── DEMO_RESULT, TRANSFORMATION_SAMPLES (mock data)
-```
+Vitest v4 + @testing-library/react + @testing-library/jest-dom
 
-### 문제점
+### 근거
 
-1. **단일 파일에 모든 것** — 1107줄, 유지보수 한계
-2. **상태 관리 부재** — `useState` 8개가 App 최상위에 집중
-3. **라우팅 없음** — `AppStep` enum으로 수동 전환, URL 변경 없음
-4. **Mock 데이터가 컴포넌트 안에** — 분리 필요
-5. **재사용 불가** — 컴포넌트가 App 내부에 결합
+- Vite 네이티브 테스트 러너 (설정 최소화)
+- jsdom 환경에서 React 컴포넌트 렌더링
+- Testing Library의 "사용자 관점" 테스트 철학
 
-### 목표 구조
+### 현재 상태 ✅
 
-```
-src/
-├── components/
-│   ├── ui/                      # 공통 UI 컴포넌트
-│   │   ├── Toggle.tsx
-│   │   ├── LuxuryCard.tsx
-│   │   ├── FilterChip.tsx
-│   │   ├── CategoryLabel.tsx
-│   │   ├── MatchBadge.tsx
-│   │   └── LuxuryFileUpload.tsx
-│   ├── sherlock/                # Sherlock 분석 관련
-│   │   ├── ProportionVisualizer.tsx
-│   │   └── MethodologyView.tsx
-│   ├── analysis/                # 분석 결과 관련
-│   │   └── AnalysisResultView.tsx
-│   ├── onboarding/
-│   │   └── OnboardingView.tsx
-│   ├── experts/
-│   │   └── ExpertMatchingView.tsx
-│   ├── checkout/
-│   │   └── GlobalCheckoutView.tsx
-│   └── layout/
-│       ├── Navbar.tsx
-│       └── Footer.tsx
-├── pages/                       # 라우팅 페이지
-│   ├── ScanPage.tsx
-│   ├── ResultPage.tsx
-│   ├── MuseBoardPage.tsx
-│   ├── SettingsPage.tsx
-│   └── CheckoutPage.tsx
-├── services/
-│   ├── geminiService.ts         # AI 분석
-│   ├── colorService.ts          # 발색 렌더링 (예정)
-│   └── landmarkService.ts       # Face Mesh (예정)
-├── store/                       # 상태 관리 (예정)
-│   ├── useAppStore.ts           # Zustand 또는 Context
-│   └── useUserStore.ts
-├── data/
-│   ├── celebCatalog.ts          # K-셀럽 데이터
-│   └── mockResults.ts           # 데모 데이터
-├── constants/
-│   ├── animations.ts            # Framer Motion variants
-│   └── design-tokens.ts         # 디자인 토큰
-├── types/
-│   └── index.ts                 # 모든 타입 정의
-├── i18n/                        # 다국어 (예정)
-│   ├── en.json
-│   └── ko.json
-├── App.tsx                      # 라우터 + 레이아웃만
-└── index.tsx
-```
-
-### 상태 관리 후보
-
-| 옵션 | 장점 | 단점 |
-|------|------|------|
-| **Zustand** (추천) | 가볍고, 보일러플레이트 최소, React 외부에서도 접근 가능 | 대규모 앱에서 구조화 필요 |
-| React Context | 추가 의존성 없음 | 리렌더링 이슈, 중첩 복잡 |
-| Jotai | 원자적 상태, 간결 | 러닝커브 |
-
-### 라우팅 후보
-
-| 옵션 | 장점 | 단점 |
-|------|------|------|
-| **React Router v7** (추천) | 표준, URL 기반, 뒤로가기 지원 | 번들 크기 약간 증가 |
-| TanStack Router | 타입 안전 라우팅 | 새로움, 생태계 작음 |
-| 유지 (enum) | 변경 없음 | URL 없음, 공유/북마크 불가 |
+- 65개 테스트 (유닛 41 + 통합 24)
+- 글로벌 모킹: framer-motion, react-i18next, @google/genai, @supabase/supabase-js
+- `@/` path alias 설정으로 소스 코드와 동일한 import
 
 ---
 
-## ADR-006: 배포 환경
+## ADR-008: Validation — Zod v4
 
-### 현재
+### 결정
 
-- Google AI Studio에 배포 (iframe 기반)
-- `metadata.json`에 앱 메타데이터 + 카메라 권한 정의
+Zod v4로 AI 응답 런타임 검증
 
-### 한계
+### 근거
 
-- AI Studio 내에서만 접근 가능
-- 커스텀 도메인 불가
-- 백엔드 서버 불가 (서버리스도 불가)
+- TypeScript 타입과 런타임 검증을 동일 스키마에서 관리
+- AI 응답은 예측 불가능 — 빌드 타임 타입만으로 불충분
+- 의미 있는 에러 메시지 (`ZodError`)
 
-### 향후 전환 고려
+### 현재 상태 ✅
 
-| 옵션 | 용도 | 비고 |
-|------|------|------|
-| **Vercel** | 프론트엔드 + API Routes | Next.js 전환 시 자연스러움 |
-| **Firebase** | Auth + Firestore + Hosting | Google 생태계 유지 |
-| **Supabase** | Auth + DB + Storage | 오픈소스, 비용 효율 |
-| **Railway / Render** | 백엔드 API 서버 | 스타일리스트 마켓 등 복잡한 로직 |
+- `src/schemas/analysisResult.ts`에 전체 스키마 정의
+- `geminiService.ts`에서 `JSON.parse` 후 스키마 검증
+- 검증 실패 시 `AnalysisError('VALIDATION')` throw
 
-### Phase별 배포 전략
+### 이전 상태 (해소됨)
+
+- ~~`as AnalysisResult` 타입 단언~~ → Zod 런타임 검증
+
+---
+
+## ADR-009: 배포 — Vercel
+
+### 결정
+
+Vercel에 배포 (main 브랜치 자동 배포)
+
+### 근거
+
+- Vite SPA에 최적화된 배포 플랫폼
+- GitHub 연동으로 push → 자동 배포
+- 글로벌 CDN, HTTPS 자동
+
+### 현재 상태 ✅
+
+- `vercel.json`에서 SPA 리라이트 설정
+- PWA Service Worker + manifest 자동 배포
+- 환경변수는 Vercel Dashboard에서 관리
+
+### 이전 상태 (해소됨)
+
+- ~~Google AI Studio에만 배포~~ → Vercel 프로덕션 배포
+
+---
+
+## ADR-010: Color Rendering — 자체 블렌딩 엔진
+
+### 결정
+
+`colorService.ts`에서 Photoshop 스타일 블렌딩 구현
+
+### 근거
+
+- AI 호출 불필요 — 수학적 연산으로 충분
+- 멜라닌 지수별 불투명도 보정으로 피부톤 인식 정확도 향상
+- Tint/Cushion/Matte 3종 렌더링으로 실제 발색 시뮬레이션
+
+### 현재 상태 ✅
+
+- Multiply 블렌드 (어두운 피부에 자연스러운 발색)
+- Screen 블렌드 (밝은 피부에 반투명 효과)
+- `melaninAdjustedOpacity()`: L1-L6별 불투명도 자동 보정 (+5%/레벨)
+- `renderSwatchSet()`: Tint(15%), Cushion(30%), Matte(50%) 3종 생성
+
+---
+
+## 아키텍처 개요 (현재)
 
 ```
-Phase 1: Google AI Studio (현재) — 프로토타이핑
-Phase 2: Vercel + Firebase Auth — 사용자 계정, 이미지 저장
-Phase 3: + Stripe + 물류 API — 결제, 배송
-Phase 4: + Video SDK + 예약 시스템 — 스타일리스트 마켓
+                   ┌──────────────┐
+                   │   Vercel     │  ← 자동 배포
+                   │  (CDN/SSL)   │
+                   └──────┬───────┘
+                          │
+                   ┌──────▼───────┐
+                   │   Vite Build │  ← React, Tailwind, PWA
+                   │  + PWA SW    │
+                   └──────┬───────┘
+                          │
+          ┌───────────────┼───────────────┐
+          │               │               │
+   ┌──────▼──────┐ ┌─────▼──────┐ ┌──────▼──────┐
+   │ React Router│ │  Zustand   │ │  Services   │
+   │ (12 routes) │ │ (5 stores) │ │             │
+   └──────┬──────┘ └─────┬──────┘ ├─ gemini     │
+          │               │        ├─ color      │
+   ┌──────▼──────┐        │        ├─ product    │
+   │   Views     │◄───────┘        └─ muse       │
+   │ (12 pages)  │                       │
+   └─────────────┘                       │
+                                  ┌──────▼──────┐
+                                  │ External    │
+                                  ├─ Gemini API │
+                                  └─ Supabase   │
+                                    (optional)  │
+                                  └─────────────┘
 ```
 
 ---
 
-## ADR-007: 이미지 처리 전략
-
-### 현재
-
-- FileReader API로 브라우저에서 base64 변환
-- base64 문자열을 그대로 Gemini API에 전송
-- 이미지 저장/캐싱 없음 (세션 종료 시 소멸)
-
-### 문제점
-
-- base64가 메모리에 상주 → 대용량 이미지 시 성능 저하
-- 사용자 이미지가 서버에 저장되지 않아 Muse Board 구현 불가
-- 가상 피팅 결과 이미지 저장 불가
-
-### 향후 고려
-
-```
-[1] 이미지 업로드 → Cloud Storage (Firebase/S3)에 저장
-[2] 리사이즈/최적화 후 AI API에 전송
-[3] 결과 이미지도 Cloud Storage에 저장
-[4] Muse Board에서 URL로 참조
-[5] 사용자 동의 기반 데이터 보관 정책 필요 (GDPR 등)
-```
-
-### 개인정보 고려사항
-
-- 얼굴 이미지는 민감 개인정보 — 명시적 동의 필수
-- 보관 기간 정책 필요 (예: 30일 후 자동 삭제)
-- GDPR, CCPA 대응 준비
-- 얼굴 데이터를 모델 학습에 사용하지 않음을 명시
-
----
-
-## 요약: 현재 기술 부채
+## 남은 기술 부채
 
 | 항목 | 심각도 | 설명 |
 |------|--------|------|
-| 모놀리식 App.tsx | 높음 | 유지보수/확장 한계 |
-| 상태 관리 부재 | 높음 | 복잡해질수록 prop drilling 심화 |
-| 라우팅 없음 | 중간 | URL 공유, 뒤로가기 불가 |
-| CDN 의존 | 중간 | 프로덕션 성능, 오프라인 불가 |
-| 이미지 저장 없음 | 높음 | Muse Board, 가상피팅 결과 보관 불가 |
-| 에러 처리 미흡 | 중간 | API 실패 시 사용자 피드백 없음 |
-| 테스트 전무 | 높음 | 회귀 버그 방지 불가 |
-| 국제화 없음 | 중간 | 글로벌 타겟인데 영어 고정 |
+| 번들 크기 | 중간 | 833KB JS — code splitting 미적용 |
+| TypeScript strict | 낮음 | `strict: true` 미활성화 |
+| 이미지 저장 없음 | 중간 | Muse Board, 가상피팅 결과 보관 불가 |
+| 접근성 | 중간 | aria 속성, 키보드 내비게이션 미비 |
+| i18n 커버리지 | 낮음 | 일부 문자열 하드코딩 |
