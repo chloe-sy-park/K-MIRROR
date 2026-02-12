@@ -93,7 +93,10 @@
   "orders": {
     "title": "주문 내역",
     "noOrders": "아직 주문이 없습니다",
-    "noOrdersDesc": "쇼핑을 시작하면 주문 내역이 여기에 표시됩니다."
+    "noOrdersDesc": "쇼핑을 시작하면 주문 내역이 여기에 표시됩니다.",
+    "browseShop": "쇼핑하기",
+    "ordersPlaced": "건 주문 완료",
+    "orderPlaced": "건 주문 완료"
   },
   "settings": {
     "title": "설정",
@@ -125,7 +128,30 @@
     "addressMinLength": "주소는 5자 이상이어야 합니다",
     "fillFormToContinue": "이름과 주소를 입력해주세요"
   },
+  "celebs": {
+    "title": "K-셀럽 갤러리",
+    "subtitle": "트렌딩 K-뷰티 아이콘을 둘러보세요. 스타일 뮤즈를 선택하여 맞춤 분석을 시작하세요.",
+    "filterByGenre": "장르별 필터",
+    "filterByMood": "무드별 필터",
+    "noResults": "필터에 맞는 셀럽이 없습니다. 다른 조합을 시도해보세요.",
+    "selectAsMuse": "뮤즈로 선택",
+    "all": "전체"
+  },
+  "onboarding": {
+    "title": "스타일리스트를 설정하세요.",
+    "tagline": "초기화",
+    "environment": "대상 환경",
+    "skill": "메이크업 스킬 레벨",
+    "mood": "선호 무드",
+    "start": "엔진 초기화"
+  },
+  "methodology": {
+    "title": "셜록 방법론",
+    "subtitle": "스타일 분석의 과학적 원리",
+    "bookSession": "전문가 세션 예약"
+  },
   "a11y": {
+    "skipToContent": "본문으로 건너뛰기",
     "inclusionGuard": "포용성 가드",
     "neuralSafetyFilter": "뉴럴 안전 필터",
     "uploadImage": "이미지 업로드",
@@ -135,7 +161,12 @@
     "shoppingCart": "장바구니",
     "signIn": "로그인",
     "signOut": "로그아웃",
-    "selectAsMuse": "스타일 뮤즈로 선택"
+    "selectAsMuse": "스타일 뮤즈로 선택",
+    "deleteBoard": "보드 삭제",
+    "deleteMuse": "뮤즈 삭제",
+    "removeItem": "항목 삭제",
+    "increaseQuantity": "수량 증가",
+    "decreaseQuantity": "수량 감소"
   },
   "common": {
     "loading": "로딩 중...",
@@ -144,6 +175,11 @@
     "items": "개",
     "match": "매치",
     "retry": "다시 시도",
-    "goHome": "홈으로"
+    "goHome": "홈으로",
+    "newScan": "새 스캔",
+    "browseShop": "쇼핑하기",
+    "browseCelebs": "셀럽 둘러보기",
+    "startScan": "스캔 시작",
+    "saved": "저장됨"
   }
 }

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import * as m from 'framer-motion/m';
 import {
-  LayoutGrid, Plus, Trash2, X, Sparkles, User, ChevronLeft, Camera,
+  LayoutGrid, Plus, Trash2, X, Sparkles, User, ChevronLeft, Camera, Star,
 } from 'lucide-react';
 import { useMuseStore } from '@/store/museStore';
 import { containerVariants, itemVariants } from '@/constants/animations';
@@ -147,12 +147,20 @@ const MuseBoardView = () => {
           <p className="text-[10px] text-gray-300 max-w-xs mx-auto">
             Run a scan and save your analysis to start building your muse collection.
           </p>
-          <button
-            onClick={() => navigate('/')}
-            className="inline-flex items-center gap-2 px-8 py-4 bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#FF4D8D] transition-all"
-          >
-            <Camera size={14} /> Start a Scan
-          </button>
+          <div className="flex items-center justify-center gap-4 flex-wrap">
+            <button
+              onClick={() => navigate('/')}
+              className="inline-flex items-center gap-2 px-8 py-4 bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#FF4D8D] transition-all"
+            >
+              <Camera size={14} /> Start a Scan
+            </button>
+            <button
+              onClick={() => navigate('/celebs')}
+              className="inline-flex items-center gap-2 px-8 py-4 bg-gray-50 text-gray-500 border border-gray-200 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:border-[#FF4D8D] hover:text-[#FF4D8D] transition-all"
+            >
+              <Star size={14} /> Browse Celebs
+            </button>
+          </div>
         </m.div>
       ) : (
         <m.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
