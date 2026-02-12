@@ -1,0 +1,119 @@
+{
+  "nav": {
+    "scan": "Scan",
+    "museBoard": "Muse Board",
+    "match": "Match",
+    "sherlock": "Sherlock",
+    "shop": "Shop",
+    "settings": "Settings"
+  },
+  "scan": {
+    "tagline": "Biometric Style Lab",
+    "title": "Reflect Your",
+    "titleAccent": "Inner Idol.",
+    "subtitle": "Your ethnic features and bone structure are analyzed by AI.\nFor your unfiltered natural beauty.",
+    "basePortrait": "Base Portrait",
+    "styleMuse": "Style Muse",
+    "bareFace": "Bare-Face / No Makeup",
+    "pinterestInspiration": "Pinterest Inspiration",
+    "sensitivity": "Sensitivity",
+    "ingredientFilter": "Ingredient Filter",
+    "neuralScan": "Neural Scan",
+    "previewDemo": "Preview Demo"
+  },
+  "result": {
+    "diagnosticReport": "Diagnostic Report",
+    "newScan": "New Scan",
+    "save": "Save",
+    "saved": "Saved",
+    "neuralIdentity": "NEURAL IDENTITY.",
+    "toneMapping": "Tone Mapping",
+    "osteoStructure": "Osteo-Structure",
+    "aestheticVibe": "Aesthetic Vibe",
+    "forensicMapping": "Forensic Mapping",
+    "neuralBase": "Neural Base",
+    "lipStrategy": "Lip Strategy",
+    "vectorFocus": "Vector Focus",
+    "adaptationNotes": "Laboratory Adaptation Notes",
+    "recommendedObjects": "Recommended Objects",
+    "shopCollection": "Shop the collection",
+    "curatedEducation": "Curated Education",
+    "aiCoachingProtocol": "AI Coaching Protocol",
+    "swatchPreview": "Swatch"
+  },
+  "muse": {
+    "title": "MUSE BOARD",
+    "subtitle": "Your Saved Neural Analyses",
+    "allMuses": "All Muses",
+    "emptyBoard": "This board is empty",
+    "noMusesYet": "No saved muses yet",
+    "emptyHint": "Run a scan and save your analysis to start building your muse collection.",
+    "newBoard": "New Board",
+    "organizeCollection": "Organize your muse collection",
+    "icon": "Icon",
+    "boardName": "Board Name",
+    "boardPlaceholder": "e.g., Summer Looks, Daily Glam",
+    "createBoard": "Create Board",
+    "saveToMuseBoard": "Save to Muse Board",
+    "noBoard": "No board (general)",
+    "saveMuse": "Save Muse"
+  },
+  "shop": {
+    "title": "K-BEAUTY SHOP",
+    "subtitle": "Curated Products for Every Melanin Level",
+    "addToCart": "Add to Cart",
+    "addedToCart": "Added to Cart",
+    "melaninRange": "Melanin Range",
+    "keyIngredients": "Key Ingredients",
+    "back": "Back"
+  },
+  "checkout": {
+    "title": "SECURE YOUR ARCHIVE.",
+    "continueShopping": "Continue Shopping",
+    "yourCollection": "Your Collection",
+    "shippingDestination": "Shipping Destination",
+    "fullName": "Full Name",
+    "country": "Country",
+    "address": "Address",
+    "logistics": "Logistics",
+    "orderSummary": "Order Summary",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "total": "Total",
+    "completePayment": "Complete Payment",
+    "secureCheckout": "Secure Checkout by Stripe",
+    "orderPlaced": "Order Placed",
+    "orderPlacedDesc": "Your K-Beauty collection is on its way.",
+    "cartEmpty": "Cart is Empty",
+    "cartEmptyDesc": "Run a scan to get AI-matched product recommendations.",
+    "startScan": "Start Scan",
+    "browseShop": "Browse Shop",
+    "viewOrders": "View Orders"
+  },
+  "orders": {
+    "title": "ORDER HISTORY",
+    "noOrders": "No Orders Yet",
+    "noOrdersDesc": "Start shopping to see your order history here."
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "resetData": "Reset All Data"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Create Account",
+    "email": "Email",
+    "password": "Password",
+    "continueWithGoogle": "Continue with Google",
+    "switchToSignUp": "Don't have an account? Sign up",
+    "switchToSignIn": "Already have an account? Sign in"
+  },
+  "common": {
+    "loading": "Loading...",
+    "muses": "muses",
+    "muse": "muse",
+    "items": "items",
+    "match": "Match"
+  }
+}
