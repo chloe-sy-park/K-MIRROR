@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { UserPreferences } from '@/types';
 
 interface SettingsState {
@@ -12,13 +13,18 @@ interface SettingsState {
   resetData: () => void;
 }
 
-export const useSettingsStore = create<SettingsState>((set) => ({
-  prefs: { environment: 'Office', skill: 'Beginner', mood: 'Natural' },
-  isSensitive: false,
-  isOnboarded: false,
+export const useSettingsStore = create<SettingsState>()(
+  persist(
+    (set) => ({
+      prefs: { environment: 'Office', skill: 'Beginner', mood: 'Natural' },
+      isSensitive: false,
+      isOnboarded: false,
 
-  setPrefs: (prefs) => set({ prefs }),
-  toggleSensitive: () => set((s) => ({ isSensitive: !s.isSensitive })),
-  completeOnboarding: (prefs) => set({ prefs, isOnboarded: true }),
-  resetData: () => set({ isOnboarded: false, prefs: { environment: 'Office', skill: 'Beginner', mood: 'Natural' } }),
-}));
+      setPrefs: (prefs) => set({ prefs }),
+      toggleSensitive: () => set((s) => ({ isSensitive: !s.isSensitive })),
+      completeOnboarding: (prefs) => set({ prefs, isOnboarded: true }),
+      resetData: () => set({ isOnboarded: false, prefs: { environment: 'Office', skill: 'Beginner', mood: 'Natural' } }),
+    }),
+    { name: 'kmirror_settings' }
+  )
+);

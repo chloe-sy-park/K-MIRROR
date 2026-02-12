@@ -14,7 +14,8 @@ export const analyzeKBeauty = async (
   userImageBase64: string,
   celebImageBase64: string,
   isSensitive: boolean,
-  prefs: UserPreferences
+  prefs: UserPreferences,
+  selectedCelebName?: string
 ): Promise<AnalysisResult> => {
   const apiKey = process.env.API_KEY;
   if (!apiKey) {
@@ -23,12 +24,16 @@ export const analyzeKBeauty = async (
 
   const ai = new GoogleGenAI({ apiKey });
 
-  // Prompt v5.0 — Inclusive K-Beauty Neural Stylist
+  // Prompt v5.1 — Inclusive K-Beauty Neural Stylist
+  const celebContext = selectedCelebName
+    ? `The user has selected "${selectedCelebName}" as their style muse.`
+    : 'The user uploaded a K-Celeb inspiration photo.';
+
   const systemInstruction = `
-    You are a Global K-Beauty Stylist and Face Analysis Expert (Neural Stylist v5.0).
+    You are a Global K-Beauty Stylist and Face Analysis Expert (Neural Stylist v5.1).
     Analyze the two images provided:
     1. The user's bare face.
-    2. A K-Celeb inspiration photo.
+    2. ${celebContext}
 
     User Profile & Preferences:
     - Environment: ${prefs.environment} (Tailor makeup longevity and finish)
@@ -79,11 +84,13 @@ export const analyzeKBeauty = async (
       contents: {
         parts: [
           { text: systemInstruction },
+          { text: 'Analyze these two images. Image 1 is the user\'s bare face. Image 2 is the K-Celeb style muse.' },
           { inlineData: { mimeType: 'image/jpeg', data: userImageBase64 } },
           { inlineData: { mimeType: 'image/jpeg', data: celebImageBase64 } }
         ]
       },
       config: {
+        temperature: 0.4,
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
@@ -196,7 +203,12 @@ export const analyzeKBeauty = async (
     throw new AnalysisError('AI returned an empty response. Please try again.', 'EMPTY_RESPONSE');
   }
 
-  const parsed: unknown = JSON.parse(text);
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    throw new AnalysisError('AI returned invalid JSON. Please try again.', 'VALIDATION');
+  }
   const validated = analysisResultSchema.safeParse(parsed);
 
   if (!validated.success) {

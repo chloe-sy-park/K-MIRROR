@@ -1,17 +1,36 @@
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Beaker } from 'lucide-react';
+import { Sparkles, Beaker, X } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { containerVariants, itemVariants } from '@/constants/animations';
 import { useScanStore } from '@/store/scanStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import LuxuryFileUpload from '@/components/ui/LuxuryFileUpload';
 import Toggle from '@/components/ui/Toggle';
+import type { CelebProfile } from '@/data/celebGallery';
 
 const ScanView = () => {
-  const { userImage, celebImage, setUserImage, setCelebImage, analyze, demoMode } = useScanStore();
+  const { userImage, celebImage, selectedCelebName, setUserImage, setCelebImage, setCelebFromGallery, analyze, demoMode } = useScanStore();
   const { isSensitive, toggleSensitive, prefs } = useSettingsStore();
+  const location = useLocation();
+
+  // Accept celeb from CelebGalleryView navigation
+  useEffect(() => {
+    const state = location.state as { selectedCeleb?: CelebProfile } | null;
+    if (state?.selectedCeleb) {
+      setCelebFromGallery(state.selectedCeleb);
+      // Clear the state so it doesn't re-trigger on navigation
+      window.history.replaceState({}, '');
+    }
+  }, [location.state, setCelebFromGallery]);
 
   const handleAnalyze = () => {
     analyze(isSensitive, prefs);
+  };
+
+  const clearCelebSelection = () => {
+    setCelebImage('');
+    useScanStore.setState({ celebImage: null, selectedCelebName: null });
   };
 
   return (
@@ -37,7 +56,17 @@ const ScanView = () => {
         </div>
         <div className="grid grid-cols-2 gap-6 md:gap-10 mb-12">
           <LuxuryFileUpload label="Base Portrait" preview={userImage} onImageSelect={setUserImage} secondaryLabel="Bare-Face / No Makeup" capture="user" />
-          <LuxuryFileUpload label="Style Muse" preview={celebImage} onImageSelect={setCelebImage} secondaryLabel="Pinterest Inspiration" />
+          <div className="relative">
+            <LuxuryFileUpload label="Style Muse" preview={celebImage} onImageSelect={setCelebImage} secondaryLabel={selectedCelebName ?? 'Pinterest Inspiration'} />
+            {selectedCelebName && (
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-[#FF4D8D] text-white px-3 py-1 rounded-full z-10 shadow-lg">
+                <span className="text-[9px] font-black uppercase tracking-wider">{selectedCelebName}</span>
+                <button onClick={clearCelebSelection} className="hover:bg-white/20 rounded-full p-0.5 transition-colors">
+                  <X size={10} />
+                </button>
+              </div>
+            )}
+          </div>
         </div>
         <div className="flex flex-col sm:flex-row gap-8 justify-center lg:justify-start items-center">
           <motion.div

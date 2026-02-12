@@ -9,7 +9,10 @@ import {
 import { containerVariants, itemVariants } from '@/constants/animations';
 import { useScanStore } from '@/store/scanStore';
 import { useMuseStore } from '@/store/museStore';
+import { useCartStore } from '@/store/cartStore';
 import { renderColorOnSkin } from '@/services/colorService';
+import { matchRecommendedProducts } from '@/services/productService';
+import { PRODUCT_CATALOG } from '@/data/productCatalog';
 import SherlockProportionVisualizer from '@/components/sherlock/ProportionVisualizer';
 
 const AnalysisResultView = () => {
@@ -20,7 +23,18 @@ const AnalysisResultView = () => {
   const [selectedBoardId, setSelectedBoardId] = useState<string | undefined>();
   const [isSaved, setIsSaved] = useState(false);
 
+  const { addItem } = useCartStore();
+
   if (!result) return null;
+
+  const matchedProducts = matchRecommendedProducts(result.recommendations.products, PRODUCT_CATALOG);
+
+  const handleAddToCart = (idx: number) => {
+    const catalogProduct = matchedProducts[idx];
+    if (catalogProduct) {
+      addItem(catalogProduct);
+    }
+  };
 
   const handleReset = () => {
     reset();
@@ -29,6 +43,9 @@ const AnalysisResultView = () => {
   const handleCheckout = () => {
     navigate('/checkout');
   };
+
+  const getYouTubeSearchUrl = (title: string, creator: string) =>
+    `https://www.youtube.com/results?search_query=${encodeURIComponent(`${title} ${creator} K-beauty tutorial`)}`;
 
   const handleOpenSave = async () => {
     await fetchBoards();
@@ -214,8 +231,9 @@ const AnalysisResultView = () => {
                   <p className="text-sm font-black">{product.price}</p>
                   <motion.button
                     whileTap={{ scale: 0.9 }}
-                    onClick={handleCheckout}
+                    onClick={() => handleAddToCart(idx)}
                     className="p-3 bg-black text-white rounded-full hover:bg-[#FF4D8D] transition-colors"
+                    title="Add to cart"
                   >
                     <Plus size={16} />
                   </motion.button>
@@ -237,18 +255,24 @@ const AnalysisResultView = () => {
               viewport={{ once: true }}
               className="flex flex-col gap-6"
             >
-              <div className="relative group cursor-pointer overflow-hidden rounded-[3rem] h-[450px] shadow-xl">
-                <div className="absolute inset-0 bg-gray-900 flex items-center justify-center">
-                  <img src={`https://images.unsplash.com/photo-1596704017254-9b121068fb31?q=80&w=800`} className="w-full h-full object-cover opacity-60" alt={video.title} />
+              <a
+                href={getYouTubeSearchUrl(video.title, video.creator)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative group cursor-pointer overflow-hidden rounded-[3rem] h-[450px] shadow-xl block"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center">
+                  <div className="text-[120px] font-black heading-font text-white/5 uppercase select-none">{idx + 1}</div>
                 </div>
                 <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center transition-all group-hover:bg-black/20">
                   <motion.div
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
-                    className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20"
+                    className="w-20 h-20 rounded-full bg-red-600/80 backdrop-blur-md flex items-center justify-center border border-red-400/30"
                   >
                     <Play fill="white" className="text-white translate-x-1" size={28} />
                   </motion.div>
+                  <span className="text-[9px] font-black uppercase tracking-widest text-white/60 mt-4">Watch on YouTube</span>
                 </div>
                 <div className="absolute top-10 left-10">
                   <div className="px-4 py-2 bg-[#FF4D8D] text-white rounded-full text-[8px] font-black uppercase tracking-[0.2em] shadow-lg uppercase">
@@ -270,7 +294,7 @@ const AnalysisResultView = () => {
                     <ExternalLink size={18} />
                   </div>
                 </div>
-              </div>
+              </a>
               {video.aiCoaching && (
                 <motion.div
                   initial={{ opacity: 0, x: -10 }}
