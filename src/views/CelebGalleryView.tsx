@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import * as m from 'framer-motion/m';
 import { Star, Sparkles, Filter, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { containerVariants, itemVariants } from '@/constants/animations';
@@ -43,9 +43,9 @@ const CelebGalleryView = () => {
   };
 
   return (
-    <motion.div initial="hidden" animate="visible" variants={containerVariants} className="max-w-6xl mx-auto space-y-16 pb-20">
+    <m.div initial="hidden" animate="visible" variants={containerVariants} className="max-w-6xl mx-auto space-y-16 pb-20">
       {/* Header */}
-      <motion.div variants={itemVariants} className="text-center space-y-4">
+      <m.div variants={itemVariants} className="text-center space-y-4">
         <p className="text-[10px] font-black text-[#FF4D8D] uppercase tracking-[0.5em]">Style Muse Gallery</p>
         <h2 className="text-[50px] lg:text-[70px] heading-font leading-[0.85] tracking-[-0.05em] uppercase">
           K-CELEB <span className="italic text-[#FF4D8D]">GALLERY</span>
@@ -53,10 +53,10 @@ const CelebGalleryView = () => {
         <p className="text-sm text-gray-400 max-w-md mx-auto">
           Browse trending K-Beauty icons. Select your style muse to start a personalized analysis.
         </p>
-      </motion.div>
+      </m.div>
 
       {/* Filters */}
-      <motion.div variants={itemVariants} className="space-y-6">
+      <m.div variants={itemVariants} className="space-y-6">
         <div className="flex items-center gap-3 text-gray-400">
           <Filter size={14} />
           <span className="text-[9px] font-black uppercase tracking-widest">Filter by Genre</span>
@@ -100,23 +100,23 @@ const CelebGalleryView = () => {
             </button>
           ))}
         </div>
-      </motion.div>
+      </m.div>
 
       {/* Results count */}
-      <motion.p variants={itemVariants} className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-300">
+      <m.p variants={itemVariants} className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-300">
         {filtered.length} {filtered.length === 1 ? 'celeb' : 'celebs'} found
-      </motion.p>
+      </m.p>
 
       {/* Grid */}
       {filtered.length === 0 ? (
-        <motion.div variants={itemVariants} className="py-20 text-center space-y-4">
+        <m.div variants={itemVariants} className="py-20 text-center space-y-4">
           <Star size={48} className="mx-auto text-gray-200" />
           <p className="text-gray-400 text-sm">No celebs match your filters. Try a different combination.</p>
-        </motion.div>
+        </m.div>
       ) : (
-        <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <m.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((celeb) => (
-            <motion.div
+            <m.div
               key={celeb.id}
               role="button"
               tabIndex={0}
@@ -183,11 +183,11 @@ const CelebGalleryView = () => {
                   </span>
                 </div>
               </div>
-            </motion.div>
+            </m.div>
           ))}
-        </motion.div>
+        </m.div>
       )}
-    </motion.div>
+    </m.div>
   );
 };
 

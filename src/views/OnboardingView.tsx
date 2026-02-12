@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import * as m from 'framer-motion/m';
 import { ArrowRight } from 'lucide-react';
 import { UserPreferences } from '@/types';
 import { useSettingsStore } from '@/store/settingsStore';
@@ -21,25 +21,25 @@ const OnboardingView = () => {
   };
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center p-6 text-center"
     >
-      <motion.div
+      <m.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
         className="max-w-xl w-full space-y-12"
       >
-        <motion.header variants={itemVariants}>
+        <m.header variants={itemVariants}>
           <p className="text-[10px] font-black tracking-[0.6em] text-[#FF4D8D] mb-6 uppercase">Initialization</p>
           <h2 className="text-5xl heading-font uppercase">Calibrate Your <br/><span className="italic">Stylist.</span></h2>
-        </motion.header>
+        </m.header>
 
         <div className="space-y-10">
-          <motion.section variants={itemVariants}>
+          <m.section variants={itemVariants}>
             <p id="env-label" className="text-[10px] font-black uppercase text-gray-400 mb-4 tracking-widest">Target Environment</p>
             <div role="radiogroup" aria-labelledby="env-label" className="flex justify-center gap-4">
               {(['Office', 'Outdoor', 'Studio'] as const).map((env) => (
@@ -54,9 +54,9 @@ const OnboardingView = () => {
                 </button>
               ))}
             </div>
-          </motion.section>
+          </m.section>
 
-          <motion.section variants={itemVariants}>
+          <m.section variants={itemVariants}>
             <p id="skill-label" className="text-[10px] font-black uppercase text-gray-400 mb-4 tracking-widest">Makeup Skill Level</p>
             <div role="radiogroup" aria-labelledby="skill-label" className="flex justify-center gap-4">
               {(['Beginner', 'Intermediate', 'Pro'] as const).map((lvl) => (
@@ -71,9 +71,9 @@ const OnboardingView = () => {
                 </button>
               ))}
             </div>
-          </motion.section>
+          </m.section>
 
-          <motion.section variants={itemVariants}>
+          <m.section variants={itemVariants}>
             <p id="mood-label" className="text-[10px] font-black uppercase text-gray-400 mb-4 tracking-widest">Desired Mood</p>
             <div role="radiogroup" aria-labelledby="mood-label" className="flex justify-center gap-4">
               {(['Natural', 'Elegant', 'Powerful'] as const).map((m) => (
@@ -88,18 +88,18 @@ const OnboardingView = () => {
                 </button>
               ))}
             </div>
-          </motion.section>
+          </m.section>
         </div>
 
-        <motion.button
+        <m.button
           variants={itemVariants}
           onClick={handleComplete}
           className="group flex items-center gap-4 px-12 py-6 bg-black text-white rounded-full font-black text-[10px] tracking-[0.4em] uppercase hover:bg-[#FF4D8D] transition-all"
         >
           Initialize Engine <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-        </motion.button>
-      </motion.div>
-    </motion.div>
+        </m.button>
+      </m.div>
+    </m.div>
   );
 };
 

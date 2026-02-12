@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import * as m from 'framer-motion/m';
 import { ArrowLeft, ShoppingBag, Sparkles, Check, ShieldCheck } from 'lucide-react';
 import { containerVariants, itemVariants } from '@/constants/animations';
 import { useCartStore } from '@/store/cartStore';
@@ -38,18 +38,18 @@ const ProductDetailView = () => {
   };
 
   return (
-    <motion.div initial="hidden" animate="visible" variants={containerVariants} className="max-w-5xl mx-auto pb-20">
-      <motion.button
+    <m.div initial="hidden" animate="visible" variants={containerVariants} className="max-w-5xl mx-auto pb-20">
+      <m.button
         variants={itemVariants}
         onClick={() => navigate(-1)}
         className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-black transition-colors mb-12"
       >
         <ArrowLeft size={14} /> Back
-      </motion.button>
+      </m.button>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
         {/* Product Image Area */}
-        <motion.div variants={itemVariants}>
+        <m.div variants={itemVariants}>
           <div className="aspect-square bg-gray-50 rounded-[3.5rem] flex items-center justify-center relative overflow-hidden">
             {product.imageUrl ? (
               <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
@@ -85,10 +85,10 @@ const ProductDetailView = () => {
               </div>
             </div>
           )}
-        </motion.div>
+        </m.div>
 
         {/* Product Info */}
-        <motion.div variants={itemVariants} className="space-y-10">
+        <m.div variants={itemVariants} className="space-y-10">
           <div>
             <p className="text-[10px] font-black text-[#FF4D8D] uppercase tracking-widest mb-2">{product.brand}</p>
             <h1 className="text-4xl lg:text-5xl heading-font italic uppercase leading-[0.9] tracking-tight mb-6">{product.name}</h1>
@@ -133,7 +133,7 @@ const ProductDetailView = () => {
             </div>
           )}
 
-          <motion.button
+          <m.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleAdd}
@@ -149,10 +149,10 @@ const ProductDetailView = () => {
             ) : (
               <><ShoppingBag size={16} /> Add to Cart</>
             )}
-          </motion.button>
-        </motion.div>
+          </m.button>
+        </m.div>
       </div>
-    </motion.div>
+    </m.div>
   );
 };
 

@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import * as m from 'framer-motion/m';
 import { useTranslation } from 'react-i18next';
 import { useSettingsStore } from '@/store/settingsStore';
 import Toggle from '@/components/ui/Toggle';
@@ -20,7 +20,7 @@ const SettingsView = () => {
   };
 
   return (
-    <motion.div key="settings" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="max-w-xl mx-auto space-y-16 py-12 px-6">
+    <m.div key="settings" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="max-w-xl mx-auto space-y-16 py-12 px-6">
       <div className="text-center">
         <h2 className="text-4xl font-black heading-font tracking-tighter uppercase italic uppercase">System <span className="text-[#FF4D8D] not-italic">Settings</span></h2>
       </div>
@@ -59,7 +59,7 @@ const SettingsView = () => {
         </div>
       </div>
       <button onClick={handleResetData} className="w-full py-6 text-[10px] font-black uppercase tracking-widest text-gray-200 hover:text-red-500 transition-colors">Reset Neural Stylist Data</button>
-    </motion.div>
+    </m.div>
   );
 };
 

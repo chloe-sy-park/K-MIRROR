@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
+import * as m from 'framer-motion/m';
 import { X, Mail, Chrome } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { isSupabaseConfigured } from '@/lib/supabase';
@@ -33,7 +34,7 @@ const AuthModal = () => {
   return (
     <AnimatePresence>
       {isAuthModalOpen && (
-        <motion.div
+        <m.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -41,7 +42,7 @@ const AuthModal = () => {
           onClick={closeAuthModal}
           onKeyDown={(e) => { if (e.key === 'Escape') closeAuthModal(); }}
         >
-          <motion.div
+          <m.div
             role="dialog"
             aria-modal="true"
             aria-label={mode === 'signin' ? 'Sign in to K-MIRROR' : 'Create K-MIRROR account'}
@@ -137,8 +138,8 @@ const AuthModal = () => {
                 {mode === 'signin' ? 'Sign Up' : 'Sign In'}
               </button>
             </p>
-          </motion.div>
-        </motion.div>
+          </m.div>
+        </m.div>
       )}
     </AnimatePresence>
   );

@@ -1,6 +1,6 @@
 import { useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
+import { LazyMotion, domAnimation, AnimatePresence } from 'framer-motion';
 import { useScanStore } from '@/store/scanStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useAuthStore } from '@/store/authStore';
@@ -40,6 +40,19 @@ const ScanRoute = () => {
   return <ScanView />;
 };
 
+const ROUTE_TITLES: Record<string, string> = {
+  '/': 'Scan',
+  '/onboarding': 'Onboarding',
+  '/checkout': 'Checkout',
+  '/match': 'Expert Match',
+  '/methodology': 'Sherlock Methodology',
+  '/settings': 'Settings',
+  '/muse': 'Muse Board',
+  '/shop': 'K-Beauty Shop',
+  '/orders': 'Orders',
+  '/celebs': 'K-Celeb Gallery',
+};
+
 const App = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -51,7 +64,24 @@ const App = () => {
     initializeAuth();
   }, [initializeAuth]);
 
+  // Update document.title on route change
+  useEffect(() => {
+    const path = location.pathname;
+    const pageTitle = ROUTE_TITLES[path]
+      ?? (path.startsWith('/shop/') ? 'Product Details' : null);
+    document.title = pageTitle
+      ? `${pageTitle} | K-MIRROR AI`
+      : 'K-MIRROR AI | Global K-Beauty Stylist';
+  }, [location.pathname]);
+
   return (
+    <LazyMotion features={domAnimation} strict>
+    <a
+      href="#main-content"
+      className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[200] focus:px-4 focus:py-2 focus:bg-[#FF4D8D] focus:text-white focus:rounded-lg focus:text-sm focus:font-bold focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF4D8D]"
+    >
+      Skip to content
+    </a>
     <div className="min-h-screen bg-white flex flex-col font-['Plus_Jakarta_Sans'] text-[#0F0F0F] relative selection:bg-[#FF4D8D] selection:text-white">
       <AnimatePresence>
         {!isOnboarded && location.pathname === '/onboarding' && (
@@ -61,7 +91,7 @@ const App = () => {
 
       <Navbar />
 
-      <main className="flex-1 pt-32 pb-24 px-6 lg:px-12 max-w-7xl mx-auto w-full min-h-screen">
+      <main id="main-content" tabIndex={-1} className="flex-1 pt-32 pb-24 px-6 lg:px-12 max-w-7xl mx-auto w-full min-h-screen outline-none">
         <ErrorBoundary inline>
           <Suspense fallback={<LazyFallback />}>
           <Routes location={location}>
@@ -88,6 +118,7 @@ const App = () => {
       <ErrorToast message={error} onDismiss={clearError} />
       <AuthModal />
     </div>
+    </LazyMotion>
   );
 };
 

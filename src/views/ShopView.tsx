@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import * as m from 'framer-motion/m';
 import { Sparkles, ShoppingBag, Filter } from 'lucide-react';
 import { containerVariants, itemVariants } from '@/constants/animations';
 import { useCartStore } from '@/store/cartStore';
@@ -27,18 +27,18 @@ const ShopView = () => {
     : products.filter((p) => p.category === activeCategory);
 
   return (
-    <motion.div initial="hidden" animate="visible" variants={containerVariants} className="space-y-16 pb-20">
-      <motion.div variants={itemVariants} className="text-center space-y-4">
+    <m.div initial="hidden" animate="visible" variants={containerVariants} className="space-y-16 pb-20">
+      <m.div variants={itemVariants} className="text-center space-y-4">
         <h2 className="text-[50px] lg:text-[80px] heading-font leading-[0.85] tracking-[-0.05em] uppercase">
           K-BEAUTY <span className="italic text-[#FF4D8D]">SHOP</span>
         </h2>
         <p className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-400">
           Curated Products for Every Melanin Level
         </p>
-      </motion.div>
+      </m.div>
 
       {/* Category Filter */}
-      <motion.div variants={itemVariants}>
+      <m.div variants={itemVariants}>
         <div className="flex items-center gap-4 overflow-x-auto pb-4">
           <Filter size={14} className="text-gray-300 flex-shrink-0" />
           {CATEGORIES.map((cat) => (
@@ -55,7 +55,7 @@ const ShopView = () => {
             </button>
           ))}
         </div>
-      </motion.div>
+      </m.div>
 
       {/* Products Grid */}
       {loading ? (
@@ -65,9 +65,9 @@ const ShopView = () => {
           ))}
         </div>
       ) : (
-        <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <m.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {filtered.map((product) => (
-            <motion.div
+            <m.div
               key={product.id}
               whileHover={{ y: -4 }}
               className="bg-white border border-gray-100 rounded-[3rem] overflow-hidden shadow-sm hover:shadow-xl transition-all group flex flex-col"
@@ -115,20 +115,20 @@ const ShopView = () => {
 
                 <div className="flex justify-between items-center mt-auto pt-4 border-t border-gray-50">
                   <span className="text-lg font-black">{product.priceDisplay}</span>
-                  <motion.button
+                  <m.button
                     whileTap={{ scale: 0.9 }}
                     onClick={() => addItem(product)}
                     className="p-3 bg-black text-white rounded-full hover:bg-[#FF4D8D] transition-colors"
                   >
                     <ShoppingBag size={14} />
-                  </motion.button>
+                  </m.button>
                 </div>
               </div>
-            </motion.div>
+            </m.div>
           ))}
-        </motion.div>
+        </m.div>
       )}
-    </motion.div>
+    </m.div>
   );
 };
 
