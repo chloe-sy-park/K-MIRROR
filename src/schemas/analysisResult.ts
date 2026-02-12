@@ -21,6 +21,12 @@ const videoSchema = z.object({
   skillLevel: z.string(),
 });
 
+const youtubeSearchSchema = z.object({
+  queries: z.array(z.string()),
+  focusPoints: z.array(z.string()),
+  channelSuggestions: z.array(z.string()),
+});
+
 export const analysisResultSchema = z.object({
   tone: z.object({
     melaninIndex: z.number().min(1).max(6),
@@ -55,4 +61,6 @@ export const analysisResultSchema = z.object({
     videos: z.array(videoSchema),
     sensitiveSafe: z.boolean(),
   }),
+  autoTags: z.array(z.string()).optional().default([]),
+  youtubeSearch: youtubeSearchSchema.optional(),
 });

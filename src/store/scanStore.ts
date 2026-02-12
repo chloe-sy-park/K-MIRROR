@@ -1,6 +1,7 @@
 import { create } from 'zustand';
-import { AnalysisResult, UserPreferences } from '@/types';
+import { AnalysisResult, UserPreferences, YouTubeVideo } from '@/types';
 import { analyzeKBeauty, AnalysisError } from '@/services/geminiService';
+import { searchYouTubeVideos, isYouTubeConfigured } from '@/services/youtubeService';
 import { DEMO_RESULT } from '@/data/demoResult';
 import type { CelebProfile } from '@/data/celebGallery';
 
@@ -12,6 +13,7 @@ interface ScanState {
   celebImage: string | null;
   selectedCelebName: string | null;
   result: AnalysisResult | null;
+  youtubeVideos: YouTubeVideo[];
   error: string | null;
 
   setUserImage: (base64: string) => void;
@@ -43,6 +45,7 @@ export const useScanStore = create<ScanState>((set, get) => ({
   celebImage: null,
   selectedCelebName: null,
   result: null,
+  youtubeVideos: [],
   error: null,
 
   setUserImage: (base64) => set({ userImage: base64 }),
@@ -75,6 +78,15 @@ export const useScanStore = create<ScanState>((set, get) => ({
       // Only apply result if this request wasn't aborted
       if (!controller.signal.aborted) {
         set({ result: res, phase: 'result' });
+
+        // Fetch real YouTube videos using Gemini-generated search hints (non-blocking)
+        if (isYouTubeConfigured && res.youtubeSearch?.queries?.length) {
+          searchYouTubeVideos(res.youtubeSearch.queries).then((videos) => {
+            if (!controller.signal.aborted) {
+              set({ youtubeVideos: videos });
+            }
+          }).catch(() => { /* YouTube search is best-effort */ });
+        }
       }
     } catch (err) {
       if (controller.signal.aborted) return;
@@ -101,7 +113,7 @@ export const useScanStore = create<ScanState>((set, get) => ({
     if (demoTimer) { clearTimeout(demoTimer); demoTimer = null; }
     analyzeController?.abort();
     analyzeController = null;
-    set({ result: null, phase: 'idle', error: null, selectedCelebName: null });
+    set({ result: null, youtubeVideos: [], phase: 'idle', error: null, selectedCelebName: null });
   },
   clearError: () => set({ error: null }),
 }));

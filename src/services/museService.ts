@@ -129,7 +129,12 @@ export async function deleteBoard(id: string): Promise<void> {
 
 export async function fetchMuses(boardId?: string): Promise<SavedMuse[]> {
   if (!isSupabaseConfigured) {
-    const muses = lsGet<SavedMuse>(LS_MUSES_KEY);
+    const muses = lsGet<SavedMuse>(LS_MUSES_KEY).map((m) => ({
+      ...m,
+      tags: m.tags || [],
+      notes: m.notes || '',
+      extraImages: m.extraImages || [],
+    }));
     return boardId ? muses.filter((m) => m.boardId === boardId) : muses;
   }
 
@@ -148,6 +153,9 @@ export async function fetchMuses(boardId?: string): Promise<SavedMuse[]> {
     vibe: r.vibe,
     boardId: r.board_id ?? undefined,
     aiStylePoints: r.ai_style_points || [],
+    tags: r.tags || [],
+    notes: r.notes || '',
+    extraImages: r.extra_images || [],
   }));
 }
 
@@ -173,6 +181,9 @@ export async function saveMuse(muse: Omit<SavedMuse, 'id'>): Promise<SavedMuse> 
       celeb_name: muse.celebName,
       vibe: muse.vibe,
       ai_style_points: muse.aiStylePoints,
+      tags: muse.tags || [],
+      notes: muse.notes || '',
+      extra_images: muse.extraImages || [],
     })
     .select()
     .single();
@@ -187,6 +198,9 @@ export async function saveMuse(muse: Omit<SavedMuse, 'id'>): Promise<SavedMuse> 
     vibe: data.vibe,
     boardId: data.board_id ?? undefined,
     aiStylePoints: data.ai_style_points || [],
+    tags: data.tags || [],
+    notes: data.notes || '',
+    extraImages: data.extra_images || [],
   };
 }
 
@@ -197,5 +211,92 @@ export async function deleteMuse(id: string): Promise<void> {
   }
 
   const { error } = await supabase.from('saved_muses').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
+// ── Board Update ─────────────────────────────────────────
+
+export async function updateBoard(id: string, updates: { name?: string; icon?: string }): Promise<MuseBoard> {
+  if (!isSupabaseConfigured) {
+    const boards = lsGet<MuseBoard>(LS_BOARDS_KEY);
+    const idx = boards.findIndex((b) => b.id === id);
+    if (idx === -1) throw new Error('Board not found');
+    boards[idx] = { ...boards[idx], ...updates };
+    lsSet(LS_BOARDS_KEY, boards);
+    return boards[idx];
+  }
+
+  const { data, error } = await supabase
+    .from('muse_boards')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  const muses = await fetchMuses(id);
+  return { id: data.id, name: data.name, icon: data.icon, count: muses.length, aiSummary: data.ai_summary || '' };
+}
+
+// ── Muse Update (notes, extraImages) ─────────────────────
+
+export async function updateMuse(
+  id: string,
+  updates: { notes?: string; extraImages?: string[]; tags?: string[] }
+): Promise<SavedMuse> {
+  if (!isSupabaseConfigured) {
+    const muses = lsGet<SavedMuse>(LS_MUSES_KEY);
+    const idx = muses.findIndex((m) => m.id === id);
+    if (idx === -1) throw new Error('Muse not found');
+    muses[idx] = { ...muses[idx], ...updates };
+    lsSet(LS_MUSES_KEY, muses);
+    return muses[idx];
+  }
+
+  const dbUpdates: Record<string, unknown> = {};
+  if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
+  if (updates.extraImages !== undefined) dbUpdates.extra_images = updates.extraImages;
+  if (updates.tags !== undefined) dbUpdates.tags = updates.tags;
+
+  const { data, error } = await supabase
+    .from('saved_muses')
+    .update(dbUpdates)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return {
+    id: data.id,
+    userImage: data.user_image,
+    celebImage: data.celeb_image,
+    celebName: data.celeb_name,
+    date: new Date(data.created_at).toLocaleDateString(),
+    vibe: data.vibe,
+    boardId: data.board_id ?? undefined,
+    aiStylePoints: data.ai_style_points || [],
+    tags: data.tags || [],
+    notes: data.notes || '',
+    extraImages: data.extra_images || [],
+  };
+}
+
+// ── Move Muse to Different Board ─────────────────────────
+
+export async function moveMuse(id: string, newBoardId: string | null): Promise<void> {
+  if (!isSupabaseConfigured) {
+    const muses = lsGet<SavedMuse>(LS_MUSES_KEY);
+    const idx = muses.findIndex((m) => m.id === id);
+    if (idx === -1) throw new Error('Muse not found');
+    muses[idx] = { ...muses[idx], boardId: newBoardId ?? undefined };
+    lsSet(LS_MUSES_KEY, muses);
+    return;
+  }
+
+  const { error } = await supabase
+    .from('saved_muses')
+    .update({ board_id: newBoardId })
+    .eq('id', id);
+
   if (error) throw new Error(error.message);
 }

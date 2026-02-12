@@ -1,26 +1,34 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import * as m from 'framer-motion/m';
 import {
   LayoutGrid, Plus, Trash2, X, Sparkles, User, ChevronLeft, Camera, Star,
+  Pencil, FolderInput, ImagePlus, StickyNote, Tag,
 } from 'lucide-react';
 import { useMuseStore } from '@/store/museStore';
+import type { SavedMuse } from '@/types';
 import { containerVariants, itemVariants } from '@/constants/animations';
 
 const BOARD_ICONS = ['🎨', '💄', '✨', '🌸', '🔥', '💎', '🦋', '🌙'];
+
+type ModalType = 'create-board' | 'edit-board' | 'muse-detail' | 'move-muse' | null;
 
 const MuseBoardView = () => {
   const navigate = useNavigate();
   const {
     boards, muses, activeBoardId, loading,
-    fetchBoards, fetchMuses, createBoard, deleteBoard, deleteMuse,
-    setActiveBoard,
+    fetchBoards, fetchMuses, createBoard, updateBoard, deleteBoard,
+    deleteMuse, updateMuse, moveMuse, setActiveBoard,
   } = useMuseStore();
 
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [modal, setModal] = useState<ModalType>(null);
   const [newBoardName, setNewBoardName] = useState('');
   const [newBoardIcon, setNewBoardIcon] = useState('🎨');
+  const [selectedMuse, setSelectedMuse] = useState<SavedMuse | null>(null);
+  const [editNotes, setEditNotes] = useState('');
+  const [isEditingNotes, setIsEditingNotes] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchBoards();
@@ -31,19 +39,165 @@ const MuseBoardView = () => {
     fetchMuses(activeBoardId ?? undefined);
   }, [activeBoardId, fetchMuses]);
 
+  // ── Board CRUD ──────────────────────────────────────
+
   const handleCreateBoard = async () => {
     if (!newBoardName.trim()) return;
     await createBoard(newBoardName.trim(), newBoardIcon);
     setNewBoardName('');
     setNewBoardIcon('🎨');
-    setShowCreateModal(false);
+    setModal(null);
+  };
+
+  const handleEditBoard = async () => {
+    if (!activeBoardId || !newBoardName.trim()) return;
+    await updateBoard(activeBoardId, { name: newBoardName.trim(), icon: newBoardIcon });
+    setNewBoardName('');
+    setNewBoardIcon('🎨');
+    setModal(null);
   };
 
   const handleDeleteBoard = async (id: string) => {
     await deleteBoard(id);
   };
 
+  const openEditBoard = () => {
+    const board = boards.find((b) => b.id === activeBoardId);
+    if (!board) return;
+    setNewBoardName(board.name);
+    setNewBoardIcon(board.icon);
+    setModal('edit-board');
+  };
+
+  // ── Muse Actions ────────────────────────────────────
+
+  const openMuseDetail = (muse: SavedMuse) => {
+    setSelectedMuse(muse);
+    setEditNotes(muse.notes || '');
+    setIsEditingNotes(false);
+    setModal('muse-detail');
+  };
+
+  const handleSaveNotes = async () => {
+    if (!selectedMuse) return;
+    await updateMuse(selectedMuse.id, { notes: editNotes });
+    setSelectedMuse({ ...selectedMuse, notes: editNotes });
+    setIsEditingNotes(false);
+  };
+
+  const handleAddExtraImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!selectedMuse || !e.target.files?.length) return;
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64 = reader.result as string;
+      const updated = [...(selectedMuse.extraImages || []), base64];
+      await updateMuse(selectedMuse.id, { extraImages: updated });
+      setSelectedMuse({ ...selectedMuse, extraImages: updated });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveExtraImage = async (idx: number) => {
+    if (!selectedMuse) return;
+    const updated = selectedMuse.extraImages.filter((_, i) => i !== idx);
+    await updateMuse(selectedMuse.id, { extraImages: updated });
+    setSelectedMuse({ ...selectedMuse, extraImages: updated });
+  };
+
+  const openMoveModal = (muse: SavedMuse) => {
+    setSelectedMuse(muse);
+    setModal('move-muse');
+  };
+
+  const handleMoveMuse = async (boardId: string | null) => {
+    if (!selectedMuse) return;
+    await moveMuse(selectedMuse.id, boardId);
+    setSelectedMuse({ ...selectedMuse, boardId: boardId ?? undefined });
+    setModal(null);
+  };
+
   const activeBoard = boards.find((b) => b.id === activeBoardId);
+
+  const getImageSrc = (img: string) =>
+    img.startsWith('data:') || img.startsWith('http')
+      ? img
+      : `data:image/jpeg;base64,${img}`;
+
+  // ── Board/Icon picker shared UI ─────────────────────
+
+  const BoardFormModal = ({ mode }: { mode: 'create' | 'edit' }) => (
+    <m.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[250] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      onClick={() => setModal(null)}
+    >
+      <m.div
+        initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white rounded-[3rem] p-10 max-w-md w-full shadow-2xl relative"
+      >
+        <button
+          onClick={() => setModal(null)}
+          className="absolute top-6 right-6 p-2 text-gray-300 hover:text-black transition-colors"
+        >
+          <X size={20} />
+        </button>
+
+        <div className="text-center mb-10">
+          <h2 className="text-3xl heading-font uppercase tracking-tight">
+            {mode === 'create' ? 'New' : 'Edit'} <span className="italic text-[#FF4D8D]">Board</span>
+          </h2>
+          <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-3">
+            {mode === 'create' ? 'Organize your muse collection' : 'Update board details'}
+          </p>
+        </div>
+
+        <div className="space-y-6">
+          <div className="space-y-1">
+            <span className="text-[9px] font-black uppercase text-gray-400 ml-2" id="icon-label">Icon</span>
+            <div className="flex gap-2 flex-wrap" role="group" aria-labelledby="icon-label">
+              {BOARD_ICONS.map((icon) => (
+                <button
+                  key={icon}
+                  onClick={() => setNewBoardIcon(icon)}
+                  className={`w-12 h-12 rounded-2xl text-xl flex items-center justify-center transition-all ${
+                    newBoardIcon === icon
+                      ? 'bg-black text-white scale-110 shadow-lg'
+                      : 'bg-gray-50 hover:bg-gray-100'
+                  }`}
+                >
+                  {icon}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label htmlFor="board-name-input" className="text-[9px] font-black uppercase text-gray-400 ml-2">Board Name</label>
+            <input
+              id="board-name-input"
+              type="text"
+              value={newBoardName}
+              onChange={(e) => setNewBoardName(e.target.value)}
+              placeholder="e.g., Summer Looks, Daily Glam"
+              maxLength={40}
+              className="w-full bg-[#F9F9F9] rounded-2xl px-4 py-4 text-sm focus:ring-1 ring-black transition-all border-none"
+              onKeyDown={(e) => e.key === 'Enter' && (mode === 'create' ? handleCreateBoard() : handleEditBoard())}
+            />
+          </div>
+
+          <button
+            onClick={mode === 'create' ? handleCreateBoard : handleEditBoard}
+            disabled={!newBoardName.trim()}
+            className="w-full py-5 bg-black text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] hover:bg-[#FF4D8D] transition-all disabled:opacity-40"
+          >
+            {mode === 'create' ? 'Create Board' : 'Save Changes'}
+          </button>
+        </div>
+      </m.div>
+    </m.div>
+  );
 
   return (
     <m.div
@@ -99,7 +253,11 @@ const MuseBoardView = () => {
             </button>
           ))}
           <button
-            onClick={() => setShowCreateModal(true)}
+            onClick={() => {
+              setNewBoardName('');
+              setNewBoardIcon('🎨');
+              setModal('create-board');
+            }}
             className="flex-shrink-0 w-10 h-10 rounded-2xl bg-gray-50 border border-dashed border-gray-200 flex items-center justify-center text-gray-300 hover:text-[#FF4D8D] hover:border-[#FF4D8D] transition-all"
           >
             <Plus size={16} />
@@ -122,12 +280,29 @@ const MuseBoardView = () => {
               </p>
             </div>
           </div>
-          <button
-            onClick={() => handleDeleteBoard(activeBoard.id)}
-            className="p-3 text-gray-300 hover:text-red-500 transition-colors"
-          >
-            <Trash2 size={16} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate('/')}
+              className="p-3 text-gray-300 hover:text-[#FF4D8D] transition-colors"
+              title="New Scan for this board"
+            >
+              <Camera size={16} />
+            </button>
+            <button
+              onClick={openEditBoard}
+              className="p-3 text-gray-300 hover:text-black transition-colors"
+              title="Edit board"
+            >
+              <Pencil size={16} />
+            </button>
+            <button
+              onClick={() => handleDeleteBoard(activeBoard.id)}
+              className="p-3 text-gray-300 hover:text-red-500 transition-colors"
+              title="Delete board"
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
         </m.div>
       )}
 
@@ -168,17 +343,14 @@ const MuseBoardView = () => {
             <m.div
               key={muse.id}
               whileHover={{ y: -4 }}
-              className="group relative bg-white border border-gray-100 rounded-[3rem] overflow-hidden shadow-sm hover:shadow-xl transition-all"
+              className="group relative bg-white border border-gray-100 rounded-[3rem] overflow-hidden shadow-sm hover:shadow-xl transition-all cursor-pointer"
+              onClick={() => openMuseDetail(muse)}
             >
               {/* Images */}
               <div className="relative h-52 bg-gray-50 overflow-hidden">
                 {muse.userImage ? (
                   <img
-                    src={
-                      muse.userImage.startsWith('data:') || muse.userImage.startsWith('http')
-                        ? muse.userImage
-                        : `data:image/jpeg;base64,${muse.userImage}`
-                    }
+                    src={getImageSrc(muse.userImage)}
                     alt="Uploaded selfie"
                     className="w-full h-full object-cover"
                   />
@@ -216,27 +388,71 @@ const MuseBoardView = () => {
                     </span>
                   ))}
                 </div>
+                {/* Tags preview */}
+                {muse.tags && muse.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {muse.tags.slice(0, 3).map((tag) => (
+                      <span
+                        key={tag}
+                        className="text-[8px] font-bold text-[#FF4D8D] bg-[#FF4D8D]/10 px-2 py-0.5 rounded-full"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {/* Notes indicator */}
+                {muse.notes && (
+                  <div className="flex items-center gap-1.5 text-gray-400">
+                    <StickyNote size={10} />
+                    <span className="text-[9px] truncate max-w-[200px]">{muse.notes}</span>
+                  </div>
+                )}
               </div>
 
-              {/* Delete button */}
-              <button
-                onClick={() => deleteMuse(muse.id)}
-                className="absolute top-4 right-4 p-2 bg-white/80 backdrop-blur-sm rounded-xl opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-all"
-              >
-                <Trash2 size={14} />
-              </button>
+              {/* Hover action buttons */}
+              <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                <button
+                  onClick={(e) => { e.stopPropagation(); openMoveModal(muse); }}
+                  className="p-2 bg-white/80 backdrop-blur-sm rounded-xl text-gray-300 hover:text-blue-500 transition-all"
+                  title="Move to board"
+                >
+                  <FolderInput size={14} />
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); deleteMuse(muse.id); }}
+                  className="p-2 bg-white/80 backdrop-blur-sm rounded-xl text-gray-300 hover:text-red-500 transition-all"
+                  title="Delete muse"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
             </m.div>
           ))}
         </m.div>
       )}
 
-      {/* Create Board Modal */}
+      {/* Hidden file input for extra images */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleAddExtraImage}
+      />
+
+      {/* ── Modals ─────────────────────────────────────── */}
       <AnimatePresence>
-        {showCreateModal && (
+        {(modal === 'create-board' || modal === 'edit-board') && (
+          <BoardFormModal mode={modal === 'create-board' ? 'create' : 'edit'} />
+        )}
+
+        {/* Move Muse Modal */}
+        {modal === 'move-muse' && selectedMuse && (
           <m.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-[250] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
-            onClick={() => setShowCreateModal(false)}
+            onClick={() => setModal(null)}
           >
             <m.div
               initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
@@ -244,62 +460,235 @@ const MuseBoardView = () => {
               className="bg-white rounded-[3rem] p-10 max-w-md w-full shadow-2xl relative"
             >
               <button
-                onClick={() => setShowCreateModal(false)}
+                onClick={() => setModal(null)}
                 className="absolute top-6 right-6 p-2 text-gray-300 hover:text-black transition-colors"
               >
                 <X size={20} />
               </button>
 
-              <div className="text-center mb-10">
-                <h2 className="text-3xl heading-font uppercase tracking-tight">
-                  New <span className="italic text-[#FF4D8D]">Board</span>
+              <div className="text-center mb-8">
+                <h2 className="text-2xl heading-font uppercase tracking-tight">
+                  Move <span className="italic text-[#FF4D8D]">Muse</span>
                 </h2>
-                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-3">
-                  Organize your muse collection
+                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-2">
+                  Select a destination board
                 </p>
               </div>
 
-              <div className="space-y-6">
-                <div className="space-y-1">
-                  <span className="text-[9px] font-black uppercase text-gray-400 ml-2" id="icon-label">Icon</span>
-                  <div className="flex gap-2 flex-wrap" role="group" aria-labelledby="icon-label">
-                    {BOARD_ICONS.map((icon) => (
-                      <button
-                        key={icon}
-                        onClick={() => setNewBoardIcon(icon)}
-                        className={`w-12 h-12 rounded-2xl text-xl flex items-center justify-center transition-all ${
-                          newBoardIcon === icon
-                            ? 'bg-black text-white scale-110 shadow-lg'
-                            : 'bg-gray-50 hover:bg-gray-100'
-                        }`}
-                      >
-                        {icon}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <label htmlFor="board-name-input" className="text-[9px] font-black uppercase text-gray-400 ml-2">Board Name</label>
-                  <input
-                    id="board-name-input"
-                    type="text"
-                    value={newBoardName}
-                    onChange={(e) => setNewBoardName(e.target.value)}
-                    placeholder="e.g., Summer Looks, Daily Glam"
-                    maxLength={40}
-                    className="w-full bg-[#F9F9F9] rounded-2xl px-4 py-4 text-sm focus:ring-1 ring-black transition-all border-none"
-                    onKeyDown={(e) => e.key === 'Enter' && handleCreateBoard()}
-                  />
-                </div>
-
+              <div className="space-y-3">
                 <button
-                  onClick={handleCreateBoard}
-                  disabled={!newBoardName.trim()}
-                  className="w-full py-5 bg-black text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] hover:bg-[#FF4D8D] transition-all disabled:opacity-40"
+                  onClick={() => handleMoveMuse(null)}
+                  className={`w-full flex items-center gap-3 px-5 py-4 rounded-2xl transition-all text-left ${
+                    !selectedMuse.boardId
+                      ? 'bg-black text-white'
+                      : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
+                  }`}
                 >
-                  Create Board
+                  <LayoutGrid size={16} />
+                  <span className="text-[10px] font-black uppercase tracking-widest">No Board (All Muses)</span>
                 </button>
+                {boards.map((board) => (
+                  <button
+                    key={board.id}
+                    onClick={() => handleMoveMuse(board.id)}
+                    className={`w-full flex items-center gap-3 px-5 py-4 rounded-2xl transition-all text-left ${
+                      selectedMuse.boardId === board.id
+                        ? 'bg-black text-white'
+                        : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
+                    }`}
+                  >
+                    <span className="text-lg">{board.icon}</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest">{board.name}</span>
+                    <span className="ml-auto text-[8px] opacity-60">{board.count}</span>
+                  </button>
+                ))}
+              </div>
+            </m.div>
+          </m.div>
+        )}
+
+        {/* Muse Detail Modal */}
+        {modal === 'muse-detail' && selectedMuse && (
+          <m.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[250] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 overflow-y-auto"
+            onClick={() => setModal(null)}
+          >
+            <m.div
+              initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-[3rem] max-w-2xl w-full shadow-2xl relative my-8"
+            >
+              {/* Close */}
+              <button
+                onClick={() => setModal(null)}
+                className="absolute top-6 right-6 z-10 p-2 bg-white/80 backdrop-blur-sm rounded-xl text-gray-400 hover:text-black transition-colors"
+              >
+                <X size={20} />
+              </button>
+
+              {/* Images side by side */}
+              <div className="grid grid-cols-2 h-64 rounded-t-[3rem] overflow-hidden">
+                <div className="relative bg-gray-100">
+                  {selectedMuse.userImage ? (
+                    <img src={getImageSrc(selectedMuse.userImage)} alt="Your photo" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center"><User size={40} className="text-gray-300" /></div>
+                  )}
+                  <span className="absolute bottom-3 left-3 text-[8px] font-black uppercase tracking-widest bg-black/60 text-white px-3 py-1 rounded-lg">You</span>
+                </div>
+                <div className="relative bg-gray-100">
+                  {selectedMuse.celebImage ? (
+                    <img src={getImageSrc(selectedMuse.celebImage)} alt={selectedMuse.celebName} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center"><Star size={40} className="text-gray-300" /></div>
+                  )}
+                  <span className="absolute bottom-3 left-3 text-[8px] font-black uppercase tracking-widest bg-[#FF4D8D]/80 text-white px-3 py-1 rounded-lg">{selectedMuse.celebName}</span>
+                </div>
+              </div>
+
+              {/* Detail Content */}
+              <div className="p-10 space-y-8">
+                {/* Header info */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-2xl heading-font italic uppercase">{selectedMuse.celebName}</h3>
+                    <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-1">{selectedMuse.date}</p>
+                  </div>
+                  {selectedMuse.vibe && (
+                    <div className="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-xl">
+                      <Sparkles size={12} className="text-[#FF4D8D]" />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">{selectedMuse.vibe}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Tags */}
+                {selectedMuse.tags && selectedMuse.tags.length > 0 && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Tag size={12} className="text-gray-400" />
+                      <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">Auto Tags</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedMuse.tags.map((tag) => (
+                        <span key={tag} className="text-[9px] font-bold text-[#FF4D8D] bg-[#FF4D8D]/10 px-3 py-1 rounded-full">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* AI Style Points */}
+                {selectedMuse.aiStylePoints.length > 0 && (
+                  <div className="space-y-2">
+                    <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">Style Points</span>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedMuse.aiStylePoints.map((point) => (
+                        <span key={point} className="text-[8px] font-black uppercase tracking-widest bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
+                          {point}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Notes */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <StickyNote size={12} className="text-gray-400" />
+                      <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">Notes</span>
+                    </div>
+                    {!isEditingNotes && (
+                      <button
+                        onClick={() => { setEditNotes(selectedMuse.notes || ''); setIsEditingNotes(true); }}
+                        className="text-[9px] font-black uppercase tracking-widest text-[#FF4D8D] hover:underline"
+                      >
+                        {selectedMuse.notes ? 'Edit' : 'Add Note'}
+                      </button>
+                    )}
+                  </div>
+                  {isEditingNotes ? (
+                    <div className="space-y-2">
+                      <textarea
+                        value={editNotes}
+                        onChange={(e) => setEditNotes(e.target.value)}
+                        placeholder="Add your thoughts, tips, reminders..."
+                        rows={3}
+                        className="w-full bg-[#F9F9F9] rounded-2xl px-4 py-3 text-sm focus:ring-1 ring-black transition-all border-none resize-none"
+                      />
+                      <div className="flex gap-2 justify-end">
+                        <button
+                          onClick={() => setIsEditingNotes(false)}
+                          className="px-4 py-2 text-[9px] font-black uppercase tracking-widest text-gray-400 hover:text-black"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleSaveNotes}
+                          className="px-6 py-2 bg-black text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-[#FF4D8D] transition-all"
+                        >
+                          Save
+                        </button>
+                      </div>
+                    </div>
+                  ) : selectedMuse.notes ? (
+                    <p className="text-sm text-gray-600 leading-relaxed bg-gray-50 rounded-2xl px-5 py-4">{selectedMuse.notes}</p>
+                  ) : (
+                    <p className="text-[10px] text-gray-300 italic">No notes yet</p>
+                  )}
+                </div>
+
+                {/* Extra Images */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <ImagePlus size={12} className="text-gray-400" />
+                      <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">Extra Images</span>
+                    </div>
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="text-[9px] font-black uppercase tracking-widest text-[#FF4D8D] hover:underline"
+                    >
+                      Add Image
+                    </button>
+                  </div>
+                  {selectedMuse.extraImages && selectedMuse.extraImages.length > 0 ? (
+                    <div className="grid grid-cols-3 gap-3">
+                      {selectedMuse.extraImages.map((img, idx) => (
+                        <div key={idx} className="relative group/img aspect-square rounded-2xl overflow-hidden bg-gray-50">
+                          <img src={getImageSrc(img)} alt={`Extra ${idx + 1}`} className="w-full h-full object-cover" />
+                          <button
+                            onClick={() => handleRemoveExtraImage(idx)}
+                            className="absolute top-2 right-2 p-1.5 bg-white/80 backdrop-blur-sm rounded-lg opacity-0 group-hover/img:opacity-100 text-gray-400 hover:text-red-500 transition-all"
+                          >
+                            <Trash2 size={10} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-[10px] text-gray-300 italic">No extra images</p>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-3 pt-4 border-t border-gray-100">
+                  <button
+                    onClick={() => { setModal(null); openMoveModal(selectedMuse); }}
+                    className="flex-1 flex items-center justify-center gap-2 py-4 bg-gray-50 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:bg-gray-100 transition-all"
+                  >
+                    <FolderInput size={14} /> Move to Board
+                  </button>
+                  <button
+                    onClick={() => navigate('/')}
+                    className="flex-1 flex items-center justify-center gap-2 py-4 bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#FF4D8D] transition-all"
+                  >
+                    <Camera size={14} /> Try This Look Again
+                  </button>
+                </div>
               </div>
             </m.div>
           </m.div>
