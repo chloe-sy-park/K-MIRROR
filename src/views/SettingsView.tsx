@@ -30,14 +30,14 @@ const SettingsView = () => {
             <p className="text-xs font-black uppercase tracking-widest uppercase">Inclusion Guard™</p>
             <p className="text-[10px] text-gray-400 mt-1 text-balance">Ethical melanin rebalancing protocol</p>
           </div>
-          <Toggle checked={true} onChange={() => {}} />
+          <Toggle checked={isSensitive} onChange={toggleSensitive} label="Inclusion Guard" />
         </div>
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-widest uppercase">Neural Safety Filter</p>
             <p className="text-[10px] text-gray-400 mt-1 text-balance">Ingredient safety scan active</p>
           </div>
-          <Toggle checked={isSensitive} onChange={toggleSensitive} />
+          <Toggle checked={isSensitive} onChange={toggleSensitive} label="Neural Safety Filter" />
         </div>
       </div>
       <div className="p-12 bg-white border border-gray-100 rounded-[3.5rem] shadow-xl space-y-6">

@@ -57,6 +57,7 @@ const Navbar = () => {
             <NavLink
               key={item.to}
               to={item.to}
+              aria-current={isActive(item.to) ? 'page' : undefined}
               className={() =>
                 `text-[10px] font-black uppercase tracking-[0.3em] transition-all hover:text-[#FF4D8D] ${
                   isActive(item.to) ? 'text-black border-b-2 border-[#FF4D8D] pb-1' : 'text-gray-400'
@@ -69,15 +70,15 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          <Link to="/checkout" className="relative p-2 text-gray-400 hover:text-black transition-colors">
+          <Link to="/checkout" aria-label={`Shopping cart${cartCount() > 0 ? `, ${cartCount()} items` : ''}`} className="relative p-2 text-gray-400 hover:text-black transition-colors">
             <ShoppingBag size={18} />
             {cartCount() > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#FF4D8D] text-white text-[8px] font-black rounded-full flex items-center justify-center">
+              <span aria-hidden="true" className="absolute -top-1 -right-1 w-5 h-5 bg-[#FF4D8D] text-white text-[8px] font-black rounded-full flex items-center justify-center">
                 {cartCount()}
               </span>
             )}
           </Link>
-          <button className="lg:hidden p-2" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          <button className="lg:hidden p-2" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-expanded={isMenuOpen} aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}>
             {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
           {user ? (
@@ -90,7 +91,7 @@ const Navbar = () => {
                   {user.email?.charAt(0) ?? 'U'}
                 </span>
               </motion.div>
-              <button onClick={signOut} className="p-2 text-gray-300 hover:text-red-500 transition-colors">
+              <button onClick={signOut} aria-label="Sign out" className="p-2 text-gray-300 hover:text-red-500 transition-colors">
                 <LogOut size={16} />
               </button>
             </div>
@@ -98,6 +99,7 @@ const Navbar = () => {
             <motion.button
               whileHover={{ scale: 1.1 }}
               onClick={openAuthModal}
+              aria-label="Sign in"
               className="w-10 h-10 md:w-11 md:h-11 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center cursor-pointer overflow-hidden shadow-sm hover:shadow-md transition-all"
             >
               <User size={18} className="text-gray-400" />

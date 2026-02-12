@@ -39,15 +39,19 @@ const AuthModal = () => {
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[250] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
           onClick={closeAuthModal}
+          onKeyDown={(e) => { if (e.key === 'Escape') closeAuthModal(); }}
         >
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label={mode === 'signin' ? 'Sign in to K-MIRROR' : 'Create K-MIRROR account'}
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
             onClick={(e) => e.stopPropagation()}
             className="bg-white rounded-[3rem] p-10 max-w-md w-full shadow-2xl relative"
           >
-            <button onClick={closeAuthModal} className="absolute top-6 right-6 p-2 text-gray-300 hover:text-black transition-colors">
+            <button onClick={closeAuthModal} aria-label="Close dialog" className="absolute top-6 right-6 p-2 text-gray-300 hover:text-black transition-colors">
               <X size={20} />
             </button>
 
@@ -84,28 +88,32 @@ const AuthModal = () => {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-[9px] font-black uppercase text-gray-400 ml-2">Email</label>
+                <label htmlFor="auth-email" className="text-[9px] font-black uppercase text-gray-400 ml-2">Email</label>
                 <div className="relative">
-                  <Mail size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" />
+                  <Mail size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" aria-hidden="true" />
                   <input
+                    id="auth-email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
                     required
+                    autoComplete="email"
                     className="w-full bg-[#F9F9F9] rounded-2xl pl-10 pr-4 py-4 text-sm focus:ring-1 ring-black transition-all border-none"
                   />
                 </div>
               </div>
               <div className="space-y-1">
-                <label className="text-[9px] font-black uppercase text-gray-400 ml-2">Password</label>
+                <label htmlFor="auth-password" className="text-[9px] font-black uppercase text-gray-400 ml-2">Password</label>
                 <input
+                  id="auth-password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Min 6 characters"
                   required
                   minLength={6}
+                  autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
                   className="w-full bg-[#F9F9F9] rounded-2xl px-4 py-4 text-sm focus:ring-1 ring-black transition-all border-none"
                 />
               </div>

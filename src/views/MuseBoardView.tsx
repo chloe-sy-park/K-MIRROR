@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  LayoutGrid, Plus, Trash2, X, Sparkles, User, ChevronLeft,
+  LayoutGrid, Plus, Trash2, X, Sparkles, User, ChevronLeft, Camera,
 } from 'lucide-react';
 import { useMuseStore } from '@/store/museStore';
 import { containerVariants, itemVariants } from '@/constants/animations';
@@ -9,6 +10,7 @@ import { containerVariants, itemVariants } from '@/constants/animations';
 const BOARD_ICONS = ['🎨', '💄', '✨', '🌸', '🔥', '💎', '🦋', '🌙'];
 
 const MuseBoardView = () => {
+  const navigate = useNavigate();
   const {
     boards, muses, activeBoardId, loading,
     fetchBoards, fetchMuses, createBoard, deleteBoard, deleteMuse,
@@ -136,14 +138,20 @@ const MuseBoardView = () => {
           ))}
         </div>
       ) : muses.length === 0 ? (
-        <motion.div variants={itemVariants} className="py-32 text-center border-2 border-dashed border-gray-100 rounded-[4rem] bg-gray-50/20">
-          <LayoutGrid size={64} className="mx-auto text-gray-200 mb-10" />
-          <p className="text-gray-300 font-black uppercase tracking-[0.4em] text-sm mb-3">
+        <motion.div variants={itemVariants} className="py-32 text-center border-2 border-dashed border-gray-100 rounded-[4rem] bg-gray-50/20 space-y-6">
+          <LayoutGrid size={64} className="mx-auto text-gray-200" />
+          <p className="text-gray-300 font-black uppercase tracking-[0.4em] text-sm">
             {activeBoardId ? 'This board is empty' : 'No saved muses yet'}
           </p>
           <p className="text-[10px] text-gray-300 max-w-xs mx-auto">
             Run a scan and save your analysis to start building your muse collection.
           </p>
+          <button
+            onClick={() => navigate('/')}
+            className="inline-flex items-center gap-2 px-8 py-4 bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#FF4D8D] transition-all"
+          >
+            <Camera size={14} /> Start a Scan
+          </button>
         </motion.div>
       ) : (
         <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

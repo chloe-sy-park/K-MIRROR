@@ -48,7 +48,7 @@ const LuxuryFileUpload = ({ label, secondaryLabel, preview, onImageSelect, captu
       transition={{ type: "spring", stiffness: 400, damping: 17 }}
     >
       <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-4">{label}</p>
-      <label className="group relative block aspect-[4/5] bg-[#F9F9F9] rounded-[2.5rem] border border-gray-100 overflow-hidden cursor-pointer hover:border-black transition-all">
+      <label aria-label={`${label} — ${secondaryLabel}`} className="group relative block aspect-[4/5] bg-[#F9F9F9] rounded-[2.5rem] border border-gray-100 overflow-hidden cursor-pointer hover:border-black transition-all focus-within:ring-2 focus-within:ring-[#FF4D8D] focus-within:ring-offset-2">
         {preview ? (
           <motion.img
             initial={{ opacity: 0, scale: 1.1 }}
@@ -76,7 +76,7 @@ const LuxuryFileUpload = ({ label, secondaryLabel, preview, onImageSelect, captu
             )}
           </div>
         )}
-        <input type="file" className="hidden" accept="image/jpeg,image/png,image/webp" onChange={handleChange} capture={capture} />
+        <input type="file" className="sr-only" accept="image/jpeg,image/png,image/webp" onChange={handleChange} capture={capture} aria-label={`Upload ${label}`} />
       </label>
     </motion.div>
   );

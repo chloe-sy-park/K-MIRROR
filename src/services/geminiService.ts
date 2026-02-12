@@ -3,11 +3,46 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { AnalysisResult, UserPreferences } from "@/types";
 import { analysisResultSchema } from "@/schemas/analysisResult";
 
+export type AnalysisErrorCode = 'EMPTY_RESPONSE' | 'VALIDATION' | 'API' | 'NETWORK' | 'TIMEOUT' | 'RATE_LIMITED' | 'ABORTED';
+
 export class AnalysisError extends Error {
-  constructor(message: string, public readonly code: 'EMPTY_RESPONSE' | 'VALIDATION' | 'API' | 'NETWORK') {
+  constructor(message: string, public readonly code: AnalysisErrorCode) {
     super(message);
     this.name = 'AnalysisError';
   }
+}
+
+// Simple rate limiter: max `limit` calls per `windowMs`
+const rateLimiter = {
+  timestamps: [] as number[],
+  limit: 2,
+  windowMs: 60_000,
+  check() {
+    const now = Date.now();
+    this.timestamps = this.timestamps.filter(t => now - t < this.windowMs);
+    if (this.timestamps.length >= this.limit) return false;
+    this.timestamps.push(now);
+    return true;
+  },
+};
+
+const TIMEOUT_MS = 30_000;
+const MAX_RETRIES = 2;
+const RETRY_DELAYS = [1000, 3000];
+
+function isRetryable(err: unknown): boolean {
+  if (err instanceof AnalysisError) {
+    return err.code === 'NETWORK' || err.code === 'TIMEOUT';
+  }
+  if (err instanceof Error) {
+    const msg = err.message.toLowerCase();
+    return msg.includes('fetch') || msg.includes('network') || msg.includes('429') || msg.includes('500') || msg.includes('503');
+  }
+  return false;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export const analyzeKBeauty = async (
@@ -15,11 +50,16 @@ export const analyzeKBeauty = async (
   celebImageBase64: string,
   isSensitive: boolean,
   prefs: UserPreferences,
-  selectedCelebName?: string
+  selectedCelebName?: string,
+  signal?: AbortSignal
 ): Promise<AnalysisResult> => {
   const apiKey = process.env.API_KEY;
   if (!apiKey) {
     throw new AnalysisError('API key is not configured. Check your .env.local file.', 'API');
+  }
+
+  if (!rateLimiter.check()) {
+    throw new AnalysisError('Too many requests. Please wait a moment before scanning again.', 'RATE_LIMITED');
   }
 
   const ai = new GoogleGenAI({ apiKey });
@@ -77,22 +117,33 @@ export const analyzeKBeauty = async (
     Output MUST be in valid JSON format only.
   `;
 
-  let response;
-  try {
-    response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
-      contents: {
-        parts: [
-          { text: systemInstruction },
-          { text: 'Analyze these two images. Image 1 is the user\'s bare face. Image 2 is the K-Celeb style muse.' },
-          { inlineData: { mimeType: 'image/jpeg', data: userImageBase64 } },
-          { inlineData: { mimeType: 'image/jpeg', data: celebImageBase64 } }
-        ]
-      },
-      config: {
-        temperature: 0.4,
-        responseMimeType: "application/json",
-        responseSchema: {
+  const makeRequest = async () => {
+    // Check if already aborted
+    if (signal?.aborted) throw new AnalysisError('Analysis was cancelled.', 'ABORTED');
+
+    // Timeout wrapper
+    const timeoutController = new AbortController();
+    const timeoutId = setTimeout(() => timeoutController.abort(), TIMEOUT_MS);
+
+    // Abort if external signal fires
+    const onAbort = () => timeoutController.abort();
+    signal?.addEventListener('abort', onAbort, { once: true });
+
+    try {
+      const response = await ai.models.generateContent({
+        model: 'gemini-3-pro-preview',
+        contents: {
+          parts: [
+            { text: systemInstruction },
+            { text: 'Analyze these two images. Image 1 is the user\'s bare face. Image 2 is the K-Celeb style muse.' },
+            { inlineData: { mimeType: 'image/jpeg', data: userImageBase64 } },
+            { inlineData: { mimeType: 'image/jpeg', data: celebImageBase64 } }
+          ]
+        },
+        config: {
+          temperature: 0.4,
+          responseMimeType: "application/json",
+          responseSchema: {
           type: Type.OBJECT,
           properties: {
             tone: {
@@ -188,36 +239,63 @@ export const analyzeKBeauty = async (
         }
       }
     });
-  } catch (err) {
-    if (err instanceof Error && err.message.includes('fetch')) {
-      throw new AnalysisError('Network error. Please check your connection.', 'NETWORK');
+      return response;
+    } catch (err) {
+      if (signal?.aborted) throw new AnalysisError('Analysis was cancelled.', 'ABORTED');
+      if (timeoutController.signal.aborted && !signal?.aborted) {
+        throw new AnalysisError('Analysis timed out. Please try again.', 'TIMEOUT');
+      }
+      if (err instanceof Error && err.message.includes('fetch')) {
+        throw new AnalysisError('Network error. Please check your connection.', 'NETWORK');
+      }
+      throw new AnalysisError(
+        err instanceof Error ? err.message : 'Failed to communicate with AI service.',
+        'API'
+      );
+    } finally {
+      clearTimeout(timeoutId);
+      signal?.removeEventListener('abort', onAbort);
     }
-    throw new AnalysisError(
-      err instanceof Error ? err.message : 'Failed to communicate with AI service.',
-      'API'
-    );
+  };
+
+  // Retry loop
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const response = await makeRequest();
+
+      const text = response.text;
+      if (!text) {
+        throw new AnalysisError('AI returned an empty response. Please try again.', 'EMPTY_RESPONSE');
+      }
+
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(text);
+      } catch {
+        throw new AnalysisError('AI returned invalid JSON. Please try again.', 'VALIDATION');
+      }
+      const validated = analysisResultSchema.safeParse(parsed);
+
+      if (!validated.success) {
+        console.error('Zod validation errors:', validated.error.issues);
+        throw new AnalysisError(
+          'AI response did not match expected format. Please try again.',
+          'VALIDATION'
+        );
+      }
+
+      return validated.data;
+    } catch (err) {
+      lastError = err;
+      if (err instanceof AnalysisError && err.code === 'ABORTED') throw err;
+      if (attempt < MAX_RETRIES && isRetryable(err)) {
+        await sleep(RETRY_DELAYS[attempt]);
+        continue;
+      }
+      throw err;
+    }
   }
 
-  const text = response.text;
-  if (!text) {
-    throw new AnalysisError('AI returned an empty response. Please try again.', 'EMPTY_RESPONSE');
-  }
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(text);
-  } catch {
-    throw new AnalysisError('AI returned invalid JSON. Please try again.', 'VALIDATION');
-  }
-  const validated = analysisResultSchema.safeParse(parsed);
-
-  if (!validated.success) {
-    console.error('Zod validation errors:', validated.error.issues);
-    throw new AnalysisError(
-      'AI response did not match expected format. Please try again.',
-      'VALIDATION'
-    );
-  }
-
-  return validated.data;
+  throw lastError;
 };

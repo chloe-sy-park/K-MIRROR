@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { useScanStore } from '@/store/scanStore';
@@ -11,19 +11,26 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import ErrorToast from '@/components/ui/ErrorToast';
 import AuthModal from '@/components/ui/AuthModal';
 
-import OnboardingView from '@/views/OnboardingView';
-import ScanView from '@/views/ScanView';
-import AnalyzingView from '@/views/AnalyzingView';
-import AnalysisResultView from '@/views/AnalysisResultView';
-import GlobalCheckoutView from '@/views/GlobalCheckoutView';
-import ExpertMatchingView from '@/views/ExpertMatchingView';
-import MethodologyView from '@/views/MethodologyView';
-import SettingsView from '@/views/SettingsView';
-import MuseBoardView from '@/views/MuseBoardView';
-import ShopView from '@/views/ShopView';
-import ProductDetailView from '@/views/ProductDetailView';
-import OrdersView from '@/views/OrdersView';
-import CelebGalleryView from '@/views/CelebGalleryView';
+// Lazy-loaded views for code splitting
+const OnboardingView = lazy(() => import('@/views/OnboardingView'));
+const ScanView = lazy(() => import('@/views/ScanView'));
+const AnalyzingView = lazy(() => import('@/views/AnalyzingView'));
+const AnalysisResultView = lazy(() => import('@/views/AnalysisResultView'));
+const GlobalCheckoutView = lazy(() => import('@/views/GlobalCheckoutView'));
+const ExpertMatchingView = lazy(() => import('@/views/ExpertMatchingView'));
+const MethodologyView = lazy(() => import('@/views/MethodologyView'));
+const SettingsView = lazy(() => import('@/views/SettingsView'));
+const MuseBoardView = lazy(() => import('@/views/MuseBoardView'));
+const ShopView = lazy(() => import('@/views/ShopView'));
+const ProductDetailView = lazy(() => import('@/views/ProductDetailView'));
+const OrdersView = lazy(() => import('@/views/OrdersView'));
+const CelebGalleryView = lazy(() => import('@/views/CelebGalleryView'));
+
+const LazyFallback = () => (
+  <div className="flex items-center justify-center py-32">
+    <div className="w-8 h-8 border-2 border-gray-200 border-t-[#FF4D8D] rounded-full animate-spin" />
+  </div>
+);
 
 const ScanRoute = () => {
   const { phase, result } = useScanStore();
@@ -56,6 +63,7 @@ const App = () => {
 
       <main className="flex-1 pt-32 pb-24 px-6 lg:px-12 max-w-7xl mx-auto w-full min-h-screen">
         <ErrorBoundary inline>
+          <Suspense fallback={<LazyFallback />}>
           <Routes location={location}>
             <Route path="/" element={<ScanRoute />} />
             <Route path="/onboarding" element={
@@ -72,6 +80,7 @@ const App = () => {
             <Route path="/celebs" element={<CelebGalleryView />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          </Suspense>
         </ErrorBoundary>
       </main>
 

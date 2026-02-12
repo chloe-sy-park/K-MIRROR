@@ -42,7 +42,7 @@ describe('CelebGalleryView', () => {
 
   it('filters by genre when clicking a genre button', () => {
     renderView();
-    const kDramaBtn = screen.getByRole('button', { name: 'K-Drama' });
+    const kDramaBtn = screen.getByRole('radio', { name: 'K-Drama' });
     fireEvent.click(kDramaBtn);
 
     const kDramaCelebs = CELEB_GALLERY.filter(c => c.genre === 'K-Drama');
@@ -52,7 +52,7 @@ describe('CelebGalleryView', () => {
 
   it('filters by mood when clicking a mood button', () => {
     renderView();
-    const cuteBtn = screen.getByRole('button', { name: 'Cute' });
+    const cuteBtn = screen.getByRole('radio', { name: 'Cute' });
     fireEvent.click(cuteBtn);
 
     const cuteCelebs = CELEB_GALLERY.filter(c => c.mood === 'Cute');
@@ -72,7 +72,7 @@ describe('CelebGalleryView', () => {
 
   it('shows empty state when no celebs match filters', () => {
     renderView();
-    const kFilmBtn = screen.getByRole('button', { name: 'K-Film' });
+    const kFilmBtn = screen.getByRole('radio', { name: 'K-Film' });
     fireEvent.click(kFilmBtn);
 
     if (CELEB_GALLERY.filter(c => c.genre === 'K-Film').length === 0) {
