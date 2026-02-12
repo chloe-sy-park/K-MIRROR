@@ -61,10 +61,12 @@ const CelebGalleryView = () => {
           <Filter size={14} />
           <span className="text-[9px] font-black uppercase tracking-widest">Filter by Genre</span>
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3" role="radiogroup" aria-label="Filter by genre">
           {GENRES.map((g) => (
             <button
               key={g}
+              role="radio"
+              aria-checked={genre === g}
               onClick={() => setGenre(g)}
               className={`px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
                 genre === g
@@ -78,13 +80,15 @@ const CelebGalleryView = () => {
         </div>
 
         <div className="flex items-center gap-3 text-gray-400 mt-4">
-          <Sparkles size={14} />
+          <Sparkles size={14} aria-hidden="true" />
           <span className="text-[9px] font-black uppercase tracking-widest">Filter by Mood</span>
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3" role="radiogroup" aria-label="Filter by mood">
           {MOODS.map((m) => (
             <button
               key={m}
+              role="radio"
+              aria-checked={mood === m}
               onClick={() => setMood(m)}
               className={`px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
                 mood === m
@@ -114,9 +118,13 @@ const CelebGalleryView = () => {
           {filtered.map((celeb) => (
             <motion.div
               key={celeb.id}
+              role="button"
+              tabIndex={0}
+              aria-label={`Select ${celeb.name} as style muse`}
               whileHover={{ y: -4, scale: 1.01 }}
-              className="bg-white border border-gray-100 rounded-[2.5rem] p-8 shadow-sm hover:shadow-xl transition-all group cursor-pointer"
+              className="bg-white border border-gray-100 rounded-[2.5rem] p-8 shadow-sm hover:shadow-xl transition-all group cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FF4D8D] focus-visible:ring-offset-2 outline-none"
               onClick={() => handleSelectCeleb(celeb)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleSelectCeleb(celeb); } }}
             >
               {/* Avatar */}
               {celeb.imageUrl ? (

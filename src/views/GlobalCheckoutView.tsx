@@ -17,8 +17,14 @@ const GlobalCheckoutView = () => {
   } = useCartStore();
   const [orderPlaced, setOrderPlaced] = useState(false);
 
+  const [fullName, setFullName] = useState('');
+  const [country, setCountry] = useState('United States');
+  const [address, setAddress] = useState('');
+
+  const isFormValid = fullName.trim().length >= 2 && address.trim().length >= 5;
+
   const handlePlaceOrder = () => {
-    if (items.length === 0) return;
+    if (items.length === 0 || !isFormValid) return;
     placeOrder();
     setOrderPlaced(true);
   };
@@ -120,12 +126,12 @@ const GlobalCheckoutView = () => {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
               <div className="space-y-2">
-                <label className="text-[9px] font-black uppercase text-gray-400 ml-2">Full Name</label>
-                <input type="text" placeholder="Sarah Jenkins" className="w-full bg-[#F9F9F9] border-none rounded-2xl px-6 py-4 text-sm focus:ring-1 ring-black transition-all" />
+                <label htmlFor="checkout-name" className="text-[9px] font-black uppercase text-gray-400 ml-2">Full Name</label>
+                <input id="checkout-name" type="text" placeholder="Sarah Jenkins" value={fullName} onChange={(e) => setFullName(e.target.value)} className="w-full bg-[#F9F9F9] border-none rounded-2xl px-6 py-4 text-sm focus:ring-1 ring-black transition-all" />
               </div>
               <div className="space-y-2">
-                <label className="text-[9px] font-black uppercase text-gray-400 ml-2">Country</label>
-                <select className="w-full bg-[#F9F9F9] border-none rounded-2xl px-6 py-4 text-sm focus:ring-1 ring-black">
+                <label htmlFor="checkout-country" className="text-[9px] font-black uppercase text-gray-400 ml-2">Country</label>
+                <select id="checkout-country" value={country} onChange={(e) => setCountry(e.target.value)} className="w-full bg-[#F9F9F9] border-none rounded-2xl px-6 py-4 text-sm focus:ring-1 ring-black">
                   <option>United States</option>
                   <option>United Kingdom</option>
                   <option>France</option>
@@ -135,8 +141,8 @@ const GlobalCheckoutView = () => {
                 </select>
               </div>
               <div className="md:col-span-2 space-y-2">
-                <label className="text-[9px] font-black uppercase text-gray-400 ml-2">Address</label>
-                <input type="text" placeholder="123 Beauty Lane, Manhattan, NY" className="w-full bg-[#F9F9F9] border-none rounded-2xl px-6 py-4 text-sm focus:ring-1 ring-black" />
+                <label htmlFor="checkout-address" className="text-[9px] font-black uppercase text-gray-400 ml-2">Address</label>
+                <input id="checkout-address" type="text" placeholder="123 Beauty Lane, Manhattan, NY" value={address} onChange={(e) => setAddress(e.target.value)} className="w-full bg-[#F9F9F9] border-none rounded-2xl px-6 py-4 text-sm focus:ring-1 ring-black" />
               </div>
             </div>
 
@@ -198,10 +204,14 @@ const GlobalCheckoutView = () => {
 
             <button
               onClick={handlePlaceOrder}
-              className="w-full py-6 bg-black text-white rounded-2xl font-black text-xs tracking-[0.3em] uppercase hover:bg-[#FF4D8D] transition-all mb-6 shadow-xl"
+              disabled={!isFormValid}
+              className={`w-full py-6 rounded-2xl font-black text-xs tracking-[0.3em] uppercase transition-all mb-4 shadow-xl ${isFormValid ? 'bg-black text-white hover:bg-[#FF4D8D]' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
             >
               Complete Payment
             </button>
+            {!isFormValid && (
+              <p className="text-[9px] text-center text-gray-400 mb-2">Please fill in your name and address to continue</p>
+            )}
             <div className="flex items-center justify-center gap-2 text-[10px] text-gray-300 font-bold uppercase tracking-widest">
               <ShieldCheck size={14} className="text-green-500" /> Secure Checkout by Stripe
             </div>

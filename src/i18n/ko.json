@@ -109,11 +109,41 @@
     "switchToSignUp": "계정이 없으신가요? 회원가입",
     "switchToSignIn": "이미 계정이 있으신가요? 로그인"
   },
+  "errors": {
+    "networkError": "네트워크 오류입니다. 인터넷 연결을 확인하세요.",
+    "timeout": "분석 시간이 초과되었습니다. 다시 시도해주세요.",
+    "rateLimited": "요청이 너무 많습니다. 잠시 후 다시 시도해주세요.",
+    "emptyResponse": "AI가 빈 응답을 반환했습니다. 다시 시도해주세요.",
+    "validation": "AI 응답 형식 오류입니다. 다시 시도해주세요.",
+    "apiError": "AI 서비스와 통신에 실패했습니다.",
+    "unexpected": "예기치 않은 오류가 발생했습니다. 다시 시도해주세요.",
+    "cancelled": "분석이 취소되었습니다."
+  },
+  "validation": {
+    "required": "필수 입력 항목입니다",
+    "nameMinLength": "이름은 2자 이상이어야 합니다",
+    "addressMinLength": "주소는 5자 이상이어야 합니다",
+    "fillFormToContinue": "이름과 주소를 입력해주세요"
+  },
+  "a11y": {
+    "inclusionGuard": "포용성 가드",
+    "neuralSafetyFilter": "뉴럴 안전 필터",
+    "uploadImage": "이미지 업로드",
+    "closeDialog": "대화상자 닫기",
+    "openMenu": "메뉴 열기",
+    "closeMenu": "메뉴 닫기",
+    "shoppingCart": "장바구니",
+    "signIn": "로그인",
+    "signOut": "로그아웃",
+    "selectAsMuse": "스타일 뮤즈로 선택"
+  },
   "common": {
     "loading": "로딩 중...",
     "muses": "뮤즈",
     "muse": "뮤즈",
     "items": "개",
-    "match": "매치"
+    "match": "매치",
+    "retry": "다시 시도",
+    "goHome": "홈으로"
   }
 }

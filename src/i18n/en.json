@@ -109,11 +109,41 @@
     "switchToSignUp": "Don't have an account? Sign up",
     "switchToSignIn": "Already have an account? Sign in"
   },
+  "errors": {
+    "networkError": "Network error. Please check your connection.",
+    "timeout": "Analysis timed out. Please try again.",
+    "rateLimited": "Too many requests. Please wait a moment.",
+    "emptyResponse": "AI returned an empty response. Please try again.",
+    "validation": "AI response format error. Please try again.",
+    "apiError": "Failed to communicate with AI service.",
+    "unexpected": "An unexpected error occurred. Please try again.",
+    "cancelled": "Analysis was cancelled."
+  },
+  "validation": {
+    "required": "This field is required",
+    "nameMinLength": "Name must be at least 2 characters",
+    "addressMinLength": "Address must be at least 5 characters",
+    "fillFormToContinue": "Please fill in your name and address to continue"
+  },
+  "a11y": {
+    "inclusionGuard": "Inclusion Guard",
+    "neuralSafetyFilter": "Neural Safety Filter",
+    "uploadImage": "Upload image",
+    "closeDialog": "Close dialog",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "shoppingCart": "Shopping cart",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "selectAsMuse": "Select as style muse"
+  },
   "common": {
     "loading": "Loading...",
     "muses": "muses",
     "muse": "muse",
     "items": "items",
-    "match": "Match"
+    "match": "Match",
+    "retry": "Try Again",
+    "goHome": "Go Home"
   }
 }

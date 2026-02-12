@@ -40,11 +40,13 @@ const OnboardingView = () => {
 
         <div className="space-y-10">
           <motion.section variants={itemVariants}>
-            <p className="text-[10px] font-black uppercase text-gray-400 mb-4 tracking-widest">Target Environment</p>
-            <div className="flex justify-center gap-4">
+            <p id="env-label" className="text-[10px] font-black uppercase text-gray-400 mb-4 tracking-widest">Target Environment</p>
+            <div role="radiogroup" aria-labelledby="env-label" className="flex justify-center gap-4">
               {(['Office', 'Outdoor', 'Studio'] as const).map((env) => (
                 <button
                   key={env}
+                  role="radio"
+                  aria-checked={prefs.environment === env}
                   onClick={() => setPrefs({ ...prefs, environment: env })}
                   className={`px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all ${prefs.environment === env ? 'bg-black text-white border-black' : 'bg-white text-gray-400 border-gray-100 hover:border-gray-300'}`}
                 >
@@ -55,11 +57,13 @@ const OnboardingView = () => {
           </motion.section>
 
           <motion.section variants={itemVariants}>
-            <p className="text-[10px] font-black uppercase text-gray-400 mb-4 tracking-widest">Makeup Skill Level</p>
-            <div className="flex justify-center gap-4">
+            <p id="skill-label" className="text-[10px] font-black uppercase text-gray-400 mb-4 tracking-widest">Makeup Skill Level</p>
+            <div role="radiogroup" aria-labelledby="skill-label" className="flex justify-center gap-4">
               {(['Beginner', 'Intermediate', 'Pro'] as const).map((lvl) => (
                 <button
                   key={lvl}
+                  role="radio"
+                  aria-checked={prefs.skill === lvl}
                   onClick={() => setPrefs({ ...prefs, skill: lvl })}
                   className={`px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all ${prefs.skill === lvl ? 'bg-black text-white border-black' : 'bg-white text-gray-400 border-gray-100 hover:border-gray-300'}`}
                 >
@@ -70,11 +74,13 @@ const OnboardingView = () => {
           </motion.section>
 
           <motion.section variants={itemVariants}>
-            <p className="text-[10px] font-black uppercase text-gray-400 mb-4 tracking-widest">Desired Mood</p>
-            <div className="flex justify-center gap-4">
+            <p id="mood-label" className="text-[10px] font-black uppercase text-gray-400 mb-4 tracking-widest">Desired Mood</p>
+            <div role="radiogroup" aria-labelledby="mood-label" className="flex justify-center gap-4">
               {(['Natural', 'Elegant', 'Powerful'] as const).map((m) => (
                 <button
                   key={m}
+                  role="radio"
+                  aria-checked={prefs.mood === m}
                   onClick={() => setPrefs({ ...prefs, mood: m })}
                   className={`px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all ${prefs.mood === m ? 'bg-black text-white border-black' : 'bg-white text-gray-400 border-gray-100 hover:border-gray-300'}`}
                 >

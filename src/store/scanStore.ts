@@ -71,7 +71,7 @@ export const useScanStore = create<ScanState>((set, get) => ({
 
     try {
       set({ phase: 'analyzing', error: null });
-      const res = await analyzeKBeauty(userImage, celebImage, isSensitive, prefs, selectedCelebName ?? undefined);
+      const res = await analyzeKBeauty(userImage, celebImage, isSensitive, prefs, selectedCelebName ?? undefined, controller.signal);
       // Only apply result if this request wasn't aborted
       if (!controller.signal.aborted) {
         set({ result: res, phase: 'result' });
