@@ -1,5 +1,36 @@
 import '@testing-library/jest-dom';
 
+// Mock @google/genai — heavy SDK that hangs in jsdom
+vi.mock('@google/genai', () => ({
+  GoogleGenAI: class {
+    models = { generateContent: vi.fn().mockResolvedValue({ text: '{}' }) };
+  },
+  Type: { OBJECT: 'OBJECT', STRING: 'STRING', NUMBER: 'NUMBER', ARRAY: 'ARRAY', BOOLEAN: 'BOOLEAN' },
+}));
+
+// Mock @supabase/supabase-js
+vi.mock('@supabase/supabase-js', () => ({
+  createClient: () => ({
+    auth: {
+      getUser: vi.fn().mockResolvedValue({ data: { user: null }, error: null }),
+      getSession: vi.fn().mockResolvedValue({ data: { session: null }, error: null }),
+      onAuthStateChange: vi.fn().mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } }),
+      signInWithPassword: vi.fn(),
+      signUp: vi.fn(),
+      signOut: vi.fn(),
+    },
+    from: () => ({
+      select: vi.fn().mockReturnThis(),
+      insert: vi.fn().mockReturnThis(),
+      delete: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: null, error: null }),
+    }),
+  }),
+}));
+
 // Mock framer-motion to avoid JSDOM issues
 vi.mock('framer-motion', () => ({
   motion: new Proxy({}, {

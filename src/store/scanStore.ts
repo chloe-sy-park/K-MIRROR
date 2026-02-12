@@ -34,6 +34,9 @@ async function fetchImageAsBase64(url: string): Promise<string> {
   });
 }
 
+let demoTimer: ReturnType<typeof setTimeout> | null = null;
+let analyzeController: AbortController | null = null;
+
 export const useScanStore = create<ScanState>((set, get) => ({
   phase: 'idle',
   userImage: null,
@@ -60,11 +63,21 @@ export const useScanStore = create<ScanState>((set, get) => ({
   analyze: async (isSensitive, prefs) => {
     const { userImage, celebImage, selectedCelebName } = get();
     if (!userImage || !celebImage) return;
+
+    // Abort any previous in-flight analysis
+    analyzeController?.abort();
+    const controller = new AbortController();
+    analyzeController = controller;
+
     try {
       set({ phase: 'analyzing', error: null });
       const res = await analyzeKBeauty(userImage, celebImage, isSensitive, prefs, selectedCelebName ?? undefined);
-      set({ result: res, phase: 'result' });
+      // Only apply result if this request wasn't aborted
+      if (!controller.signal.aborted) {
+        set({ result: res, phase: 'result' });
+      }
     } catch (err) {
+      if (controller.signal.aborted) return;
       console.error(err);
       const message = err instanceof AnalysisError
         ? err.message
@@ -74,12 +87,21 @@ export const useScanStore = create<ScanState>((set, get) => ({
   },
 
   demoMode: () => {
+    // Clear any previous demo timer to prevent race conditions
+    if (demoTimer) clearTimeout(demoTimer);
     set({ phase: 'analyzing', error: null });
-    setTimeout(() => {
+    demoTimer = setTimeout(() => {
+      demoTimer = null;
       set({ result: DEMO_RESULT, phase: 'result' });
     }, 2000);
   },
 
-  reset: () => set({ result: null, phase: 'idle', error: null, selectedCelebName: null }),
+  reset: () => {
+    // Cancel pending demo timer and in-flight analysis
+    if (demoTimer) { clearTimeout(demoTimer); demoTimer = null; }
+    analyzeController?.abort();
+    analyzeController = null;
+    set({ result: null, phase: 'idle', error: null, selectedCelebName: null });
+  },
   clearError: () => set({ error: null }),
 }));

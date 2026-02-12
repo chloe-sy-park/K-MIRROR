@@ -7,6 +7,7 @@ import { useAuthStore } from '@/store/authStore';
 
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import ErrorToast from '@/components/ui/ErrorToast';
 import AuthModal from '@/components/ui/AuthModal';
 
@@ -54,22 +55,24 @@ const App = () => {
       <Navbar />
 
       <main className="flex-1 pt-32 pb-24 px-6 lg:px-12 max-w-7xl mx-auto w-full min-h-screen">
-        <Routes location={location}>
-          <Route path="/" element={<ScanRoute />} />
-          <Route path="/onboarding" element={
-            isOnboarded ? <Navigate to="/" replace /> : <OnboardingView />
-          } />
-          <Route path="/checkout" element={<GlobalCheckoutView />} />
-          <Route path="/match" element={<ExpertMatchingView />} />
-          <Route path="/methodology" element={<MethodologyView onBookSession={() => navigate('/match')} />} />
-          <Route path="/settings" element={<SettingsView />} />
-          <Route path="/muse" element={<MuseBoardView />} />
-          <Route path="/shop" element={<ShopView />} />
-          <Route path="/shop/:id" element={<ProductDetailView />} />
-          <Route path="/orders" element={<OrdersView />} />
-          <Route path="/celebs" element={<CelebGalleryView />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <ErrorBoundary inline>
+          <Routes location={location}>
+            <Route path="/" element={<ScanRoute />} />
+            <Route path="/onboarding" element={
+              isOnboarded ? <Navigate to="/" replace /> : <OnboardingView />
+            } />
+            <Route path="/checkout" element={<GlobalCheckoutView />} />
+            <Route path="/match" element={<ExpertMatchingView />} />
+            <Route path="/methodology" element={<MethodologyView onBookSession={() => navigate('/match')} />} />
+            <Route path="/settings" element={<SettingsView />} />
+            <Route path="/muse" element={<MuseBoardView />} />
+            <Route path="/shop" element={<ShopView />} />
+            <Route path="/shop/:id" element={<ProductDetailView />} />
+            <Route path="/orders" element={<OrdersView />} />
+            <Route path="/celebs" element={<CelebGalleryView />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </ErrorBoundary>
       </main>
 
       <Footer />
