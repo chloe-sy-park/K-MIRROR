@@ -42,8 +42,12 @@ React 19 + Vite 6 + TypeScript 5.8
 
 - 프롬프트 v5.1: 멜라닌 포용적 분석, 셀럽 컨텍스트, temperature 0.4
 - Zod v4 스키마로 AI 응답 런타임 검증
-- `AnalysisError` 클래스로 에러 분류 (EMPTY_RESPONSE, VALIDATION, API, NETWORK)
+- `AnalysisError` 클래스로 에러 분류 (EMPTY_RESPONSE, VALIDATION, API, NETWORK, TIMEOUT, RATE_LIMITED, ABORTED)
 - `selectedCelebName` 파라미터로 셀럽 갤러리 연동
+- 재시도: 최대 2회, 지수 백오프 (1초 → 3초), NETWORK/TIMEOUT만 대상
+- 타임아웃: AbortController + 30초
+- 클라이언트 레이트 리미팅: 토큰 버킷 (분당 2회)
+- 외부 `signal?: AbortSignal` 파라미터로 요청 취소 지원
 
 ### 한계
 
@@ -134,10 +138,14 @@ React Router v7 (`react-router-dom`)
 12개 라우트 정의 (`App.tsx`):
 `/`, `/onboarding`, `/celebs`, `/match`, `/methodology`, `/settings`, `/muse`, `/shop`, `/shop/:id`, `/checkout`, `/orders`, `*`
 
+- 모든 뷰 `React.lazy()` + `Suspense` 적용 (라우트 기반 코드 스플리팅)
+- 메인 번들 833KB → 733KB, 뷰별 청크 자동 생성
+
 ### 이전 상태 (해소됨)
 
 - ~~AppStep enum으로 수동 전환~~ → URL 기반 라우팅
 - ~~URL 변경 없음~~ → 모든 뷰가 고유 URL
+- ~~전체 뷰 static import~~ → React.lazy 코드 스플리팅
 
 ---
 
@@ -220,12 +228,17 @@ Vercel에 배포 (main 브랜치 자동 배포)
 ### 현재 상태 ✅
 
 - `vercel.json`에서 SPA 리라이트 설정
+- 보안 헤더: X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy
 - PWA Service Worker + manifest 자동 배포
 - 환경변수는 Vercel Dashboard에서 관리
+- Open Graph + Twitter Card 메타 태그 (index.html)
+- GitHub Actions CI: push/PR 시 자동 테스트 + 빌드
 
 ### 이전 상태 (해소됨)
 
 - ~~Google AI Studio에만 배포~~ → Vercel 프로덕션 배포
+- ~~보안 헤더 없음~~ → X-Frame-Options, CSP 등 설정 완료
+- ~~CI/CD 없음~~ → GitHub Actions 파이프라인 구축
 
 ---
 
@@ -250,29 +263,130 @@ Vercel에 배포 (main 브랜치 자동 배포)
 
 ---
 
+## ADR-011: 코드 스플리팅 — React.lazy + Suspense
+
+### 결정
+
+`React.lazy()` + `Suspense`로 라우트 기반 코드 스플리팅
+
+### 근거
+
+- 메인 번들이 833KB로 초기 로딩 느림
+- 사용자가 방문하지 않는 뷰까지 다운로드하는 비효율
+- React 내장 API로 추가 라이브러리 불필요
+
+### 현재 상태 ✅
+
+- 13개 뷰 모두 `lazy(() => import(...))`로 전환
+- `LazyFallback` 스피너 컴포넌트 (브랜드 핑크 링)
+- 메인 번들: 833KB → 733KB
+- 뷰별 청크 자동 생성 (Vite 빌드)
+
+---
+
+## ADR-012: 접근성 — WCAG 2.1 기본 적용
+
+### 결정
+
+핵심 인터랙티브 요소에 ARIA 속성 + 키보드 지원 적용
+
+### 근거
+
+- 접근성 속성 0개인 상태에서 최소한의 WCAG 준수 필요
+- 스크린 리더, 키보드 전용 사용자 지원
+
+### 현재 상태 ✅
+
+| 컴포넌트 | 적용된 접근성 |
+|----------|------------|
+| `Toggle.tsx` | `role="switch"`, `aria-checked`, `aria-label`, `onKeyDown(Enter/Space)`, `focus-visible:ring-2` |
+| `LuxuryFileUpload.tsx` | `aria-label`, `sr-only` input, `focus-within:ring-2` |
+| `AuthModal.tsx` | `role="dialog"`, `aria-modal`, `aria-label`, Escape 키, `htmlFor`, `autoComplete` |
+| `Navbar.tsx` | `aria-current="page"`, `aria-expanded`, `aria-label` (동적 카트 수량) |
+| `OnboardingView.tsx` | `role="radiogroup"`, `role="radio"`, `aria-checked`, `aria-labelledby` |
+| `CelebGalleryView.tsx` | `role="radiogroup"`, `role="radio"`, `role="button"`, `tabIndex(0)`, `onKeyDown` |
+| `GlobalCheckoutView.tsx` | `htmlFor`, `aria-required` |
+| `SettingsView.tsx` | Toggle에 `label` prop |
+
+### 향후 고려
+
+- Skip to content 링크
+- 페이지 전환 시 `document.title` 업데이트
+- 모달 포커스 트랩 강화
+
+---
+
+## ADR-013: CI/CD — GitHub Actions
+
+### 결정
+
+GitHub Actions로 CI 파이프라인 구축
+
+### 근거
+
+- PR 병합 전 테스트/빌드 자동 검증
+- GitHub 네이티브 통합으로 추가 설정 최소
+
+### 현재 상태 ✅
+
+- `.github/workflows/ci.yml`
+- 트리거: `main` 브랜치 push + PR
+- 단계: checkout → setup-node(v20) → npm ci → test:run → build
+
+---
+
+## ADR-014: Gemini 서비스 복원력
+
+### 결정
+
+클라이언트 측 retry + timeout + rate limiting 구현
+
+### 근거
+
+- 무료 티어의 낮은 할당량 (분당 2회)
+- 네트워크 불안정 시 사용자 경험 저하
+- 에러 원인별 다른 UI 메시지 필요
+
+### 현재 상태 ✅
+
+| 메커니즘 | 설정 | 구현 |
+|---------|------|------|
+| 타임아웃 | 30초 | AbortController + setTimeout |
+| 재시도 | 최대 2회, 1s/3s 백오프 | NETWORK, TIMEOUT만 대상 |
+| 레이트 리미팅 | 분당 2회 | 토큰 버킷 패턴 |
+| 요청 취소 | AbortSignal 전파 | scanStore → geminiService |
+| 에러 분류 | 8종 | TIMEOUT, RATE_LIMITED, ABORTED, NETWORK, EMPTY_RESPONSE, VALIDATION, API, UNEXPECTED |
+
+---
+
 ## 아키텍처 개요 (현재)
 
 ```
                    ┌──────────────┐
-                   │   Vercel     │  ← 자동 배포
+                   │   Vercel     │  ← 자동 배포 + 보안 헤더
                    │  (CDN/SSL)   │
                    └──────┬───────┘
                           │
-                   ┌──────▼───────┐
-                   │   Vite Build │  ← React, Tailwind, PWA
-                   │  + PWA SW    │
-                   └──────┬───────┘
+              ┌───────────┤
+              │           │
+   ┌──────────▼──┐ ┌─────▼───────┐
+   │ GitHub      │ │  Vite Build │  ← React, Tailwind, PWA
+   │ Actions CI  │ │  + PWA SW   │
+   │ (test+build)│ │  + lazy     │
+   └─────────────┘ └──────┬──────┘
                           │
           ┌───────────────┼───────────────┐
           │               │               │
    ┌──────▼──────┐ ┌─────▼──────┐ ┌──────▼──────┐
    │ React Router│ │  Zustand   │ │  Services   │
    │ (12 routes) │ │ (5 stores) │ │             │
-   └──────┬──────┘ └─────┬──────┘ ├─ gemini     │
-          │               │        ├─ color      │
-   ┌──────▼──────┐        │        ├─ product    │
-   │   Views     │◄───────┘        └─ muse       │
-   │ (12 pages)  │                       │
+   │ + lazy load │ │ + persist  │ ├─ gemini     │
+   └──────┬──────┘ └─────┬──────┘ │  (retry+    │
+          │               │        │   timeout)  │
+   ┌──────▼──────┐        │        ├─ color      │
+   │   Views     │◄───────┘        ├─ product    │
+   │ (13 pages)  │                 └─ muse       │
+   │ + a11y ARIA │                       │
    └─────────────┘                       │
                                   ┌──────▼──────┐
                                   │ External    │
@@ -284,12 +398,28 @@ Vercel에 배포 (main 브랜치 자동 배포)
 
 ---
 
+## 해소된 기술 부채 (Sprint 2)
+
+| 항목 | 이전 상태 | 현재 상태 |
+|------|----------|----------|
+| 번들 크기 | 833KB 단일 번들 | 733KB + 뷰별 청크 (React.lazy) |
+| 접근성 | ARIA 속성 0개 | Toggle, Modal, Navbar, Gallery 등 ARIA + 키보드 적용 |
+| Gemini 복원력 | retry/timeout 없음 | 재시도 2회 + 30초 타임아웃 + 레이트 리미팅 |
+| Checkout 폼 | input value/onChange 미연결 | 폼 상태 바인딩 + 유효성 검사 |
+| Inclusion Guard | onChange 하드코딩 | settingsStore 연동 |
+| 보안 헤더 | 없음 | Vercel 보안 헤더 5개 |
+| CI/CD | 없음 | GitHub Actions (test + build) |
+| i18n 커버리지 | 에러/검증/접근성 라벨 누락 | errors, validation, a11y 섹션 완성 |
+| SEO | OG 태그 없음 | Open Graph + Twitter Card 추가 |
+
 ## 남은 기술 부채
 
 | 항목 | 심각도 | 설명 |
 |------|--------|------|
-| 번들 크기 | 중간 | 833KB JS — code splitting 미적용 |
 | TypeScript strict | 낮음 | `strict: true` 미활성화 |
 | 이미지 저장 없음 | 중간 | Muse Board, 가상피팅 결과 보관 불가 |
-| 접근성 | 중간 | aria 속성, 키보드 내비게이션 미비 |
-| i18n 커버리지 | 낮음 | 일부 문자열 하드코딩 |
+| ESLint 미설정 | 낮음 | 린팅 규칙 강제 없음 (Prettier만 있음) |
+| Framer Motion 번들 | 낮음 | 트리 셰이킹 미적용 (LazyMotion 미사용) |
+| 테스트 커버리지 | 중간 | geminiService, scanStore 등 테스트 미작성 |
+| 포커스 관리 | 낮음 | Skip to content, document.title 업데이트 미구현 |
+| mimeType 감지 | 낮음 | 이미지 업로드 시 항상 jpeg으로 전송 |

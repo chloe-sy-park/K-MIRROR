@@ -10,11 +10,15 @@
 
 | 항목 | 값 |
 |------|-----|
-| 서비스 파일 | `services/geminiService.ts` (149줄) |
+| 서비스 파일 | `services/geminiService.ts` |
 | Export | `analyzeKBeauty()` (단일 함수) |
 | 모델 | `gemini-3-pro-preview` (멀티모달) |
 | SDK | `@google/genai` (`GoogleGenAI` 클래스) |
 | 출력 형식 | Structured JSON (`responseMimeType: "application/json"`) |
+| 타임아웃 | 30초 (AbortController) |
+| 재시도 | 최대 2회, 지수 백오프 (1s → 3s) |
+| 레이트 리미팅 | 분당 2회 (토큰 버킷) |
+| 에러 분류 | 8종 (`AnalysisErrorCode`) |
 
 ---
 
@@ -112,18 +116,19 @@
 | `recommendations.videos[]` | `VideoRecommendation` | O | 모든 필드 일치 |
 | `recommendations.sensitiveSafe` | `boolean` | O | `Type.BOOLEAN` |
 
-### 4-2. Validation Gap (중요)
+### 4-2. Validation (Zod v4) ✅
 
 ```typescript
-// geminiService.ts:148
-return JSON.parse(text) as AnalysisResult;
+// geminiService.ts — JSON.parse 후 Zod 스키마 검증
+const parsed = JSON.parse(text);
+const validated = analysisResultSchema.parse(parsed);
+return validated;
 ```
 
-- `as AnalysisResult`는 **TypeScript 타입 단언** — 런타임 검증 없음
-- `responseSchema`가 API 레벨에서 구조를 강제하지만, 완벽하지 않음
-- 예: `melaninIndex`가 7이나 0이 반환되어도 코드가 감지하지 못함
-- `undertone`이 `'Olive'`로 반환되어도 TypeScript 런타임에서 알 수 없음
-- 향후: Zod 스키마 검증 추가 고려
+- `schemas/analysisResult.ts`에 Zod v4 스키마 정의
+- `melaninIndex`: `z.number().min(1).max(6)` — 범위 검증
+- 검증 실패 시 `AnalysisError('VALIDATION')` throw
+- 3중 검증: Gemini `responseSchema` → `JSON.parse` → Zod 런타임
 
 ---
 
@@ -149,66 +154,106 @@ contents: {
 
 ---
 
-## 6. 응답 파싱
+## 6. 응답 파싱 + Zod 검증
 
 ```typescript
-// geminiService.ts:146-148
+// geminiService.ts
 const text = response.text;
-if (!text) throw new Error("Empty response from AI");
-return JSON.parse(text) as AnalysisResult;
+if (!text) throw new AnalysisError('EMPTY_RESPONSE', 'AI returned an empty response');
+const parsed = JSON.parse(text);
+const validated = analysisResultSchema.parse(parsed);
+return validated;
 ```
 
 - `response.text`: SDK가 제공하는 텍스트 접근자
-- null/undefined 체크 후 `Error` throw
-- `JSON.parse` 실패 시 — catch 없음, 호출자에게 throw됨
-- 호출자(`App.tsx:870`)의 `catch`에서 `console.error` + IDLE 복귀
+- 빈 응답 → `AnalysisError('EMPTY_RESPONSE')`
+- JSON 파싱 실패 → `AnalysisError('VALIDATION')`
+- Zod 검증 실패 → `AnalysisError('VALIDATION')`
 
 ---
 
-## 7. 에러 핸들링 현황
+## 7. 복원력 레이어 (Resilience)
 
-### geminiService.ts 내부
-
-- try/catch 없음
-- 재시도 없음
-- 타임아웃 설정 없음
-- AbortController 없음
-
-### App.tsx (호출자)
+### 7-1. 에러 코드 분류
 
 ```typescript
-// App.tsx:863-873
+type AnalysisErrorCode =
+  | 'EMPTY_RESPONSE'   // AI가 빈 응답 반환
+  | 'VALIDATION'       // JSON 파싱 또는 Zod 검증 실패
+  | 'API'              // Gemini API 에러 (400, 403 등)
+  | 'NETWORK'          // 네트워크 연결 실패
+  | 'TIMEOUT'          // 30초 타임아웃 초과
+  | 'RATE_LIMITED'     // 클라이언트 레이트 리미터 차단
+  | 'ABORTED'          // 사용자가 요청 취소
+  | 'UNEXPECTED';      // 그 외 모든 에러
+```
+
+### 7-2. 레이트 리미터 (토큰 버킷)
+
+```typescript
+// 분당 2회 제한 (무료 티어 기준)
+const RATE_LIMIT = { maxTokens: 2, windowMs: 60_000 };
+```
+
+- 요청 시 토큰 소비, 시간 경과 시 자동 복원
+- 토큰 부족 시 `AnalysisError('RATE_LIMITED')` 즉시 throw
+- 무의미한 API 호출 방지
+
+### 7-3. 타임아웃
+
+```typescript
+const TIMEOUT_MS = 30_000;  // 30초
+// AbortController + setTimeout으로 구현
+```
+
+- Gemini API 응답 지연 시 30초 후 자동 취소
+- `AnalysisError('TIMEOUT')` throw
+- 타이머 정리 보장 (finally 블록)
+
+### 7-4. 재시도
+
+```typescript
+const RETRY = { maxAttempts: 2, delays: [1000, 3000] };  // 지수 백오프
+```
+
+- NETWORK, TIMEOUT 에러만 재시도 대상
+- API(400/403), VALIDATION, RATE_LIMITED는 재시도 안 함
+- 외부 AbortSignal이 취소되면 재시도 중단
+
+### 7-5. 요청 취소 (AbortSignal)
+
+```typescript
+// 함수 시그니처
+export const analyzeKBeauty = async (
+  userImageBase64: string,
+  celebImageBase64: string,
+  isSensitive: boolean,
+  prefs: UserPreferences,
+  selectedCelebName?: string,
+  signal?: AbortSignal          // ← 외부에서 취소 가능
+) => { ... }
+```
+
+- `scanStore.ts`에서 `AbortController.signal` 전달
+- 사용자가 분석 취소 → signal abort → `AnalysisError('ABORTED')`
+- 재시도 루프에서도 signal 체크
+
+### 7-6. scanStore 연동
+
+```typescript
+// scanStore.ts — analyze()
+const controller = new AbortController();
 try {
-  setStep(AppStep.ANALYZING);
-  const res = await analyzeKBeauty(...);
-  setResult(res);
-  setStep(AppStep.RESULT);
+  const result = await analyzeKBeauty(..., controller.signal);
 } catch (err) {
-  console.error(err);        // 콘솔에만 출력
-  setStep(AppStep.IDLE);     // 조용히 IDLE로 복귀
+  if (err instanceof AnalysisError) {
+    set({ error: err.message, errorCode: err.code });
+  }
 }
 ```
 
-### 사용자에게 보이는 것
-
-- **아무것도 없음** — 에러 state 변수가 없고, 에러 UI가 없음
-- ANALYZING 화면에서 갑자기 IDLE로 돌아감
-- 원인 구분 불가: 네트워크 오류? API 키 오류? 할당량 초과? 응답 파싱 실패?
-
-### 향후 개선 방향
-
-```typescript
-// 추천 구조
-const [error, setError] = useState<string | null>(null);
-
-catch (err) {
-  if (err instanceof TypeError) setError('Network error');
-  else if (err.message?.includes('429')) setError('Rate limit exceeded');
-  else if (err.message?.includes('401')) setError('Invalid API key');
-  else setError('Analysis failed. Please try again.');
-  setStep(AppStep.IDLE);
-}
-```
+- 에러 코드별 i18n 메시지 분기 (`en.json`, `ko.json`의 `errors` 섹션)
+- ErrorToast로 사용자에게 에러 원인 표시
 
 ---
 
@@ -218,36 +263,46 @@ AI 분석에 새 필드를 추가할 때 반드시 업데이트해야 하는 6�
 
 | # | 파일 | 위치 | 작업 |
 |---|------|------|------|
-| 1 | `types.ts` | `AnalysisResult` 인터페이스 | 새 필드 타입 추가 |
-| 2 | `services/geminiService.ts` | `systemInstruction` (line 14-35) | 새 분석 태스크 지시 추가 |
-| 3 | `services/geminiService.ts` | `responseSchema` (lines 49-141) | 새 필드 스키마 추가 |
-| 4 | `App.tsx` | `DEMO_RESULT` (line 457) | Demo 데이터에 새 필드 값 추가 |
-| 5 | `App.tsx` | `AnalysisResultView` 또는 해당 뷰 | 새 필드를 렌더링하는 UI 추가 |
-| 6 | `docs/04-data-model-spec.md` | 해당 섹션 | 문서 업데이트 |
+| 1 | `types/index.ts` | `AnalysisResult` 인터페이스 | 새 필드 타입 추가 |
+| 2 | `schemas/analysisResult.ts` | Zod 스키마 | 새 필드 검증 규칙 추가 |
+| 3 | `services/geminiService.ts` | `systemInstruction` | 새 분석 태스크 지시 추가 |
+| 4 | `services/geminiService.ts` | `responseSchema` | 새 필드 스키마 추가 |
+| 5 | `data/demoResult.ts` | `DEMO_RESULT` 상수 | Demo 데이터에 새 필드 값 추가 |
+| 6 | `views/AnalysisResultView.tsx` | 해당 뷰 | 새 필드를 렌더링하는 UI 추가 |
+| 7 | `docs/04-data-model-spec.md` | 해당 섹션 | 문서 업데이트 |
 
 ### 예시: `skinHexCode` 필드 추가
 
 ```
-1. types.ts → AnalysisResult.tone에 skinHexCode: string 추가
-2. systemInstruction → "- Extract the dominant skin Hex color code"
-3. responseSchema → tone.properties에 skinHexCode: { type: Type.STRING } 추가
-4. DEMO_RESULT → tone: { ..., skinHexCode: '#8B6547' }
-5. AnalysisResultView → Forensic Mapping 카드에 색상 표시 UI 추가
-6. 04-data-model-spec.md → tone 섹션에 skinHexCode 문서화
+1. types/index.ts → AnalysisResult.tone에 skinHexCode: string 추가
+2. schemas/analysisResult.ts → tone 스키마에 skinHexCode: z.string() 추가
+3. systemInstruction → "- Extract the dominant skin Hex color code"
+4. responseSchema → tone.properties에 skinHexCode: { type: Type.STRING } 추가
+5. data/demoResult.ts → tone: { ..., skinHexCode: '#8B6547' }
+6. AnalysisResultView → Forensic Mapping 카드에 색상 표시 UI 추가
+7. 04-data-model-spec.md → tone 섹션에 skinHexCode 문서화
 ```
 
 ---
 
-## 9. 한계 및 개선 기회
+## 9. 해소된 항목 및 남은 개선 기회
+
+### 해소됨 (Sprint 2) ✅
+
+| 항목 | 구현 |
+|------|------|
+| 재시도 | 최대 2회, 지수 백오프 (1s → 3s) |
+| 타임아웃 | AbortController + 30초 |
+| Rate limiting | 토큰 버킷 (분당 2회) |
+| 요청 취소 | AbortSignal 전파 (scanStore → geminiService) |
+| Zod 검증 | `schemas/analysisResult.ts` 런타임 검증 |
+
+### 남은 개선 기회
 
 | 항목 | 현재 | 개선 방향 |
 |------|------|----------|
-| 재시도 | 없음 | exponential backoff (429, 5xx 대응) |
-| 타임아웃 | 없음 | AbortController + 30초 타임아웃 |
-| Rate limiting | 없음 | 클라이언트 측 쓰로틀링 (분당 2회 제한) |
 | 결과 캐싱 | 없음 | 동일 입력 → 로컬 캐시 반환 |
 | 클라이언트 재사용 | 매번 new | 싱글톤 GoogleGenAI 인스턴스 |
 | mimeType 감지 | jpeg 고정 | FileReader + 실제 파일 타입 반영 |
 | 이미지 압축 | 없음 | Canvas API로 리사이즈 후 전송 |
-| 요청 취소 | 없음 | AbortController로 진행 중 취소 가능하게 |
 | 프롬프트 버전 관리 | 없음 | 버전 상수 + 변경 로그 |

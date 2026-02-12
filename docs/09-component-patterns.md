@@ -8,115 +8,112 @@
 
 ## 1. 현재 컴포넌트 인벤토리
 
-모든 컴포넌트가 `App.tsx` 단일 파일에 존재한다.
+컴포넌트가 `components/`, `views/` 디렉토리로 분리되어 있다.
+뷰는 `App.tsx`에서 `React.lazy()`로 동적 로딩된다.
 
-### 1-1. Helper Components (재사용 가능)
+### 1-1. UI Components (`components/ui/`)
 
-| 컴포넌트 | 라인 | Props | 용도 |
-|----------|------|-------|------|
-| `Toggle` | 56-67 | `checked: boolean`, `onChange: () => void` | on/off 스위치 (spring 애니메이션) |
-| `LuxuryFileUpload` | 69-115 | `label`, `secondaryLabel`, `preview`, `onImageSelect` | 이미지 업로드 + 미리보기 |
-| `SherlockProportionVisualizer` | 119-173 | `proportions: any` | 얼굴 비율 시각화 다이어그램 |
+| 컴포넌트 | 파일 | Props | 용도 | 접근성 |
+|----------|------|-------|------|--------|
+| `Toggle` | `Toggle.tsx` | `checked`, `onChange`, `label?` | on/off 스위치 | `role="switch"`, `aria-checked`, 키보드 Enter/Space |
+| `LuxuryFileUpload` | `LuxuryFileUpload.tsx` | `label`, `secondaryLabel`, `preview`, `onImageSelect` | 이미지 업로드 | `aria-label`, `sr-only` input |
+| `ErrorToast` | `ErrorToast.tsx` | `message`, `onDismiss` | 에러 알림 토스트 | — |
+| `AuthModal` | `AuthModal.tsx` | `onClose` | 인증 모달 | `role="dialog"`, `aria-modal`, Escape 닫기 |
 
-### 1-2. View Components (전체 페이지)
+### 1-2. Layout Components (`components/layout/`)
 
-| 컴포넌트 | 라인 | AppStep | Props |
-|----------|------|---------|-------|
-| `MethodologyView` | 178-327 | `METHODOLOGY` | `onBookSession: () => void` |
-| `OnboardingView` | 329-411 | `ONBOARDING` | `onComplete: (prefs: UserPreferences) => void` |
-| `ExpertMatchingView` | 413-453 | `STYLIST` | (없음) |
-| `GlobalCheckoutView` | 519-631 | `CHECKOUT` | `result: AnalysisResult \| null` |
-| `AnalysisResultView` | 633-851 | `RESULT` | `result`, `onReset`, `onCheckout` |
+| 컴포넌트 | 파일 | 용도 | 접근성 |
+|----------|------|------|--------|
+| `Navbar` | `Navbar.tsx` | 반응형 네비게이션 | `aria-current="page"`, `aria-expanded`, `aria-label` |
+| `Footer` | `Footer.tsx` | 푸터 네비게이션 | 아이콘 버튼 `aria-label` |
 
-### 1-3. Inline Views (App JSX 내부에 직접 정의)
+### 1-3. View Components (`views/`) — React.lazy
 
-| 뷰 | 라인 | AppStep | 특징 |
-|----|------|---------|------|
-| IDLE (스캔 페이지) | 978-1027 | `IDLE` | 이미지 업로드, 감도 토글, Neural Scan 버튼 |
-| ANALYZING (로딩) | 1029-1042 | `ANALYZING` | 스캔 애니메이션, "Decoding DNA..." |
-| SETTINGS | 1061-1084 | `SETTINGS` | 토글 2개 + 리셋 버튼 |
-| MUSEBOARD | 1086-1091 | `MUSEBOARD` | "Coming Soon" 플레이스홀더 |
+| 컴포넌트 | 라우트 | 접근성 특징 |
+|----------|--------|------------|
+| `ScanView` | `/` | 이미지 업로드, 셀럽 선택, Neural Scan |
+| `AnalysisResultView` | `/` (phase=result) | AI 분석 결과 |
+| `CelebGalleryView` | `/celebs` | `role="radiogroup"`, `role="radio"`, 키보드 Enter |
+| `ExpertMatchingView` | `/match` | 전문가 매칭 |
+| `OnboardingView` | `/onboarding` | `role="radiogroup"`, `role="radio"`, `aria-checked` |
+| `MethodologyView` | `/methodology` | Sherlock 방법론 |
+| `MuseBoardView` | `/muse` | Muse Board + 빈 상태 CTA |
+| `SettingsView` | `/settings` | Toggle `label` prop |
+| `ShopView` | `/shop` | 제품 목록 |
+| `ProductDetailView` | `/shop/:id` | 제품 상세 |
+| `GlobalCheckoutView` | `/checkout` | 폼 바인딩 + 유효성 + `htmlFor` |
+| `OrdersView` | `/orders` | 주문 내역 |
+| `NotFoundView` | `*` | 404 |
 
-### 1-4. Data Constants
+### 1-4. Data Constants (`data/`)
 
-| 상수 | 라인 | 용도 |
+| 상수 | 파일 | 용도 |
 |------|------|------|
-| `DEMO_RESULT` | 457-494 | Demo mode용 `AnalysisResult` 하드코딩 데이터 |
-| `TRANSFORMATION_SAMPLES` | 496-515 | 변환 샘플 갤러리 (현재 렌더링에 미사용) |
+| `DEMO_RESULT` | `demoResult.ts` | Demo mode용 `AnalysisResult` |
+| `CELEB_GALLERY` | `celebGallery.ts` | K-셀럽 12명 프로필 |
+| `EXPERTS` | `experts.ts` | 전문가 4명 프로필 |
+| `PRODUCT_CATALOG` | `productCatalog.ts` | 제품 카탈로그 |
 
 ---
 
-## 2. 새 뷰 추가 5단계
+## 2. 새 뷰 추가 4단계
 
 새로운 전체 페이지 뷰를 추가하는 절차:
 
-### Step 1: AppStep enum에 값 추가
-
-```typescript
-// types.ts
-export enum AppStep {
-  // ... 기존 값 ...
-  COMMUNITY = 10   // ← 새 값 추가
-}
-```
-
-### Step 2: 뷰 컴포넌트 생성
+### Step 1: 뷰 파일 생성
 
 ```tsx
-// App.tsx (기존 뷰 컴포넌트 아래에 추가)
+// src/views/CommunityView.tsx
+import { motion } from 'framer-motion';
+import { containerVariants, itemVariants } from '@/constants/animations';
+
 const CommunityView = () => {
   return (
     <motion.div
       initial="hidden" animate="visible" variants={containerVariants}
-      className="space-y-20 py-12 px-6"
+      className="space-y-20 pb-20"
     >
-      {/* 카테고리 라벨 */}
-      <motion.div variants={itemVariants} className="text-center">
-        <p className="text-[10px] font-black tracking-[0.5em] text-[#FF4D8D] uppercase italic mb-6">
-          Community Hub
-        </p>
-        <h2 className="text-5xl font-black heading-font uppercase tracking-tighter italic">
-          Connect<span className="text-gray-300">.</span>
+      <motion.div variants={itemVariants} className="text-center space-y-4">
+        <h2 className="text-[50px] lg:text-[80px] heading-font leading-[0.85] tracking-[-0.05em] uppercase">
+          COMMUNITY <span className="italic text-[#FF4D8D]">HUB</span>
         </h2>
+        <p className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-400">
+          Connect with the Community
+        </p>
       </motion.div>
 
-      {/* 콘텐츠 */}
       <motion.div variants={itemVariants}>
-        {/* ... */}
+        {/* 콘텐츠 */}
       </motion.div>
     </motion.div>
   );
 };
+
+export default CommunityView;
 ```
 
-### Step 3: AnimatePresence에 연결
+### Step 2: App.tsx에 lazy import + Route 추가
 
 ```tsx
-// App.tsx main > AnimatePresence 내부 (line ~1092 부근)
-{step === AppStep.COMMUNITY && (
-  <CommunityView />
-)}
+// App.tsx
+const CommunityView = lazy(() => import('@/views/CommunityView'));
+
+// Routes 내부에 추가
+<Route path="/community" element={<CommunityView />} />
 ```
 
-### Step 4: 네비게이션에 추가
+### Step 3: 네비게이션에 추가
 
 ```tsx
-// 데스크탑 nav (line 917-922 배열에 추가)
-{ id: AppStep.COMMUNITY, label: 'Community' }
-
-// 모바일 nav (line 956-961 배열에 추가)
-{ id: AppStep.COMMUNITY, label: 'Community', icon: <MessageCircle size={20}/> }
+// Navbar.tsx — NavLink 배열에 추가
+{ to: '/community', label: 'Community', icon: <MessageCircle size={20} /> }
 ```
 
-### Step 5: State 연결 (필요 시)
+### Step 4: 상태 연결 (필요 시)
 
-- 뷰가 App의 state를 읽어야 하면 → props로 전달
-- 뷰가 App의 state를 변경해야 하면 → callback props 전달
-
-```tsx
-// 예: 결과 데이터가 필요한 뷰
-<CommunityView result={result} onNavigate={() => setStep(AppStep.IDLE)} />
-```
+- Zustand 스토어에서 `useXxxStore()` 훅으로 상태 접근
+- `useNavigate()`로 라우트 이동
+- Props 최소화 — 스토어 직접 접근 권장
 
 ---
 
@@ -140,7 +137,7 @@ const CommunityView = () => {
 
 결과: 자식 요소들이 0.1초 간격으로 아래에서 위로 페이드인.
 
-### 3-2. 전역 Variants (App.tsx:17-52)
+### 3-2. 전역 Variants (`constants/animations.ts`)
 
 | Variant | 설정 | 용도 |
 |---------|------|------|
@@ -162,18 +159,26 @@ const CommunityView = () => {
 
 | 용도 | 설정 | 코드 위치 |
 |------|------|----------|
-| Toggle 전환 | `stiffness: 500, damping: 30` | App.tsx:63 |
-| Card hover | `stiffness: 400, damping: 17` | App.tsx:86 |
+| Toggle 전환 | `stiffness: 500, damping: 30` | `Toggle.tsx` |
+| Card hover | `stiffness: 400, damping: 17` | 각 뷰 |
 
 ### 3-5. 페이지 전환
 
 ```tsx
+// App.tsx
 <AnimatePresence mode="wait">
-  {step === AppStep.XXX && ( <XxxView /> )}
+  <ErrorBoundary inline>
+    <Suspense fallback={<LazyFallback />}>
+      <Routes location={location} key={location.pathname}>
+        {/* React.lazy 뷰 라우트 */}
+      </Routes>
+    </Suspense>
+  </ErrorBoundary>
 </AnimatePresence>
 ```
 
 - `mode="wait"`: 이전 뷰가 완전히 사라진 후 다음 뷰 등장
+- `Suspense`: lazy 로딩 중 `LazyFallback` 스피너 표시
 - exit 애니메이션: 보통 `{ opacity: 0 }` (명시하지 않으면 기본값)
 
 ### 3-6. CSS 애니메이션 (비-Framer)
@@ -342,3 +347,70 @@ const CommunityView = () => {
   {/* 상단 영역 */}
 </div>
 ```
+
+---
+
+## 8. 접근성 (a11y) 패턴
+
+### 8-1. 토글/스위치
+
+```tsx
+<button
+  role="switch"
+  aria-checked={checked}
+  aria-label={label}
+  onClick={onChange}
+  onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onChange()}
+  className="... focus-visible:ring-2 focus-visible:ring-[#FF4D8D] outline-none"
+>
+```
+
+### 8-2. 필터 그룹 (라디오)
+
+```tsx
+<div role="radiogroup" aria-label="장르 필터">
+  <button role="radio" aria-checked={selected === 'K-Drama'}>K-Drama</button>
+  <button role="radio" aria-checked={selected === 'K-Pop'}>K-Pop</button>
+</div>
+```
+
+### 8-3. 모달/다이얼로그
+
+```tsx
+<div role="dialog" aria-modal="true" aria-label="Sign In" onKeyDown={(e) => e.key === 'Escape' && onClose()}>
+  <button aria-label="Close dialog" onClick={onClose}>...</button>
+  <label htmlFor="email">Email</label>
+  <input id="email" autoComplete="email" />
+</div>
+```
+
+### 8-4. 인터랙티브 카드
+
+```tsx
+<div
+  role="button"
+  tabIndex={0}
+  aria-label={`Select ${celeb.name}`}
+  onClick={handleClick}
+  onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleClick()}
+  className="... focus-visible:ring-2 focus-visible:ring-[#FF4D8D] outline-none"
+>
+```
+
+### 8-5. 네비게이션
+
+```tsx
+<NavLink to="/shop" className={({ isActive }) => isActive ? 'active' : ''}>
+  {({ isActive }) => <span aria-current={isActive ? 'page' : undefined}>Shop</span>}
+</NavLink>
+```
+
+### 8-6. 포커스 스타일
+
+```
+❌ 금지: focus:outline-none (포커스 인디케이터 제거)
+✅ 권장: focus-visible:ring-2 focus-visible:ring-[#FF4D8D] focus-visible:ring-offset-2 outline-none
+```
+
+- `focus-visible`: 키보드 사용자에게만 포커스 링 표시 (마우스 클릭 시 미표시)
+- 브랜드 핑크(`#FF4D8D`) 포커스 링으로 일관성 유지
