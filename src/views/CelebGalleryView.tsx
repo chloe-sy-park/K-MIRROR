@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Star, Sparkles, Filter } from 'lucide-react';
+import { Star, Sparkles, Filter, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { containerVariants, itemVariants } from '@/constants/animations';
 import { CELEB_GALLERY, type CelebProfile } from '@/data/celebGallery';
@@ -118,11 +118,21 @@ const CelebGalleryView = () => {
               className="bg-white border border-gray-100 rounded-[2.5rem] p-8 shadow-sm hover:shadow-xl transition-all group cursor-pointer"
               onClick={() => handleSelectCeleb(celeb)}
             >
-              {/* Avatar placeholder */}
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#FF4D8D] to-purple-400 flex items-center justify-center mb-6 shadow-lg">
-                <span className="text-white text-2xl font-black heading-font">
-                  {celeb.name.charAt(0)}
-                </span>
+              {/* Avatar */}
+              {celeb.imageUrl ? (
+                <img
+                  src={celeb.imageUrl}
+                  alt={celeb.name}
+                  className="w-20 h-20 rounded-full object-cover mb-6 shadow-lg ring-2 ring-gray-100 group-hover:ring-[#FF4D8D] transition-all"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    target.style.display = 'none';
+                    target.nextElementSibling?.classList.remove('hidden');
+                  }}
+                />
+              ) : null}
+              <div className={`w-20 h-20 rounded-full bg-gradient-to-br from-[#FF4D8D] to-purple-400 flex items-center justify-center mb-6 shadow-lg ${celeb.imageUrl ? 'hidden' : ''}`}>
+                <User size={28} className="text-white" />
               </div>
 
               {/* Info */}
