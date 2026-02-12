@@ -83,8 +83,14 @@ const MethodologyView = ({ onBookSession }: MethodologyViewProps) => {
                   {pillar.desc}
                 </p>
               </div>
-              <button className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest border-b border-black pb-2 hover:text-[#FF4D8D] hover:border-[#FF4D8D] transition-all uppercase">
-                Access Laboratory Whitepaper <ArrowUpRight size={14} />
+              <button
+                onClick={() => {
+                  const el = document.getElementById('methodology-cta');
+                  el?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest border-b border-black pb-2 hover:text-[#FF4D8D] hover:border-[#FF4D8D] transition-all uppercase"
+              >
+                Explore Full Methodology <ArrowUpRight size={14} />
               </button>
             </div>
             <div className="flex-1 w-full aspect-square relative group">
@@ -109,7 +115,7 @@ const MethodologyView = ({ onBookSession }: MethodologyViewProps) => {
         ))}
       </section>
 
-      <motion.section variants={itemVariants} className="mt-60 mb-20 py-40 bg-black text-white rounded-[6rem] text-center overflow-hidden relative">
+      <motion.section id="methodology-cta" variants={itemVariants} className="mt-60 mb-20 py-40 bg-black text-white rounded-[6rem] text-center overflow-hidden relative">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full opacity-10 pointer-events-none">
           <Layers size={800} strokeWidth={0.5} className="absolute -top-40 -left-40 animate-pulse text-[#FF4D8D]" />
         </div>
