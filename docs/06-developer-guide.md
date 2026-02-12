@@ -40,41 +40,32 @@ npm install
 
 # 3. 환경변수 설정
 cp .env.local.example .env.local
-# .env.local을 열어서 GEMINI_API_KEY에 실제 키 입력
+# .env.local을 열어서 VITE_GEMINI_API_KEY에 실제 키 입력
 
 # 4. 개발 서버 실행
 npm run dev
-# → http://localhost:3000 에서 앱 확인
+# → http://localhost:5173 에서 앱 확인
 ```
 
 ---
 
-## 4. 환경변수 매핑 (중요)
+## 4. 환경변수
 
-`.env.local`에는 **단 하나의 변수**만 필요하다:
-
-```
-GEMINI_API_KEY=your_actual_key
-```
-
-### 매핑 흐름
+`.env.local`에 필요한 변수:
 
 ```
-.env.local
-  └── GEMINI_API_KEY = "sk-..."
-        │
-        ▼  vite.config.ts (line 6): loadEnv(mode, '.', '')
-        │
-        ├── process.env.API_KEY        ← geminiService.ts가 사용 (line 12)
-        └── process.env.GEMINI_API_KEY  ← 호환용 alias (동일 값)
+VITE_GEMINI_API_KEY=your_actual_key
+
+# Optional - Supabase 연동 시
+VITE_SUPABASE_URL=https://xxx.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGci...
 ```
 
-**왜 이름이 다른가?**
+### Vite 환경변수 규칙
 
-- `.env.local`에는 `GEMINI_API_KEY`로 저장
-- `vite.config.ts` (lines 14-15)에서 `loadEnv()`로 읽은 뒤 `define`으로 두 이름에 모두 매핑
-- `geminiService.ts` (line 12)는 `process.env.API_KEY`를 읽음
-- 이 `process.env.*`는 Node.js 런타임 환경변수가 아님 — Vite의 **빌드 타임 치환**
+- `VITE_` 접두사가 있는 변수만 클라이언트에서 접근 가능
+- `import.meta.env.VITE_GEMINI_API_KEY`로 접근
+- 빌드 타임에 치환됨 (Node.js 런타임 변수 아님)
 
 ---
 
@@ -82,170 +73,263 @@ GEMINI_API_KEY=your_actual_key
 
 | 명령어 | 설명 |
 |--------|------|
-| `npm run dev` | 개발 서버 시작 (port 3000, host 0.0.0.0) |
+| `npm run dev` | Vite 개발 서버 (HMR) |
 | `npm run build` | 프로덕션 빌드 → `/dist` |
-| `npm run preview` | 빌드된 결과물 로컬 프리뷰 |
+| `npm run preview` | 빌드 결과물 로컬 프리뷰 |
+| `npm test` | Vitest watch 모드 (파일 변경 시 자동 재실행) |
+| `npm run test:run` | Vitest 1회 실행 (CI/CD용) |
 
 ---
 
-## 6. 이중 모듈 시스템 (CDN + npm)
+## 6. 프로젝트 구조
 
-K-MIRROR는 의존성을 **두 곳에서** 로드한다:
-
-### A. CDN Importmap (index.html lines 63-74)
-
-```json
-{
-  "react": "https://esm.sh/react@^19.2.4",
-  "@google/genai": "https://esm.sh/@google/genai@^1.40.0",
-  "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
-  "framer-motion": "https://esm.sh/framer-motion@^12.34.0"
-}
 ```
-
-- 브라우저가 직접 `esm.sh`에서 모듈을 가져옴
-- **Google AI Studio 배포 시** 이 방식이 사용됨
-
-### B. npm packages (package.json)
-
-```json
-"react": "^19.0.0",
-"@google/genai": "^1.3.0",
-"lucide-react": "^0.462.0",
-"framer-motion": "^12.0.0"
+K-MIRROR/
+├── src/
+│   ├── App.tsx                    # React Router 라우팅 + 레이아웃
+│   ├── main.tsx                   # React 진입점 (BrowserRouter, i18n, ErrorBoundary)
+│   ├── index.css                  # Tailwind v4 import + 커스텀 CSS
+│   │
+│   ├── views/                     # 페이지 뷰 (URL 라우트 매핑)
+│   │   ├── ScanView.tsx           # / — 이미지 업로드 + 분석
+│   │   ├── AnalysisResultView.tsx # / (phase=result) — AI 분석 결과
+│   │   ├── CelebGalleryView.tsx   # /celebs — K-셀럽 갤러리
+│   │   ├── ExpertMatchingView.tsx # /match — 전문가 매칭
+│   │   ├── OnboardingView.tsx     # /onboarding — 첫 진입
+│   │   ├── MethodologyView.tsx    # /methodology — Sherlock 방법론
+│   │   ├── MuseBoardView.tsx      # /muse — Muse Board
+│   │   ├── SettingsView.tsx       # /settings — 설정
+│   │   ├── ShopView.tsx           # /shop — 제품 목록
+│   │   ├── ProductDetailView.tsx  # /shop/:id — 제품 상세
+│   │   ├── OrdersView.tsx         # /orders — 주문 내역
+│   │   └── GlobalCheckoutView.tsx # /checkout — 결제
+│   │
+│   ├── components/
+│   │   ├── layout/
+│   │   │   ├── Navbar.tsx         # 반응형 네비게이션 바
+│   │   │   └── Footer.tsx
+│   │   ├── ui/
+│   │   │   ├── Toggle.tsx         # spring 애니메이션 토글
+│   │   │   ├── LuxuryFileUpload.tsx # 이미지 업로드 + 미리보기
+│   │   │   ├── ErrorToast.tsx     # 에러 알림
+│   │   │   └── AuthModal.tsx      # 인증 모달
+│   │   ├── sherlock/
+│   │   │   └── ProportionVisualizer.tsx # 얼굴 비율 시각화
+│   │   └── ErrorBoundary.tsx      # React Error Boundary (inline/full-page)
+│   │
+│   ├── store/                     # Zustand 전역 상태
+│   │   ├── scanStore.ts           # 스캔 phase, 이미지, 분석 결과
+│   │   ├── settingsStore.ts       # 온보딩 완료, 민감 피부, 선호도 (localStorage persist)
+│   │   ├── cartStore.ts           # 장바구니 CRUD + 주문
+│   │   ├── museStore.ts           # Muse Board 데이터
+│   │   └── authStore.ts           # 인증 상태
+│   │
+│   ├── services/
+│   │   ├── geminiService.ts       # Gemini AI 분석 (프롬프트 v5.1, temperature 0.4)
+│   │   ├── colorService.ts        # 멜라닌 기반 Multiply/Screen 블렌딩
+│   │   ├── productService.ts      # AI 추천 → 카탈로그 매칭
+│   │   └── museService.ts         # Muse Board CRUD (Supabase)
+│   │
+│   ├── data/
+│   │   ├── celebGallery.ts        # K-셀럽 12명 (이름, 그룹, 장르, 무드, 시그니처)
+│   │   ├── experts.ts             # 전문가 4명 (역할, 전문 분야, 가격, 평점)
+│   │   ├── demoResult.ts          # Demo 모드용 AnalysisResult 상수
+│   │   └── productCatalog.ts      # 제품 카탈로그 (HERA, ROM&ND, CLIO 등)
+│   │
+│   ├── schemas/
+│   │   └── analysisResult.ts      # Zod v4 스키마 — AI 응답 런타임 검증
+│   │
+│   ├── types/
+│   │   └── index.ts               # AnalysisResult, UserPreferences 등 TS 인터페이스
+│   │
+│   ├── i18n/
+│   │   ├── index.ts               # i18next 설정
+│   │   ├── en.json                # 영어
+│   │   └── ko.json                # 한국어
+│   │
+│   └── test/
+│       └── setup.ts               # Vitest 글로벌 설정 (framer-motion, genai, supabase 모킹)
+│
+├── vite.config.ts                 # Vite 설정 (React, Tailwind, PWA 플러그인)
+├── vitest.config.ts               # Vitest 설정 (jsdom, @/ alias, testing-library)
+├── tsconfig.json                  # TypeScript 설정 (strict 모드 아님, vitest/globals 포함)
+├── vercel.json                    # Vercel SPA 리라이트 설정
+├── package.json
+└── docs/                          # 프로젝트 문서 (9개)
 ```
-
-- `npm install`로 설치, Vite 번들러가 사용
-- `npm run dev` / `npm run build` 시 이 패키지가 사용됨
-
-### 주의
-
-- Importmap의 caret 버전(`^19.2.4`)은 "최신 마이너"를 의미 — 예기치 않은 breaking 가능
-- `esm.sh`가 다운되면 AI Studio 배포판이 작동 중단
-- 로컬 개발 시에는 npm 패키지 사용 → CDN과 버전 차이 가능성 있음
 
 ---
 
-## 7. Demo Mode
+## 7. 상태 관리 (Zustand)
+
+모든 전역 상태는 Zustand 스토어로 관리된다:
+
+| 스토어 | 주요 상태 | persist |
+|--------|----------|---------|
+| `scanStore` | `phase`, `userImage`, `celebImage`, `result`, `error`, `selectedCelebName` | No |
+| `settingsStore` | `isOnboarded`, `isSensitive`, `prefs`, `language` | Yes (`kmirror_settings`) |
+| `cartStore` | `items[]`, `orders[]` | No |
+| `authStore` | `user`, `isAuthenticated` | No |
+| `museStore` | `boards[]`, `selectedBoard` | No |
+
+### settingsStore의 persist
+
+```typescript
+export const useSettingsStore = create<SettingsState>()(
+  persist(
+    (set) => ({ /* ... */ }),
+    { name: 'kmirror_settings' }  // localStorage 키
+  )
+);
+```
+
+이로써 페이지 새로고침 시에도 온보딩 완료 상태, 민감 피부 설정 등이 유지된다.
+
+---
+
+## 8. 라우팅 (React Router v7)
+
+`App.tsx`에서 모든 라우트 정의:
+
+| 경로 | 뷰 | 비고 |
+|------|-----|------|
+| `/` | `ScanView` → `AnalysisResultView` | phase에 따라 전환 |
+| `/onboarding` | `OnboardingView` | 온보딩 완료 시 `/`로 리다이렉트 |
+| `/celebs` | `CelebGalleryView` | 셀럽 선택 → state로 `/`에 전달 |
+| `/match` | `ExpertMatchingView` | 전문가 매칭 |
+| `/methodology` | `MethodologyView` | Sherlock 방법론 |
+| `/settings` | `SettingsView` | 설정 |
+| `/muse` | `MuseBoardView` | Muse Board |
+| `/shop` | `ShopView` | 제품 목록 |
+| `/shop/:id` | `ProductDetailView` | 제품 상세 |
+| `/checkout` | `GlobalCheckoutView` | 결제 |
+| `/orders` | `OrdersView` | 주문 내역 |
+| `*` | → `/` | 404 리다이렉트 |
+
+### AnimatePresence 페이지 전환
+
+```tsx
+<AnimatePresence mode="wait">
+  <ErrorBoundary inline>
+    <Routes location={location} key={location.pathname}>
+      {/* ... */}
+    </Routes>
+  </ErrorBoundary>
+</AnimatePresence>
+```
+
+---
+
+## 9. Demo Mode
 
 API 키 없이도 UI를 확인할 수 있다:
 
 1. `npm run dev`로 앱 실행
 2. Onboarding 완료 (아무 값이나 선택)
-3. IDLE(스캔) 페이지에서 **비커 아이콘** (분홍색, 우측 상단) 클릭
+3. 스캔 페이지에서 **비커 아이콘** (분홍색) 클릭
 4. 2초 후 `DEMO_RESULT` 상수가 로드됨
 
 ### 코드 흐름
 
 ```
 [비커 클릭]
-  → handleDemoMode() (App.tsx:876)
-  → setStep(ANALYZING)
+  → scanStore.demoMode()
+  → set({ phase: 'analyzing' })
   → setTimeout(2000ms)
-  → setResult(DEMO_RESULT)  ← App.tsx:457의 하드코딩 데이터
-  → setStep(RESULT)
+  → set({ result: DEMO_RESULT, phase: 'result' })
 ```
 
 - API 호출 없음 — API 키 없어도 동작
-- UI 개발, 스타일 작업 시 API 쿼터를 아낄 수 있음
+- `reset()` 호출 시 타이머가 자동으로 클리어됨 (race condition 방지)
 - DEMO_RESULT는 Melanin L5 (Deep Cool-Ebony) + Wonyoung(IVE) 스타일 매칭 시나리오
 
 ---
 
-## 8. 프로젝트 파일 맵
+## 10. 테스트
 
+### 실행
+
+```bash
+npm test          # watch 모드
+npm run test:run  # 1회 실행
 ```
-K-MIRROR/
-├── App.tsx                    # 모놀리식 앱 (1107줄)
-│                              #   ├── Animation Variants (lines 17-52)
-│                              #   ├── Helper Components (lines 54-115)
-│                              #   │   ├── Toggle
-│                              #   │   └── LuxuryFileUpload
-│                              #   ├── SherlockProportionVisualizer (lines 119-173)
-│                              #   ├── MethodologyView (lines 178-327)
-│                              #   ├── OnboardingView (lines 329-411)
-│                              #   ├── ExpertMatchingView (lines 413-453)
-│                              #   ├── Mock Data (lines 455-515)
-│                              #   │   ├── DEMO_RESULT
-│                              #   │   └── TRANSFORMATION_SAMPLES (미사용)
-│                              #   ├── GlobalCheckoutView (lines 519-631)
-│                              #   ├── AnalysisResultView (lines 633-851)
-│                              #   └── App (main) (lines 854-1107)
-│                              #       ├── State hooks (lines 855-861)
-│                              #       ├── Handlers (lines 863-896)
-│                              #       ├── Nav (lines 904-974)
-│                              #       ├── Main views (lines 976-1092)
-│                              #       └── Footer (lines 1095-1102)
-│
-├── types.ts                   # 모든 TypeScript 인터페이스 + AppStep enum
-├── index.tsx                  # React 진입점 (ReactDOM.createRoot)
-│
-├── services/
-│   └── geminiService.ts       # Gemini API 연동 (149줄)
-│
-├── index.html                 # HTML 셸, CDN imports, Tailwind, 폰트, CSS 변수
-├── vite.config.ts             # Vite 설정, 환경변수 매핑
-├── metadata.json              # Google AI Studio 앱 메타데이터
-├── tsconfig.json              # TypeScript 설정
-├── package.json               # npm 의존성
-│
-├── .env.local.example         # 환경변수 템플릿
-├── .env.local                 # 실제 키 (git-ignored)
-│
-└── docs/                      # 프로젝트 문서
-    ├── 01-design-system.md
-    ├── 02-product-vision.md
-    ├── 03-ai-inclusivity-framework.md
-    ├── 04-data-model-spec.md
-    ├── 05-architecture-decisions.md
-    ├── 06-developer-guide.md       ← 이 문서
-    ├── 07-app-state-flow.md
-    ├── 08-gemini-integration.md
-    └── 09-component-patterns.md
-```
+
+### 구조
+
+- **설정**: `vitest.config.ts` — jsdom 환경, `@/` alias, CSS 비활성화
+- **글로벌 모킹**: `src/test/setup.ts` — framer-motion, react-i18next, @google/genai, @supabase/supabase-js
+- **유닛 테스트**: `src/services/*.test.ts`, `src/store/*.test.ts`, `src/schemas/*.test.ts`
+- **통합 테스트**: `src/views/*.test.tsx` — React Testing Library로 컴포넌트 렌더링 + 인터랙션 검증
+
+### 현재 테스트 커버리지
+
+| 파일 | 테스트 수 | 테스트 대상 |
+|------|----------|------------|
+| `colorService.test.ts` | 19 | hexToRgb, rgbToHex, melaninAdjustedOpacity, renderColorOnSkin, renderSwatchSet |
+| `cartStore.test.ts` | 10 | addItem, remove, updateQuantity, subtotal, shipping, total, placeOrder |
+| `analysisResult.test.ts` | 7 | Zod 스키마 검증 (DEMO_RESULT, 필수 필드 누락, 타입 검증) |
+| `productService.test.ts` | 5 | 제품 매칭 (정확 매칭, 브랜드 폴백, 기본 폴백) |
+| `AnalysisResultView.test.tsx` | 10 | 헤더, 톤 정보, 제품, 비디오, 카트, 네비게이션, 리셋 |
+| `CelebGalleryView.test.tsx` | 8 | 헤더, 필터(장르/무드), 네비게이션, 빈 상태 |
+| `ScanView.test.tsx` | 6 | 렌더링, 버튼 활성화, 셀럽 뱃지, 데모 모드 |
 
 ---
 
-## 9. Known Gotchas
+## 11. 배포
 
-### URL 기반 라우팅 없음
+### Vercel
 
-- `AppStep` enum으로 화면 전환 (URL 변경 없음)
-- 브라우저 새로고침 → 항상 ONBOARDING으로 돌아감
-- URL 공유, 뒤로가기, 북마크 불가
+- `main` 브랜치 push → 자동 배포
+- `vercel.json`에서 SPA 리라이트 설정
+- 환경변수는 Vercel Dashboard에서 설정
 
-### Tailwind CDN 모드
+### PWA
 
-- Tailwind 설정 파일 없음 (CDN이 모든 클래스를 생성)
-- 커스텀 클래스는 `index.html`의 `<style>` 블록에 정의:
-  `.heading-font`, `.luxury-card`, `.btn-luxury`, `.accent-gradient`, `.scanning`
-- CSS 변수: `--brand-pink`, `--brand-dark`, `--brand-gray`
+- `vite-plugin-pwa`로 Service Worker + manifest 자동 생성
+- 빌드 시 13개 에셋 프리캐시
+- 오프라인 폴백은 미구현
+
+---
+
+## 12. Known Gotchas
+
+### 번들 크기
+
+- JS 번들 ~833KB (gzip ~247KB) — code splitting 미적용
+- `@google/genai`, `framer-motion`이 주요 크기 기여
+
+### Supabase 비활성 경고
+
+- `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` 미설정 시 콘솔 경고 출력
+- Auth, Muse Board 등 Supabase 기능은 비활성화되지만 앱은 정상 동작
 
 ### 이미지 메모리
 
-- 업로드 이미지가 base64 문자열로 React state에 보관
+- 업로드 이미지가 base64 문자열로 Zustand state에 보관
 - 대용량 이미지 → 브라우저 메모리 부담
-- 세션 종료/새로고침 시 모든 이미지 소멸
+- 세션 종료/새로고침 시 스캔 관련 이미지 소멸 (persist 안함)
 
-### 에러 처리 부재
+### mimeType
 
-- API 호출 실패 → `console.error(err)` + IDLE로 복귀 (App.tsx:870-872)
-- 사용자에게 에러 메시지 표시 없음
-- 네트워크 오류, API 할당량 초과, 잘못된 키 구분 없음
+- 이미지 업로드 시 `accept="image/*"`로 모든 포맷 허용
+- Gemini API 전송 시 항상 `mimeType: 'image/jpeg'` — Gemini가 자동 감지하므로 대부분 동작
 
-### mimeType 고정
-
-- `LuxuryFileUpload`는 `accept="image/*"`로 모든 이미지 포맷 허용
-- 하지만 Gemini API 전송 시 항상 `mimeType: 'image/jpeg'` 고정 (geminiService.ts:43-44)
-- PNG, WebP를 올려도 JPEG으로 전송 — 대부분 동작하지만 기술적으로는 부정확
-
-### Font Awesome 미사용
-
-- `index.html` (line 9)에서 Font Awesome 6.4.0을 로드
-- 실제 앱에서는 `lucide-react`만 사용
-- ~50KB의 불필요한 CSS 로드
-
-### TypeScript Strict 모드 비활성
+### TypeScript Strict 모드
 
 - `tsconfig.json`에 `strict: true` 없음
-- `SherlockProportionVisualizer`의 `proportions` prop이 `any` 타입
+- 점진적 전환 고려 중
+
+---
+
+## 이전 기술 부채 해소 현황
+
+| 항목 | 이전 상태 | 현재 상태 |
+|------|----------|----------|
+| 모놀리식 App.tsx (1107줄) | 모든 뷰가 한 파일 | 뷰/컴포넌트/스토어/서비스 분리 완료 |
+| 상태 관리 부재 | useState 7개 | Zustand 5개 스토어 (persist 포함) |
+| 라우팅 없음 | AppStep enum | React Router v7 (URL 기반) |
+| CDN Tailwind | `cdn.tailwindcss.com` | `@tailwindcss/vite` 빌드 파이프라인 |
+| 에러 처리 미흡 | `console.error`만 | AnalysisError 클래스 + ErrorBoundary + ErrorToast |
+| 테스트 전무 | 0개 | 65개 (유닛 + 통합) |
+| 런타임 검증 없음 | `as AnalysisResult` 타입 단언 | Zod v4 스키마 검증 |
+| 국제화 없음 | 영어 고정 | i18next (한/영) |
