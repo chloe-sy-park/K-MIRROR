@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import * as m from 'framer-motion/m';
 import { Star, Globe, MessageCircle, ExternalLink } from 'lucide-react';
 import { containerVariants, itemVariants } from '@/constants/animations';
 import { EXPERTS, type Expert } from '@/data/experts';
@@ -13,17 +13,17 @@ const ExpertMatchingView = () => {
   const filtered = filter === 'All' ? EXPERTS : EXPERTS.filter((e) => e.specialty === filter);
 
   return (
-    <motion.div initial="hidden" animate="visible" variants={containerVariants} className="space-y-20 py-12 max-w-6xl mx-auto">
-      <motion.header variants={itemVariants} className="text-center space-y-6">
+    <m.div initial="hidden" animate="visible" variants={containerVariants} className="space-y-20 py-12 max-w-6xl mx-auto">
+      <m.header variants={itemVariants} className="text-center space-y-6">
         <p className="text-[10px] font-black tracking-[0.6em] text-[#FF4D8D] uppercase">Direct Access</p>
         <h2 className="text-5xl lg:text-7xl heading-font uppercase">Human <span className="italic">Artistry.</span></h2>
         <p className="text-gray-400 max-w-lg mx-auto text-sm font-medium">
           Elevate your AI-generated protocol with a live session from Seoul's most exclusive aesthetic directors.
         </p>
-      </motion.header>
+      </m.header>
 
       {/* Specialty Filter */}
-      <motion.div variants={itemVariants} className="flex flex-wrap justify-center gap-3">
+      <m.div variants={itemVariants} className="flex flex-wrap justify-center gap-3">
         {specialties.map((s) => (
           <button
             key={s}
@@ -35,11 +35,11 @@ const ExpertMatchingView = () => {
             {s}
           </button>
         ))}
-      </motion.div>
+      </m.div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
         {filtered.map((expert) => (
-          <motion.div
+          <m.div
             key={expert.id}
             variants={itemVariants}
             className="group bg-white border border-gray-100 rounded-[3rem] p-10 hover:shadow-2xl transition-all"
@@ -109,10 +109,10 @@ const ExpertMatchingView = () => {
             >
               Book Session <ExternalLink size={12} />
             </a>
-          </motion.div>
+          </m.div>
         ))}
       </div>
-    </motion.div>
+    </m.div>
   );
 };
 

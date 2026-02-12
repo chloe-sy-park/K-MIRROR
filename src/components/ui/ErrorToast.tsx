@@ -1,4 +1,5 @@
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
+import * as m from 'framer-motion/m';
 import { X } from 'lucide-react';
 
 interface ErrorToastProps {
@@ -10,7 +11,7 @@ const ErrorToast = ({ message, onDismiss }: ErrorToastProps) => {
   return (
     <AnimatePresence>
       {message && (
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 50 }}
@@ -25,7 +26,7 @@ const ErrorToast = ({ message, onDismiss }: ErrorToastProps) => {
               <X size={16} />
             </button>
           </div>
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   );

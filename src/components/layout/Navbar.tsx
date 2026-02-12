@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
+import * as m from 'framer-motion/m';
 import {
   Camera, LayoutGrid, MessageCircle, Settings, Menu, X,
   User, Scan, LogOut, ShoppingBag, Star
@@ -44,13 +45,13 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 w-full z-[150] bg-white/80 backdrop-blur-xl border-b border-gray-100 px-6 lg:px-12 py-5 transition-all">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
-        <motion.div whileHover={{ scale: 1.05 }}>
+        <m.div whileHover={{ scale: 1.05 }}>
           <Link to="/" className="flex items-center gap-2">
             <h1 className="text-2xl font-black heading-font tracking-tighter italic uppercase text-balance">
               K-MIRROR <span className="text-[#FF4D8D] not-italic">AI</span>
             </h1>
           </Link>
-        </motion.div>
+        </m.div>
 
         <div className="hidden lg:flex items-center gap-12">
           {navItems.map(item => (
@@ -83,34 +84,34 @@ const Navbar = () => {
           </button>
           {user ? (
             <div className="flex items-center gap-2">
-              <motion.div
+              <m.div
                 whileHover={{ scale: 1.1 }}
                 className="w-10 h-10 md:w-11 md:h-11 rounded-2xl bg-[#FF4D8D] flex items-center justify-center cursor-pointer overflow-hidden shadow-sm hover:shadow-md transition-all"
               >
                 <span className="text-white text-xs font-black uppercase">
                   {user.email?.charAt(0) ?? 'U'}
                 </span>
-              </motion.div>
+              </m.div>
               <button onClick={signOut} aria-label="Sign out" className="p-2 text-gray-300 hover:text-red-500 transition-colors">
                 <LogOut size={16} />
               </button>
             </div>
           ) : (
-            <motion.button
+            <m.button
               whileHover={{ scale: 1.1 }}
               onClick={openAuthModal}
               aria-label="Sign in"
               className="w-10 h-10 md:w-11 md:h-11 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center cursor-pointer overflow-hidden shadow-sm hover:shadow-md transition-all"
             >
               <User size={18} className="text-gray-400" />
-            </motion.button>
+            </m.button>
           )}
         </div>
       </div>
 
       <AnimatePresence>
         {isMenuOpen && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
             className="lg:hidden absolute top-full left-0 w-full bg-white border-b border-gray-100 p-8 shadow-2xl"
           >
@@ -130,7 +131,7 @@ const Navbar = () => {
                 </NavLink>
               ))}
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </nav>

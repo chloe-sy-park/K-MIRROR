@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import * as m from 'framer-motion/m';
 import {
   ArrowRight, ArrowUpRight, Ruler, Eye, Box, Star,
   Activity, Layers
@@ -41,11 +41,11 @@ const MethodologyView = ({ onBookSession }: MethodologyViewProps) => {
   ];
 
   return (
-    <motion.div
+    <m.div
       initial="hidden" animate="visible" variants={containerVariants}
       className="max-w-7xl mx-auto py-20 px-6"
     >
-      <motion.section variants={itemVariants} className="mb-32 border-b border-black pb-20">
+      <m.section variants={itemVariants} className="mb-32 border-b border-black pb-20">
         <p className="text-[10px] font-black tracking-[0.6em] text-[#FF4D8D] mb-8 uppercase italic">Technical Philosophy — Sherlock v4.2</p>
         <div className="flex flex-col lg:flex-row justify-between items-end gap-12">
           <h2 className="text-[60px] lg:text-[120px] heading-font leading-[0.8] tracking-[-0.05em] uppercase">
@@ -60,11 +60,11 @@ const MethodologyView = ({ onBookSession }: MethodologyViewProps) => {
             </p>
           </div>
         </div>
-      </motion.section>
+      </m.section>
 
       <section className="grid grid-cols-1 gap-40">
         {pillars.map((pillar, idx) => (
-          <motion.div
+          <m.div
             key={pillar.id}
             variants={itemVariants}
             className={`flex flex-col lg:flex-row items-center gap-20 ${idx % 2 !== 0 ? 'lg:flex-row-reverse' : ''}`}
@@ -111,11 +111,11 @@ const MethodologyView = ({ onBookSession }: MethodologyViewProps) => {
               <div className="absolute -top-6 -right-6 w-32 h-32 border-t-2 border-r-2 border-[#FF4D8D]/20 pointer-events-none" />
               <div className="absolute -bottom-6 -left-6 w-32 h-32 border-b-2 border-l-2 border-[#FF4D8D]/20 pointer-events-none" />
             </div>
-          </motion.div>
+          </m.div>
         ))}
       </section>
 
-      <motion.section id="methodology-cta" variants={itemVariants} className="mt-60 mb-20 py-40 bg-black text-white rounded-[6rem] text-center overflow-hidden relative">
+      <m.section id="methodology-cta" variants={itemVariants} className="mt-60 mb-20 py-40 bg-black text-white rounded-[6rem] text-center overflow-hidden relative">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full opacity-10 pointer-events-none">
           <Layers size={800} strokeWidth={0.5} className="absolute -top-40 -left-40 animate-pulse text-[#FF4D8D]" />
         </div>
@@ -161,8 +161,8 @@ const MethodologyView = ({ onBookSession }: MethodologyViewProps) => {
             </div>
           </div>
         </div>
-      </motion.section>
-    </motion.div>
+      </m.section>
+    </m.div>
   );
 };
 

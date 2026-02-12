@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
+import * as m from 'framer-motion/m';
 import {
   RotateCcw, Cpu, Palette, Droplets, Eye, Activity,
   Check, Sparkles, Plus, Play, ExternalLink, Lightbulb,
@@ -15,6 +16,9 @@ import { matchRecommendedProducts } from '@/services/productService';
 import { PRODUCT_CATALOG } from '@/data/productCatalog';
 import SherlockProportionVisualizer from '@/components/sherlock/ProportionVisualizer';
 
+let nextReportId = 0;
+const generateReportId = () => ++nextReportId;
+
 const AnalysisResultView = () => {
   const navigate = useNavigate();
   const { result, userImage, celebImage, reset } = useScanStore();
@@ -24,6 +28,8 @@ const AnalysisResultView = () => {
   const [isSaved, setIsSaved] = useState(false);
 
   const { addItem } = useCartStore();
+
+  const [reportId] = useState(generateReportId);
 
   if (!result) return null;
 
@@ -67,20 +73,20 @@ const AnalysisResultView = () => {
   };
 
   return (
-    <motion.div
+    <m.div
       initial="hidden" animate="visible" variants={containerVariants}
       className="space-y-32 pb-20 px-6"
     >
-      <motion.section variants={itemVariants} className="border-b border-black pb-20">
+      <m.section variants={itemVariants} className="border-b border-black pb-20">
         <div className="flex justify-between items-start mb-12">
           <div className="flex flex-col gap-1">
-            <p className="text-[10px] font-black tracking-[0.5em] text-[#FF4D8D] uppercase italic">Diagnostic Report — ID:{Math.floor(Math.random() * 10000)}</p>
+            <p className="text-[10px] font-black tracking-[0.5em] text-[#FF4D8D] uppercase italic">Diagnostic Report — ID:{reportId}</p>
             <div className="flex items-center gap-2 text-[8px] font-bold text-gray-400 uppercase tracking-widest">
               <Cpu size={10} /> Neural Stylist v5.0-inclusive
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <motion.button
+            <m.button
               whileTap={{ scale: 0.9 }}
               onClick={handleOpenSave}
               disabled={isSaved}
@@ -89,7 +95,7 @@ const AnalysisResultView = () => {
               }`}
             >
               <Bookmark size={12} fill={isSaved ? 'currentColor' : 'none'} /> {isSaved ? 'Saved' : 'Save'}
-            </motion.button>
+            </m.button>
             <button onClick={handleReset} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-black transition-colors">
               <RotateCcw size={12} /> New Scan
             </button>
@@ -118,11 +124,11 @@ const AnalysisResultView = () => {
             </div>
           </div>
         </div>
-      </motion.section>
+      </m.section>
 
-      <motion.section variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-32">
+      <m.section variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-32">
         <div className="lg:col-span-5 space-y-12">
-          <motion.div
+          <m.div
             whileHover={{ scale: 1.02 }}
             className="p-10 md:p-12 border border-gray-100 rounded-[3.5rem] bg-white shadow-2xl relative overflow-hidden group"
           >
@@ -141,7 +147,7 @@ const AnalysisResultView = () => {
                 <span key={c} className="text-[9px] font-black uppercase tracking-widest bg-gray-50 px-3 py-1 rounded-full border border-gray-100 uppercase">{c}</span>
               ))}
             </div>
-          </motion.div>
+          </m.div>
         </div>
         <div className="lg:col-span-7 space-y-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -150,7 +156,7 @@ const AnalysisResultView = () => {
               { label: 'Lip Strategy', val: result.kMatch.adaptationLogic.lip, icon: <Droplets size={22}/> },
               { label: 'Vector Focus', val: result.kMatch.adaptationLogic.point, icon: <Eye size={22}/> }
             ].map((item, idx) => (
-              <motion.div
+              <m.div
                 key={idx}
                 whileHover={{ y: -5 }}
                 className="p-10 border border-gray-100 rounded-[3rem] bg-[#FDFDFE] flex flex-col gap-8 transition-all hover:bg-white hover:shadow-xl"
@@ -160,10 +166,10 @@ const AnalysisResultView = () => {
                   <p className="text-[9px] font-black uppercase text-gray-300 tracking-[0.4em] mb-3 uppercase">{item.label}</p>
                   <p className="text-xs font-black leading-snug tracking-tight text-gray-900 uppercase text-balance">{item.val}</p>
                 </div>
-              </motion.div>
+              </m.div>
             ))}
           </div>
-          <motion.div
+          <m.div
             whileHover={{ scale: 1.01 }}
             className="p-14 bg-black text-white rounded-[4rem] relative overflow-hidden group"
           >
@@ -183,11 +189,11 @@ const AnalysisResultView = () => {
                 </div>
               ))}
             </div>
-          </motion.div>
+          </m.div>
         </div>
-      </motion.section>
+      </m.section>
 
-      <motion.section variants={itemVariants}>
+      <m.section variants={itemVariants}>
         <div className="flex justify-between items-end mb-16">
           <h3 className="text-[40px] heading-font italic uppercase">Recommended Objects</h3>
           <button onClick={handleCheckout} className="text-[10px] font-black border-b border-black pb-1 cursor-pointer uppercase tracking-widest hover:text-[#FF4D8D] hover:border-[#FF4D8D] transition-all uppercase">Shop the collection</button>
@@ -195,7 +201,7 @@ const AnalysisResultView = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[2px] bg-black/5 border border-black/5 overflow-hidden rounded-[2.5rem]">
           {result.recommendations.products.map((product, idx) => (
-            <motion.div
+            <m.div
               key={idx}
               whileHover={{ backgroundColor: "#F9F9F9" }}
               className="bg-white p-10 group transition-all flex flex-col h-full"
@@ -229,26 +235,26 @@ const AnalysisResultView = () => {
                 <p className="text-[10px] text-gray-400 font-medium mb-6 line-clamp-2 text-balance">{product.desc}</p>
                 <div className="flex justify-between items-end mt-auto pt-6 border-t border-gray-50">
                   <p className="text-sm font-black">{product.price}</p>
-                  <motion.button
+                  <m.button
                     whileTap={{ scale: 0.9 }}
                     onClick={() => handleAddToCart(idx)}
                     className="p-3 bg-black text-white rounded-full hover:bg-[#FF4D8D] transition-colors"
                     title="Add to cart"
                   >
                     <Plus size={16} />
-                  </motion.button>
+                  </m.button>
                 </div>
               </div>
-            </motion.div>
+            </m.div>
           ))}
         </div>
-      </motion.section>
+      </m.section>
 
-      <motion.section variants={itemVariants}>
+      <m.section variants={itemVariants}>
         <h3 className="text-[40px] heading-font italic mb-16 text-center uppercase">Curated Education</h3>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           {result.recommendations.videos && result.recommendations.videos.map((video, idx) => (
-            <motion.div
+            <m.div
               key={idx}
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -265,13 +271,13 @@ const AnalysisResultView = () => {
                   <div className="text-[120px] font-black heading-font text-white/5 uppercase select-none">{idx + 1}</div>
                 </div>
                 <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center transition-all group-hover:bg-black/20">
-                  <motion.div
+                  <m.div
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     className="w-20 h-20 rounded-full bg-red-600/80 backdrop-blur-md flex items-center justify-center border border-red-400/30"
                   >
                     <Play fill="white" className="text-white translate-x-1" size={28} />
-                  </motion.div>
+                  </m.div>
                   <span className="text-[9px] font-black uppercase tracking-widest text-white/60 mt-4">Watch on YouTube</span>
                 </div>
                 <div className="absolute top-10 left-10">
@@ -296,7 +302,7 @@ const AnalysisResultView = () => {
                 </div>
               </a>
               {video.aiCoaching && (
-                <motion.div
+                <m.div
                   initial={{ opacity: 0, x: -10 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
@@ -309,21 +315,21 @@ const AnalysisResultView = () => {
                     <p className="text-[10px] font-black uppercase tracking-widest text-[#FF4D8D] uppercase">AI Coaching Protocol</p>
                     <p className="text-xs text-gray-600 leading-relaxed font-medium italic text-balance">"{video.aiCoaching}"</p>
                   </div>
-                </motion.div>
+                </m.div>
               )}
-            </motion.div>
+            </m.div>
           ))}
         </div>
-      </motion.section>
+      </m.section>
       {/* Save to Muse Board Modal */}
       <AnimatePresence>
         {showSaveModal && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-[250] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
             onClick={() => setShowSaveModal(false)}
           >
-            <motion.div
+            <m.div
               initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
               className="bg-white rounded-[3rem] p-10 max-w-md w-full shadow-2xl relative"
@@ -379,11 +385,11 @@ const AnalysisResultView = () => {
               >
                 Save Muse
               </button>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </m.div>
   );
 };
 

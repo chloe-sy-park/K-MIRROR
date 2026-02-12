@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import * as m from 'framer-motion/m';
 import {
   Globe, Truck, ShieldCheck, Sparkles, Minus, Plus, Trash2,
   ShoppingBag, Check, ArrowLeft,
@@ -31,7 +31,7 @@ const GlobalCheckoutView = () => {
 
   if (orderPlaced) {
     return (
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="max-w-2xl mx-auto py-32 text-center space-y-8">
+      <m.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="max-w-2xl mx-auto py-32 text-center space-y-8">
         <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto">
           <Check size={32} className="text-green-500" />
         </div>
@@ -45,13 +45,13 @@ const GlobalCheckoutView = () => {
             View Orders
           </button>
         </div>
-      </motion.div>
+      </m.div>
     );
   }
 
   if (items.length === 0) {
     return (
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-32 text-center space-y-8">
+      <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-32 text-center space-y-8">
         <ShoppingBag size={64} className="mx-auto text-gray-200" />
         <h2 className="text-3xl heading-font italic uppercase text-gray-300">Cart is Empty</h2>
         <p className="text-gray-400 text-sm max-w-sm mx-auto">Run a scan to get AI-matched product recommendations, or browse the catalog.</p>
@@ -63,13 +63,13 @@ const GlobalCheckoutView = () => {
             Browse Shop
           </button>
         </div>
-      </motion.div>
+      </m.div>
     );
   }
 
   return (
-    <motion.div initial="hidden" animate="visible" variants={containerVariants} className="max-w-6xl mx-auto py-10 lg:py-20">
-      <motion.div variants={itemVariants} className="mb-12">
+    <m.div initial="hidden" animate="visible" variants={containerVariants} className="max-w-6xl mx-auto py-10 lg:py-20">
+      <m.div variants={itemVariants} className="mb-12">
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-black transition-colors mb-8">
           <ArrowLeft size={14} /> Continue Shopping
         </button>
@@ -77,10 +77,10 @@ const GlobalCheckoutView = () => {
         <h2 className="text-[50px] lg:text-[70px] heading-font leading-[0.9] tracking-[-0.04em] uppercase">
           SECURE YOUR <span className="italic">ARCHIVE.</span>
         </h2>
-      </motion.div>
+      </m.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-20">
-        <motion.div variants={itemVariants} className="lg:col-span-7 space-y-12">
+        <m.div variants={itemVariants} className="lg:col-span-7 space-y-12">
           {/* Cart Items */}
           <section className="space-y-4">
             <h3 className="text-xs font-black uppercase tracking-widest mb-6 flex items-center gap-3">
@@ -168,10 +168,10 @@ const GlobalCheckoutView = () => {
               </label>
             </div>
           </section>
-        </motion.div>
+        </m.div>
 
         {/* Order Summary */}
-        <motion.div variants={itemVariants} className="lg:col-span-5">
+        <m.div variants={itemVariants} className="lg:col-span-5">
           <div className="bg-white border border-gray-100 rounded-[3rem] p-10 sticky top-32 shadow-2xl">
             <h4 className="text-[10px] font-black uppercase tracking-[0.4em] mb-10 text-gray-300 text-center">Order Summary</h4>
 
@@ -216,9 +216,9 @@ const GlobalCheckoutView = () => {
               <ShieldCheck size={14} className="text-green-500" /> Secure Checkout by Stripe
             </div>
           </div>
-        </motion.div>
+        </m.div>
       </div>
-    </motion.div>
+    </m.div>
   );
 };
 

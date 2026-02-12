@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import * as m from 'framer-motion/m';
 import { Target } from 'lucide-react';
 
 interface ProportionVisualizerProps {
@@ -7,7 +7,7 @@ interface ProportionVisualizerProps {
 
 const SherlockProportionVisualizer = ({ proportions }: ProportionVisualizerProps) => {
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       className="relative w-full max-w-[200px] aspect-[2/3] flex flex-col items-center justify-center bg-gray-50/50 rounded-[2rem] border border-gray-100 p-4"
@@ -21,7 +21,7 @@ const SherlockProportionVisualizer = ({ proportions }: ProportionVisualizerProps
         {/* Upper Zone */}
         <div className="flex-1 flex flex-col items-center justify-center relative border-b border-dashed border-[#FF4D8D]/30 group">
           <div className="text-[8px] font-black text-gray-300 uppercase absolute top-2 left-2">Frontal</div>
-          <motion.div
+          <m.div
             initial={{ height: 0 }} animate={{ height: '40%' }}
             transition={{ delay: 0.5, duration: 1 }}
             className="w-[2px] bg-[#FF4D8D]/20 absolute left-1/2 -translate-x-1/2 top-0"
@@ -32,9 +32,9 @@ const SherlockProportionVisualizer = ({ proportions }: ProportionVisualizerProps
         {/* Middle Zone */}
         <div className="flex-[1.2] flex flex-col items-center justify-center relative border-b border-dashed border-[#FF4D8D]/30">
           <div className="text-[8px] font-black text-gray-300 uppercase absolute top-2 left-2">Orbital</div>
-          <motion.div animate={{ opacity: [0.3, 0.6, 0.3] }} transition={{ repeat: Infinity, duration: 2 }}>
+          <m.div animate={{ opacity: [0.3, 0.6, 0.3] }} transition={{ repeat: Infinity, duration: 2 }}>
             <Target size={12} className="text-[#FF4D8D]/40 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-          </motion.div>
+          </m.div>
           <span className="text-lg heading-font italic text-[#FF4D8D] font-black">{proportions.middle}</span>
         </div>
 
@@ -50,7 +50,7 @@ const SherlockProportionVisualizer = ({ proportions }: ProportionVisualizerProps
 
       <div className="mt-4 w-full">
         <div className="h-[2px] w-full bg-gray-100 rounded-full overflow-hidden">
-          <motion.div
+          <m.div
             initial={{ width: 0 }} animate={{ width: '94%' }}
             transition={{ delay: 1, duration: 1.5 }}
             className="h-full bg-[#FF4D8D]"
@@ -58,7 +58,7 @@ const SherlockProportionVisualizer = ({ proportions }: ProportionVisualizerProps
         </div>
         <p className="text-[7px] text-center font-black uppercase text-gray-400 tracking-[0.3em] mt-2">Sherlock Ratio Sync: 94%</p>
       </div>
-    </motion.div>
+    </m.div>
   );
 };
 

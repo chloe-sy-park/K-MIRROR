@@ -11,12 +11,12 @@ vi.mock('react-router-dom', async (importOriginal) => {
   return { ...mod, useNavigate: () => mockNavigate };
 });
 
-vi.mock('@/components/sherlock/ProportionVisualizer', () => ({
-  default: () => {
-    const { createElement } = require('react');
-    return createElement('div', { 'data-testid': 'proportion-visualizer' });
-  },
-}));
+vi.mock('@/components/sherlock/ProportionVisualizer', async () => {
+  const React = await import('react');
+  return {
+    default: () => React.createElement('div', { 'data-testid': 'proportion-visualizer' }),
+  };
+});
 
 function renderWithResult() {
   useScanStore.setState({

@@ -31,30 +31,43 @@ vi.mock('@supabase/supabase-js', () => ({
   }),
 }));
 
-// Mock framer-motion to avoid JSDOM issues
-vi.mock('framer-motion', () => ({
-  motion: new Proxy({}, {
-    get: (_target, prop) => {
-      if (typeof prop === 'string') {
-        return ({ children, ...props }: Record<string, unknown>) => {
-          const { createElement } = require('react');
-          const filteredProps = Object.fromEntries(
-            Object.entries(props).filter(([key]) =>
-              !['initial', 'animate', 'exit', 'variants', 'transition', 'whileHover', 'whileTap', 'whileInView', 'layout'].includes(key)
-            )
-          );
-          return createElement(prop, filteredProps, children as never);
-        };
-      }
-      return undefined;
-    },
-  }),
-  AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
-  useAnimation: () => ({ start: vi.fn(), stop: vi.fn() }),
-  useInView: () => true,
-  useMotionValue: (initial: number) => ({ get: () => initial, set: vi.fn() }),
-  useTransform: (value: unknown, input: unknown, output: unknown[]) => ({ get: () => output[0] }),
-}));
+// Creates a passthrough component for a given HTML tag, filtering framer-motion props
+const MOTION_PROPS = ['initial', 'animate', 'exit', 'variants', 'transition', 'whileHover', 'whileTap', 'whileInView', 'layout'];
+const MOTION_TAGS = ['div', 'section', 'button', 'p', 'span', 'header', 'img', 'a', 'nav', 'input', 'label', 'h1', 'h2', 'h3', 'li', 'ul'];
+
+function buildMotionElements(React: typeof import('react')) {
+  const elements: Record<string, unknown> = {};
+  for (const tag of MOTION_TAGS) {
+    elements[tag] = ({ children, ...props }: Record<string, unknown>) => {
+      const filtered = Object.fromEntries(
+        Object.entries(props).filter(([k]) => !MOTION_PROPS.includes(k))
+      );
+      return React.createElement(tag, filtered, children as never);
+    };
+  }
+  return elements;
+}
+
+// Mock framer-motion (AnimatePresence, LazyMotion, domAnimation, hooks)
+vi.mock('framer-motion', async () => {
+  const React = await import('react');
+  return {
+    motion: buildMotionElements(React),
+    AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
+    LazyMotion: ({ children }: { children: React.ReactNode }) => children,
+    domAnimation: {},
+    useAnimation: () => ({ start: vi.fn(), stop: vi.fn() }),
+    useInView: () => true,
+    useMotionValue: (initial: number) => ({ get: () => initial, set: vi.fn() }),
+    useTransform: (_value: unknown, _input: unknown, output: unknown[]) => ({ get: () => output[0] }),
+  };
+});
+
+// Mock framer-motion/m (lightweight motion component — exports individual element factories)
+vi.mock('framer-motion/m', async () => {
+  const React = await import('react');
+  return buildMotionElements(React);
+});
 
 // Mock react-i18next
 vi.mock('react-i18next', () => ({

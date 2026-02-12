@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
+import * as m from 'framer-motion/m';
 import {
   LayoutGrid, Plus, Trash2, X, Sparkles, User, ChevronLeft, Camera,
 } from 'lucide-react';
@@ -45,22 +46,22 @@ const MuseBoardView = () => {
   const activeBoard = boards.find((b) => b.id === activeBoardId);
 
   return (
-    <motion.div
+    <m.div
       initial="hidden" animate="visible" variants={containerVariants}
       className="space-y-16 pb-20"
     >
       {/* Header */}
-      <motion.div variants={itemVariants} className="text-center space-y-4">
+      <m.div variants={itemVariants} className="text-center space-y-4">
         <h2 className="text-[50px] lg:text-[80px] heading-font leading-[0.85] tracking-[-0.05em] uppercase">
           MUSE <span className="italic text-[#FF4D8D]">BOARD</span>
         </h2>
         <p className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-400">
           Your Saved Neural Analyses
         </p>
-      </motion.div>
+      </m.div>
 
       {/* Board Tabs */}
-      <motion.div variants={itemVariants}>
+      <m.div variants={itemVariants}>
         <div className="flex items-center gap-4 overflow-x-auto pb-4 scrollbar-hide">
           {activeBoardId && (
             <button
@@ -104,11 +105,11 @@ const MuseBoardView = () => {
             <Plus size={16} />
           </button>
         </div>
-      </motion.div>
+      </m.div>
 
       {/* Active Board Header */}
       {activeBoard && (
-        <motion.div
+        <m.div
           variants={itemVariants}
           className="flex items-center justify-between p-8 bg-gray-50 rounded-[2.5rem]"
         >
@@ -127,7 +128,7 @@ const MuseBoardView = () => {
           >
             <Trash2 size={16} />
           </button>
-        </motion.div>
+        </m.div>
       )}
 
       {/* Muses Grid */}
@@ -138,7 +139,7 @@ const MuseBoardView = () => {
           ))}
         </div>
       ) : muses.length === 0 ? (
-        <motion.div variants={itemVariants} className="py-32 text-center border-2 border-dashed border-gray-100 rounded-[4rem] bg-gray-50/20 space-y-6">
+        <m.div variants={itemVariants} className="py-32 text-center border-2 border-dashed border-gray-100 rounded-[4rem] bg-gray-50/20 space-y-6">
           <LayoutGrid size={64} className="mx-auto text-gray-200" />
           <p className="text-gray-300 font-black uppercase tracking-[0.4em] text-sm">
             {activeBoardId ? 'This board is empty' : 'No saved muses yet'}
@@ -152,11 +153,11 @@ const MuseBoardView = () => {
           >
             <Camera size={14} /> Start a Scan
           </button>
-        </motion.div>
+        </m.div>
       ) : (
-        <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <m.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {muses.map((muse) => (
-            <motion.div
+            <m.div
               key={muse.id}
               whileHover={{ y: -4 }}
               className="group relative bg-white border border-gray-100 rounded-[3rem] overflow-hidden shadow-sm hover:shadow-xl transition-all"
@@ -170,7 +171,7 @@ const MuseBoardView = () => {
                         ? muse.userImage
                         : `data:image/jpeg;base64,${muse.userImage}`
                     }
-                    alt="Your photo"
+                    alt="Uploaded selfie"
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -216,20 +217,20 @@ const MuseBoardView = () => {
               >
                 <Trash2 size={14} />
               </button>
-            </motion.div>
+            </m.div>
           ))}
-        </motion.div>
+        </m.div>
       )}
 
       {/* Create Board Modal */}
       <AnimatePresence>
         {showCreateModal && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-[250] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
             onClick={() => setShowCreateModal(false)}
           >
-            <motion.div
+            <m.div
               initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
               className="bg-white rounded-[3rem] p-10 max-w-md w-full shadow-2xl relative"
@@ -252,8 +253,8 @@ const MuseBoardView = () => {
 
               <div className="space-y-6">
                 <div className="space-y-1">
-                  <label className="text-[9px] font-black uppercase text-gray-400 ml-2">Icon</label>
-                  <div className="flex gap-2 flex-wrap">
+                  <span className="text-[9px] font-black uppercase text-gray-400 ml-2" id="icon-label">Icon</span>
+                  <div className="flex gap-2 flex-wrap" role="group" aria-labelledby="icon-label">
                     {BOARD_ICONS.map((icon) => (
                       <button
                         key={icon}
@@ -271,8 +272,9 @@ const MuseBoardView = () => {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[9px] font-black uppercase text-gray-400 ml-2">Board Name</label>
+                  <label htmlFor="board-name-input" className="text-[9px] font-black uppercase text-gray-400 ml-2">Board Name</label>
                   <input
+                    id="board-name-input"
                     type="text"
                     value={newBoardName}
                     onChange={(e) => setNewBoardName(e.target.value)}
@@ -291,11 +293,11 @@ const MuseBoardView = () => {
                   Create Board
                 </button>
               </div>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </m.div>
   );
 };
 
