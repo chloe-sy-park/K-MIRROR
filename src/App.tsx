@@ -54,24 +54,22 @@ const App = () => {
       <Navbar />
 
       <main className="flex-1 pt-32 pb-24 px-6 lg:px-12 max-w-7xl mx-auto w-full min-h-screen">
-        <AnimatePresence mode="wait">
-          <Routes location={location} key={location.pathname}>
-            <Route path="/" element={<ScanRoute />} />
-            <Route path="/onboarding" element={
-              isOnboarded ? <Navigate to="/" replace /> : <OnboardingView />
-            } />
-            <Route path="/checkout" element={<GlobalCheckoutView />} />
-            <Route path="/match" element={<ExpertMatchingView />} />
-            <Route path="/methodology" element={<MethodologyView onBookSession={() => navigate('/match')} />} />
-            <Route path="/settings" element={<SettingsView />} />
-            <Route path="/muse" element={<MuseBoardView />} />
-            <Route path="/shop" element={<ShopView />} />
-            <Route path="/shop/:id" element={<ProductDetailView />} />
-            <Route path="/orders" element={<OrdersView />} />
-            <Route path="/celebs" element={<CelebGalleryView />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </AnimatePresence>
+        <Routes location={location}>
+          <Route path="/" element={<ScanRoute />} />
+          <Route path="/onboarding" element={
+            isOnboarded ? <Navigate to="/" replace /> : <OnboardingView />
+          } />
+          <Route path="/checkout" element={<GlobalCheckoutView />} />
+          <Route path="/match" element={<ExpertMatchingView />} />
+          <Route path="/methodology" element={<MethodologyView onBookSession={() => navigate('/match')} />} />
+          <Route path="/settings" element={<SettingsView />} />
+          <Route path="/muse" element={<MuseBoardView />} />
+          <Route path="/shop" element={<ShopView />} />
+          <Route path="/shop/:id" element={<ProductDetailView />} />
+          <Route path="/orders" element={<OrdersView />} />
+          <Route path="/celebs" element={<CelebGalleryView />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </main>
 
       <Footer />
