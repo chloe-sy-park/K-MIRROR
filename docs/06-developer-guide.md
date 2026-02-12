@@ -78,6 +78,7 @@ VITE_SUPABASE_ANON_KEY=eyJhbGci...
 | `npm run preview` | 빌드 결과물 로컬 프리뷰 |
 | `npm test` | Vitest watch 모드 (파일 변경 시 자동 재실행) |
 | `npm run test:run` | Vitest 1회 실행 (CI/CD용) |
+| `npm run format` | Prettier 코드 포매팅 |
 
 ---
 
@@ -86,7 +87,7 @@ VITE_SUPABASE_ANON_KEY=eyJhbGci...
 ```
 K-MIRROR/
 ├── src/
-│   ├── App.tsx                    # React Router 라우팅 + 레이아웃
+│   ├── App.tsx                    # React Router 라우팅 + 레이아웃 (React.lazy 코드 스플리팅)
 │   ├── main.tsx                   # React 진입점 (BrowserRouter, i18n, ErrorBoundary)
 │   ├── index.css                  # Tailwind v4 import + 커스텀 CSS
 │   │
@@ -125,7 +126,7 @@ K-MIRROR/
 │   │   └── authStore.ts           # 인증 상태
 │   │
 │   ├── services/
-│   │   ├── geminiService.ts       # Gemini AI 분석 (프롬프트 v5.1, temperature 0.4)
+│   │   ├── geminiService.ts       # Gemini AI 분석 (프롬프트 v5.1, retry/timeout/rate limit)
 │   │   ├── colorService.ts        # 멜라닌 기반 Multiply/Screen 블렌딩
 │   │   ├── productService.ts      # AI 추천 → 카탈로그 매칭
 │   │   └── museService.ts         # Muse Board CRUD (Supabase)
@@ -153,7 +154,9 @@ K-MIRROR/
 ├── vite.config.ts                 # Vite 설정 (React, Tailwind, PWA 플러그인)
 ├── vitest.config.ts               # Vitest 설정 (jsdom, @/ alias, testing-library)
 ├── tsconfig.json                  # TypeScript 설정 (strict 모드 아님, vitest/globals 포함)
-├── vercel.json                    # Vercel SPA 리라이트 설정
+├── vercel.json                    # Vercel SPA 리라이트 + 보안 헤더
+├── .prettierrc                    # Prettier 설정
+├── .github/workflows/ci.yml      # GitHub Actions CI (test + build)
 ├── package.json
 └── docs/                          # 프로젝트 문서 (9개)
 ```
@@ -280,14 +283,27 @@ npm run test:run  # 1회 실행
 ### Vercel
 
 - `main` 브랜치 push → 자동 배포
-- `vercel.json`에서 SPA 리라이트 설정
+- `vercel.json`에서 SPA 리라이트 + 보안 헤더 설정
+- 보안 헤더: X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy
 - 환경변수는 Vercel Dashboard에서 설정
+
+### CI/CD (GitHub Actions)
+
+- `.github/workflows/ci.yml`
+- `main` 브랜치 push + PR 시 자동 실행
+- 단계: checkout → setup-node(v20) → npm ci → test:run → build
+- PR 병합 전 테스트/빌드 통과 필수
 
 ### PWA
 
 - `vite-plugin-pwa`로 Service Worker + manifest 자동 생성
-- 빌드 시 13개 에셋 프리캐시
+- 빌드 시 41개 에셋 프리캐시 (코드 스플리팅으로 증가)
 - 오프라인 폴백은 미구현
+
+### SEO
+
+- `index.html`에 Open Graph + Twitter Card 메타 태그
+- `<link rel="canonical">` 설정
 
 ---
 
@@ -295,8 +311,10 @@ npm run test:run  # 1회 실행
 
 ### 번들 크기
 
-- JS 번들 ~833KB (gzip ~247KB) — code splitting 미적용
+- 메인 JS 번들 ~733KB — `React.lazy()` 코드 스플리팅 적용
+- 뷰별 청크 자동 생성 (Vite 빌드)
 - `@google/genai`, `framer-motion`이 주요 크기 기여
+- Framer Motion 트리 셰이킹(`LazyMotion`)은 미적용
 
 ### Supabase 비활성 경고
 
@@ -323,6 +341,8 @@ npm run test:run  # 1회 실행
 
 ## 이전 기술 부채 해소 현황
 
+### Sprint 1
+
 | 항목 | 이전 상태 | 현재 상태 |
 |------|----------|----------|
 | 모놀리식 App.tsx (1107줄) | 모든 뷰가 한 파일 | 뷰/컴포넌트/스토어/서비스 분리 완료 |
@@ -333,3 +353,18 @@ npm run test:run  # 1회 실행
 | 테스트 전무 | 0개 | 65개 (유닛 + 통합) |
 | 런타임 검증 없음 | `as AnalysisResult` 타입 단언 | Zod v4 스키마 검증 |
 | 국제화 없음 | 영어 고정 | i18next (한/영) |
+
+### Sprint 2
+
+| 항목 | 이전 상태 | 현재 상태 |
+|------|----------|----------|
+| Checkout 폼 미연결 | input value/onChange 없음 | useState 바인딩 + 유효성 검사 |
+| Inclusion Guard 하드코딩 | `onChange={() => {}}` | settingsStore 연동 |
+| Gemini 복원력 없음 | retry/timeout 없음 | 재시도 2회 + 30초 타임아웃 + 레이트 리미팅 |
+| 코드 스플리팅 없음 | 833KB 단일 번들 | React.lazy → 733KB + 뷰 청크 |
+| 접근성 전무 | ARIA 0개 | Toggle, Modal, Navbar, Gallery 등 ARIA + 키보드 적용 |
+| 보안 헤더 없음 | 미설정 | Vercel 보안 헤더 5개 |
+| CI/CD 없음 | 수동 검증 | GitHub Actions (test + build) |
+| i18n 누락 | 에러/검증 메시지 미번역 | errors, validation, a11y 섹션 완성 |
+| SEO 미설정 | OG 태그 없음 | Open Graph + Twitter Card |
+| Footer 아이콘 | onClick 없음 | 네비게이션 연결 + aria-label |

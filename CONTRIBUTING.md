@@ -53,9 +53,11 @@ refactor: Extract Toggle component to separate file
 ### React
 
 - Function 컴포넌트만 (arrow function)
-- `useState`로 로컬 상태 관리
+- 전역 상태: Zustand 스토어 (`store/` 디렉토리)
+- `useState`는 컴포넌트 로컬 상태에만 사용
 - `useEffect`는 꼭 필요한 경우에만
-- Props 인터페이스를 인라인 또는 `types.ts`에 정의
+- 새 뷰는 `views/` 디렉토리에 파일 생성 → `App.tsx`에서 `React.lazy()`로 등록
+- Props 인터페이스를 인라인 또는 `types/index.ts`에 정의
 
 ### 스타일링
 
@@ -86,7 +88,7 @@ refactor: Extract Toggle component to separate file
 
 | 변경 내용 | 업데이트 대상 문서 |
 |----------|-----------------|
-| 새 AppStep 추가 | `07-app-state-flow.md` |
+| 새 라우트/뷰 추가 | `07-app-state-flow.md` |
 | 새 뷰/컴포넌트 추가 | `09-component-patterns.md` |
 | Gemini 프롬프트 수정 | `08-gemini-integration.md` |
 | responseSchema 변경 | `08-gemini-integration.md` |
@@ -102,9 +104,11 @@ refactor: Extract Toggle component to separate file
 ### 제출 전 체크리스트
 
 - [ ] `npm run dev`로 로컬 동작 확인
+- [ ] `npm run test:run` 모든 테스트 통과
+- [ ] `npm run build` 성공 (TypeScript 에러 없음)
 - [ ] Demo Mode로 UI 확인 (API 없이)
 - [ ] AI 로직 변경 시 — 실제 API로 테스트
-- [ ] `npm run build` 성공 (TypeScript 에러 없음)
+- [ ] 새 인터랙티브 요소에 ARIA 속성 + 키보드 지원 추가
 - [ ] 관련 문서 업데이트 완료
 - [ ] UI 변경 시 스크린샷 포함
 
@@ -126,16 +130,41 @@ refactor: Extract Toggle component to separate file
 
 ---
 
+## 접근성 가이드라인
+
+새 컴포넌트 작성 시 반드시 준수:
+
+- 인터랙티브 요소에 적절한 ARIA role 부여 (`role="switch"`, `role="dialog"` 등)
+- 키보드 탐색 지원 (Enter/Space, Escape)
+- `focus:outline-none` 사용 금지 → `focus-visible:ring-2 focus-visible:ring-[#FF4D8D]` 사용
+- 폼 요소에 `htmlFor` + `aria-label` 또는 `aria-labelledby`
+- 장식용 아이콘에 `aria-hidden="true"`
+- 상세 패턴: [09-component-patterns.md](docs/09-component-patterns.md) §8 참조
+
+---
+
 ## 기여 환영 영역
 
 현재 기술 부채 목록은 [05-architecture-decisions.md](docs/05-architecture-decisions.md) 하단 참조.
 
-특히 기여가 필요한 영역:
+### 해소 완료 ~~(더 이상 기여 불필요)~~
 
-- App.tsx 모놀리식 → 컴포넌트 분리
-- 에러 처리 UI 추가
-- Zod 스키마 검증 (Gemini API 응답)
+- ~~App.tsx 모놀리식 → 컴포넌트 분리~~ ✅ Sprint 1
+- ~~에러 처리 UI 추가~~ ✅ Sprint 1 (ErrorBoundary + ErrorToast)
+- ~~Zod 스키마 검증~~ ✅ Sprint 1
+- ~~다국어 (i18n) 기반 구축~~ ✅ Sprint 1
+- ~~Font Awesome CDN 제거~~ ✅ (Lucide Icons 전환)
+- ~~접근성 기본 적용~~ ✅ Sprint 2
+- ~~코드 스플리팅~~ ✅ Sprint 2
+- ~~Gemini 복원력~~ ✅ Sprint 2
+
+### 현재 기여가 필요한 영역
+
 - 이미지 업로드 시 리사이즈/압축
 - mimeType 자동 감지
-- Font Awesome CDN 제거
-- 다국어 (i18n) 기반 구축
+- ESLint 설정 + 규칙 강제
+- TypeScript strict 모드 전환
+- Framer Motion 트리 셰이킹 (LazyMotion)
+- 추가 테스트 커버리지 (geminiService, scanStore)
+- Skip to content 링크 + 페이지 전환 시 document.title 업데이트
+- 결과 캐싱 (동일 입력 → 로컬 캐시)
