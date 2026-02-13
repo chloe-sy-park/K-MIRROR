@@ -3,8 +3,12 @@ import { DEMO_RESULT } from '@/data/demoResult';
 
 // Mock geminiService
 const mockAnalyzeKBeauty = vi.fn();
+const mockAnalyzeSkin = vi.fn();
+const mockMatchProducts = vi.fn();
 vi.mock('@/services/geminiService', () => ({
   analyzeKBeauty: (...args: unknown[]) => mockAnalyzeKBeauty(...args),
+  analyzeSkin: (...args: unknown[]) => mockAnalyzeSkin(...args),
+  matchProducts: (...args: unknown[]) => mockMatchProducts(...args),
   AnalysisError: class extends Error {
     code: string;
     constructor(message: string, code: string) {
@@ -24,9 +28,16 @@ describe('scanStore', () => {
       celebImage: null,
       selectedCelebName: null,
       result: null,
+      matchedProducts: [],
       error: null,
     });
     mockAnalyzeKBeauty.mockReset();
+    mockAnalyzeSkin.mockReset();
+    mockMatchProducts.mockReset();
+    // By default, analyzeSkin fails so tests go through the fallback path
+    // (preserves existing test behavior that relies on analyzeKBeauty)
+    mockAnalyzeSkin.mockRejectedValue(new Error('analyze-skin not deployed'));
+    mockMatchProducts.mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -116,11 +127,12 @@ describe('scanStore', () => {
   describe('analyze', () => {
     it('does nothing if images are missing', async () => {
       await useScanStore.getState().analyze(false, { environment: 'Office', skill: 'Beginner', mood: 'Natural' });
+      expect(mockAnalyzeSkin).not.toHaveBeenCalled();
       expect(mockAnalyzeKBeauty).not.toHaveBeenCalled();
       expect(useScanStore.getState().phase).toBe('idle');
     });
 
-    it('sets result on successful analysis', async () => {
+    it('sets result on successful analysis (fallback path)', async () => {
       useScanStore.setState({ userImage: 'user', celebImage: 'celeb' });
       mockAnalyzeKBeauty.mockResolvedValue(DEMO_RESULT);
 
@@ -130,7 +142,7 @@ describe('scanStore', () => {
       expect(useScanStore.getState().result).toEqual(DEMO_RESULT);
     });
 
-    it('sets error on failed analysis', async () => {
+    it('sets error on failed analysis (both paths fail)', async () => {
       useScanStore.setState({ userImage: 'user', celebImage: 'celeb' });
       const { AnalysisError } = await import('@/services/geminiService');
       mockAnalyzeKBeauty.mockRejectedValue(new AnalysisError('timeout', 'TIMEOUT'));
@@ -141,7 +153,7 @@ describe('scanStore', () => {
       expect(useScanStore.getState().error).toBe('timeout');
     });
 
-    it('passes selectedCelebName to analyzeKBeauty', async () => {
+    it('passes selectedCelebName to analyzeKBeauty in fallback path', async () => {
       useScanStore.setState({ userImage: 'user', celebImage: 'celeb', selectedCelebName: 'Jisoo' });
       mockAnalyzeKBeauty.mockResolvedValue(DEMO_RESULT);
 
@@ -153,6 +165,45 @@ describe('scanStore', () => {
         'Jisoo',
         expect.any(Object), // AbortSignal
       );
+    });
+
+    it('uses 2-step pipeline when analyzeSkin succeeds', async () => {
+      useScanStore.setState({ userImage: 'user', celebImage: 'celeb' });
+      mockAnalyzeSkin.mockResolvedValue(DEMO_RESULT);
+      const mockProducts = [{ id: '1', brand: 'HERA', matchScore: 98 }];
+      mockMatchProducts.mockResolvedValue(mockProducts);
+
+      await useScanStore.getState().analyze(false, { environment: 'Office', skill: 'Beginner', mood: 'Natural' });
+
+      expect(mockAnalyzeSkin).toHaveBeenCalled();
+      expect(mockMatchProducts).toHaveBeenCalledWith(DEMO_RESULT.tone, expect.any(Object));
+      expect(mockAnalyzeKBeauty).not.toHaveBeenCalled();
+      expect(useScanStore.getState().phase).toBe('result');
+      expect(useScanStore.getState().result).toEqual(DEMO_RESULT);
+      expect(useScanStore.getState().matchedProducts).toEqual(mockProducts);
+    });
+
+    it('falls back to analyzeKBeauty when analyzeSkin fails', async () => {
+      useScanStore.setState({ userImage: 'user', celebImage: 'celeb' });
+      mockAnalyzeSkin.mockRejectedValue(new Error('endpoint not found'));
+      mockAnalyzeKBeauty.mockResolvedValue(DEMO_RESULT);
+
+      await useScanStore.getState().analyze(false, { environment: 'Office', skill: 'Beginner', mood: 'Natural' });
+
+      expect(mockAnalyzeSkin).toHaveBeenCalled();
+      expect(mockAnalyzeKBeauty).toHaveBeenCalled();
+      expect(useScanStore.getState().phase).toBe('result');
+      expect(useScanStore.getState().result).toEqual(DEMO_RESULT);
+      expect(useScanStore.getState().matchedProducts).toEqual([]);
+    });
+
+    it('matchedProducts defaults to empty array in fallback path', async () => {
+      useScanStore.setState({ userImage: 'user', celebImage: 'celeb' });
+      mockAnalyzeKBeauty.mockResolvedValue(DEMO_RESULT);
+
+      await useScanStore.getState().analyze(false, { environment: 'Office', skill: 'Beginner', mood: 'Natural' });
+
+      expect(useScanStore.getState().matchedProducts).toEqual([]);
     });
   });
 });

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { AnalysisResult, UserPreferences, YouTubeVideo } from '@/types';
-import { analyzeKBeauty, AnalysisError } from '@/services/geminiService';
+import { analyzeKBeauty, analyzeSkin, matchProducts, AnalysisError } from '@/services/geminiService';
+import type { MatchedProduct } from '@/services/geminiService';
 import { searchYouTubeVideos, isYouTubeConfigured } from '@/services/youtubeService';
 import { DEMO_RESULT } from '@/data/demoResult';
 import type { CelebProfile } from '@/data/celebGallery';
@@ -13,6 +14,7 @@ interface ScanState {
   celebImage: string | null;
   selectedCelebName: string | null;
   result: AnalysisResult | null;
+  matchedProducts: MatchedProduct[];
   youtubeVideos: YouTubeVideo[];
   error: string | null;
 
@@ -45,6 +47,7 @@ export const useScanStore = create<ScanState>((set, get) => ({
   celebImage: null,
   selectedCelebName: null,
   result: null,
+  matchedProducts: [],
   youtubeVideos: [],
   error: null,
 
@@ -74,19 +77,45 @@ export const useScanStore = create<ScanState>((set, get) => ({
 
     try {
       set({ phase: 'analyzing', error: null });
-      const res = await analyzeKBeauty(userImage, celebImage, isSensitive, prefs, selectedCelebName ?? undefined, controller.signal);
-      // Only apply result if this request wasn't aborted
-      if (!controller.signal.aborted) {
-        set({ result: res, phase: 'result' });
 
-        // Fetch real YouTube videos using Gemini-generated search hints (non-blocking)
+      let res: AnalysisResult;
+      let products: MatchedProduct[] = [];
+
+      try {
+        // New 2-step pipeline: analyze-skin -> match-products + YouTube in parallel
+        res = await analyzeSkin(userImage, celebImage, isSensitive, prefs, selectedCelebName ?? undefined, controller.signal);
+
+        if (!controller.signal.aborted) {
+          // Phase 2: products + YouTube in parallel
+          const [matchedProds, videos] = await Promise.all([
+            matchProducts(res.tone, controller.signal),
+            (isYouTubeConfigured && res.youtubeSearch?.queries?.length)
+              ? searchYouTubeVideos(res.youtubeSearch.queries).catch(() => [] as YouTubeVideo[])
+              : Promise.resolve([] as YouTubeVideo[]),
+          ]);
+          products = matchedProds;
+          if (!controller.signal.aborted && videos.length > 0) {
+            set({ youtubeVideos: videos });
+          }
+        }
+      } catch (skinErr) {
+        // Fallback to legacy analyze-kbeauty endpoint
+        if (controller.signal.aborted) throw skinErr;
+        if (skinErr instanceof AnalysisError && skinErr.code === 'ABORTED') throw skinErr;
+        console.warn('analyze-skin failed, falling back to analyze-kbeauty:', skinErr);
+
+        res = await analyzeKBeauty(userImage, celebImage, isSensitive, prefs, selectedCelebName ?? undefined, controller.signal);
+
+        // Legacy YouTube (non-blocking)
         if (isYouTubeConfigured && res.youtubeSearch?.queries?.length) {
           searchYouTubeVideos(res.youtubeSearch.queries).then((videos) => {
-            if (!controller.signal.aborted) {
-              set({ youtubeVideos: videos });
-            }
-          }).catch(() => { /* YouTube search is best-effort */ });
+            if (!controller.signal.aborted) set({ youtubeVideos: videos });
+          }).catch(() => {});
         }
+      }
+
+      if (!controller.signal.aborted) {
+        set({ result: res, matchedProducts: products, phase: 'result' });
       }
     } catch (err) {
       if (controller.signal.aborted) return;
@@ -113,7 +142,7 @@ export const useScanStore = create<ScanState>((set, get) => ({
     if (demoTimer) { clearTimeout(demoTimer); demoTimer = null; }
     analyzeController?.abort();
     analyzeController = null;
-    set({ result: null, youtubeVideos: [], phase: 'idle', error: null, selectedCelebName: null });
+    set({ result: null, youtubeVideos: [], matchedProducts: [], phase: 'idle', error: null, selectedCelebName: null });
   },
   clearError: () => set({ error: null }),
 }));

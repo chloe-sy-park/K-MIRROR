@@ -1,4 +1,4 @@
-import { analyzeKBeauty, AnalysisError } from './geminiService';
+import { analyzeKBeauty, analyzeSkin, matchProducts, AnalysisError } from './geminiService';
 import { DEMO_RESULT } from '@/data/demoResult';
 import type { UserPreferences } from '@/types';
 
@@ -128,6 +128,116 @@ describe('geminiService', () => {
       await expect(
         analyzeKBeauty('img1', 'img2', false, defaultPrefs),
       ).rejects.toMatchObject({ code: 'API', message: 'Gemini API key not configured' });
+    });
+  });
+
+  describe('analyzeSkin', () => {
+    it('calls the analyze-skin endpoint with correct URL and headers', async () => {
+      mockFetch.mockResolvedValue(okResponse(DEMO_RESULT));
+      await analyzeSkin('img1', 'img2', false, defaultPrefs);
+      const [url, options] = mockFetch.mock.calls[0]!;
+      expect(url).toBe('https://test.supabase.co/functions/v1/analyze-skin');
+      expect(options.headers['Authorization']).toBe('Bearer test-anon-key');
+      expect(options.headers['apikey']).toBe('test-anon-key');
+      expect(options.headers['Content-Type']).toBe('application/json');
+    });
+
+    it('sends correct request body', async () => {
+      mockFetch.mockResolvedValue(okResponse(DEMO_RESULT));
+      await analyzeSkin('img1', 'img2', true, defaultPrefs, 'Jisoo');
+      const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
+      expect(body.userImageBase64).toBe('img1');
+      expect(body.celebImageBase64).toBe('img2');
+      expect(body.isSensitive).toBe(true);
+      expect(body.selectedCelebName).toBe('Jisoo');
+    });
+
+    it('returns validated result on success', async () => {
+      mockFetch.mockResolvedValue(okResponse(DEMO_RESULT));
+      const result = await analyzeSkin('img1', 'img2', false, defaultPrefs);
+      expect(result.tone.melaninIndex).toBe(5);
+      expect(result.kMatch.celebName).toBe('Wonyoung (IVE)');
+    });
+
+    it('throws VALIDATION when response does not match Zod schema', async () => {
+      mockFetch.mockResolvedValue(okResponse({ tone: { melaninIndex: 999 } }));
+      await expect(
+        analyzeSkin('img1', 'img2', false, defaultPrefs),
+      ).rejects.toMatchObject({ code: 'VALIDATION' });
+    });
+
+    it('throws ABORTED when signal is already aborted', async () => {
+      const controller = new AbortController();
+      controller.abort();
+      await expect(
+        analyzeSkin('img1', 'img2', false, defaultPrefs, undefined, controller.signal),
+      ).rejects.toMatchObject({ code: 'ABORTED' });
+    });
+
+    it('shares rate limiter with analyzeKBeauty', async () => {
+      mockFetch.mockResolvedValue(okResponse(DEMO_RESULT));
+      // First two calls consume the rate limit
+      await analyzeSkin('img1', 'img2', false, defaultPrefs);
+      await analyzeSkin('img1', 'img2', false, defaultPrefs);
+      // Third call should be rate-limited
+      await expect(
+        analyzeSkin('img1', 'img2', false, defaultPrefs),
+      ).rejects.toMatchObject({ code: 'RATE_LIMITED' });
+    });
+  });
+
+  describe('matchProducts', () => {
+    const skinProfile = DEMO_RESULT.tone;
+
+    it('calls the match-products endpoint with correct URL', async () => {
+      mockFetch.mockResolvedValue(okResponse([]));
+      await matchProducts(skinProfile);
+      const [url] = mockFetch.mock.calls[0]!;
+      expect(url).toBe('https://test.supabase.co/functions/v1/match-products');
+    });
+
+    it('sends skinProfile in request body', async () => {
+      mockFetch.mockResolvedValue(okResponse([]));
+      await matchProducts(skinProfile);
+      const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
+      expect(body.skinProfile.melaninIndex).toBe(5);
+      expect(body.skinProfile.undertone).toBe('Cool');
+    });
+
+    it('returns products on success', async () => {
+      const mockProducts = [
+        { id: '1', brand: 'HERA', name_en: 'Black Cushion', name_ko: '블랙쿠션', category: 'base', subcategory: null, melanin_min: 4, melanin_max: 6, undertones: ['Cool'], skin_types: ['combination'], concerns: [], ingredients: [], shade_hex: '#6B4226', price_usd: 45, image_url: null, affiliate_url: null, safety_rating: 'EWG Green', matchScore: 98 },
+      ];
+      mockFetch.mockResolvedValue(okResponse(mockProducts));
+      const result = await matchProducts(skinProfile);
+      expect(result).toHaveLength(1);
+      expect(result[0]!.brand).toBe('HERA');
+      expect(result[0]!.matchScore).toBe(98);
+    });
+
+    it('returns empty array on fetch error', async () => {
+      mockFetch.mockRejectedValue(new Error('network error'));
+      const result = await matchProducts(skinProfile);
+      expect(result).toEqual([]);
+    });
+
+    it('returns empty array on non-ok response', async () => {
+      mockFetch.mockResolvedValue(errorResponse(500, 'Internal error'));
+      const result = await matchProducts(skinProfile);
+      expect(result).toEqual([]);
+    });
+
+    it('returns empty array when Supabase is not configured', async () => {
+      vi.stubEnv('VITE_SUPABASE_URL', '');
+      const result = await matchProducts(skinProfile);
+      expect(result).toEqual([]);
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it('returns empty array when response is not an array', async () => {
+      mockFetch.mockResolvedValue(okResponse({ error: 'not an array' }));
+      const result = await matchProducts(skinProfile);
+      expect(result).toEqual([]);
     });
   });
 
