@@ -290,5 +290,20 @@
   },
   "footer": {
     "tagline": "K-MIRROR 뉴럴 뷰티 인텔리전스"
+  },
+  "consent": {
+    "biometricTitle": "생체 데이터 안내",
+    "biometricBody": "K-MIRROR는 AI를 사용하여 피부 톤, 얼굴형, 골격 구조 등의 얼굴 특징을 분석합니다. 이 데이터는 실시간으로 처리되며 서버에 저장되지 않습니다. 계속 진행하면 이 일회성 생체 분석에 동의하게 됩니다.",
+    "biometricAccept": "동의합니다",
+    "biometricDecline": "취소",
+    "biometricLearnMore": "자세한 내용은 개인정보 처리방침을 확인하세요.",
+    "cookieMessage": "필수 쿠키로 앱이 정상 작동합니다. 분석 쿠키는 사용자 경험 개선에 활용됩니다.",
+    "cookieAccept": "전체 동의",
+    "cookieDecline": "필수만 허용"
+  },
+  "legal": {
+    "privacyPolicy": "개인정보 처리방침",
+    "termsOfService": "이용약관",
+    "lastUpdated": "최종 수정일: 2026년 2월"
   }
 }

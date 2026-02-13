@@ -290,5 +290,20 @@
   },
   "footer": {
     "tagline": "K-MIRROR Neural Beauty Intelligence"
+  },
+  "consent": {
+    "biometricTitle": "Biometric Data Notice",
+    "biometricBody": "K-MIRROR uses AI to analyze facial features including skin tone, face shape, and bone structure. This data is processed in real-time and is not stored on our servers. By proceeding, you consent to this one-time biometric analysis.",
+    "biometricAccept": "I Consent",
+    "biometricDecline": "Cancel",
+    "biometricLearnMore": "Read our Privacy Policy for full details.",
+    "cookieMessage": "We use essential cookies to keep the app running. Analytics cookies help us improve your experience.",
+    "cookieAccept": "Accept All",
+    "cookieDecline": "Essential Only"
+  },
+  "legal": {
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "lastUpdated": "Last updated: February 2026"
   }
 }
