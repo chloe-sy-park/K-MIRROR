@@ -17,14 +17,6 @@ const createStorageMock = (): Storage => {
 Object.defineProperty(globalThis, 'localStorage', { value: createStorageMock(), writable: true });
 Object.defineProperty(globalThis, 'sessionStorage', { value: createStorageMock(), writable: true });
 
-// Mock @google/genai — heavy SDK that hangs in jsdom
-vi.mock('@google/genai', () => ({
-  GoogleGenAI: class {
-    models = { generateContent: vi.fn().mockResolvedValue({ text: '{}' }) };
-  },
-  Type: { OBJECT: 'OBJECT', STRING: 'STRING', NUMBER: 'NUMBER', ARRAY: 'ARRAY', BOOLEAN: 'BOOLEAN' },
-}));
-
 // Mock @supabase/supabase-js
 vi.mock('@supabase/supabase-js', () => ({
   createClient: () => ({
