@@ -39,7 +39,7 @@ const ShopView = () => {
   return (
     <m.div initial="hidden" animate="visible" variants={containerVariants} className="space-y-16 pb-20">
       <m.div variants={itemVariants} className="text-center space-y-4">
-        <h2 className="text-[50px] lg:text-[80px] heading-font leading-[0.85] tracking-[-0.05em] uppercase">
+        <h2 className="text-[32px] sm:text-[50px] lg:text-[80px] heading-font leading-[0.85] tracking-[-0.05em] uppercase">
           {t('shop.title')}
         </h2>
         <p className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-400">
@@ -91,7 +91,7 @@ const ShopView = () => {
                     {product.category}
                   </div>
                   {product.imageUrl ? (
-                    <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                    <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 group-active:scale-110 transition-transform duration-500" />
                   ) : (
                     <Sparkles size={32} className="text-gray-200 group-hover:text-[#FF4D8D] transition-colors" />
                   )}

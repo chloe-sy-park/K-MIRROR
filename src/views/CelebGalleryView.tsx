@@ -64,7 +64,7 @@ const CelebGalleryView = () => {
       {/* Header */}
       <m.div variants={itemVariants} className="text-center space-y-4">
         <p className="text-[10px] font-black text-[#FF4D8D] uppercase tracking-[0.5em]">{t('celebs.styleMuse')}</p>
-        <h2 className="text-[50px] lg:text-[70px] heading-font leading-[0.85] tracking-[-0.05em] uppercase">
+        <h2 className="text-[32px] sm:text-[50px] lg:text-[70px] heading-font leading-[0.85] tracking-[-0.05em] uppercase">
           {t('celebs.title')}
         </h2>
         <p className="text-sm text-gray-400 max-w-md mx-auto">
@@ -85,7 +85,7 @@ const CelebGalleryView = () => {
               role="radio"
               aria-checked={genre === g}
               onClick={() => setGenre(g)}
-              className={`px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+              className={`px-5 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
                 genre === g
                   ? 'bg-black text-white shadow-lg'
                   : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
@@ -107,7 +107,7 @@ const CelebGalleryView = () => {
               role="radio"
               aria-checked={mood === moodOption}
               onClick={() => setMood(moodOption)}
-              className={`px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+              className={`px-5 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
                 mood === moodOption
                   ? 'bg-black text-white shadow-lg'
                   : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
@@ -148,7 +148,7 @@ const CelebGalleryView = () => {
                 <img
                   src={celeb.imageUrl}
                   alt={celeb.name}
-                  className="w-20 h-20 rounded-full object-cover mb-6 shadow-lg ring-2 ring-gray-100 group-hover:ring-[#FF4D8D] transition-all"
+                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover mb-6 shadow-lg ring-2 ring-gray-100 group-hover:ring-[#FF4D8D] transition-all"
                   onError={(e) => {
                     const target = e.currentTarget;
                     target.style.display = 'none';
@@ -156,7 +156,7 @@ const CelebGalleryView = () => {
                   }}
                 />
               ) : null}
-              <div className={`w-20 h-20 rounded-full bg-gradient-to-br from-[#FF4D8D] to-purple-400 flex items-center justify-center mb-6 shadow-lg ${celeb.imageUrl ? 'hidden' : ''}`}>
+              <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-[#FF4D8D] to-purple-400 flex items-center justify-center mb-6 shadow-lg ${celeb.imageUrl ? 'hidden' : ''}`}>
                 <User size={28} className="text-white" />
               </div>
 
@@ -195,7 +195,7 @@ const CelebGalleryView = () => {
 
                 {/* CTA */}
                 <div className="pt-2">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-[#FF4D8D] opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-[#FF4D8D] sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex items-center gap-2">
                     <Sparkles size={12} /> {t('celebs.selectAsMuse')}
                   </span>
                 </div>

@@ -76,7 +76,7 @@ const GlobalCheckoutView = () => {
           <ArrowLeft size={14} /> {t('checkout.continueShopping')}
         </button>
         <p className="text-[10px] font-black tracking-[0.6em] text-[#FF4D8D] mb-3 uppercase italic">Checkout — {itemCount()} {t('checkout.items')}</p>
-        <h2 className="text-[50px] lg:text-[70px] heading-font leading-[0.9] tracking-[-0.04em] uppercase">
+        <h2 className="text-[32px] sm:text-[50px] lg:text-[70px] heading-font leading-[0.9] tracking-[-0.04em] uppercase">
           {t('checkout.title')}
         </h2>
       </m.div>
@@ -89,7 +89,7 @@ const GlobalCheckoutView = () => {
               <ShoppingBag size={14} /> {t('checkout.yourCollection')}
             </h3>
             {items.map(({ product, quantity }) => (
-              <div key={product.id} className="flex items-center gap-6 p-6 bg-white rounded-3xl border border-gray-100 group">
+              <div key={product.id} className="flex items-center flex-wrap sm:flex-nowrap gap-4 sm:gap-6 p-4 sm:p-6 bg-white rounded-3xl border border-gray-100 group">
                 <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden">
                   {product.imageUrl ? (
                     <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
@@ -105,16 +105,16 @@ const GlobalCheckoutView = () => {
                   <p className="text-sm font-black uppercase truncate">{product.name}</p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <button onClick={() => updateQuantity(product.id, quantity - 1)} className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 hover:text-black transition-colors">
-                    <Minus size={12} />
+                  <button onClick={() => updateQuantity(product.id, quantity - 1)} className="w-11 h-11 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 hover:text-black transition-colors">
+                    <Minus size={14} />
                   </button>
                   <span className="text-sm font-black w-6 text-center">{quantity}</span>
-                  <button onClick={() => updateQuantity(product.id, quantity + 1)} className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 hover:text-black transition-colors">
-                    <Plus size={12} />
+                  <button onClick={() => updateQuantity(product.id, quantity + 1)} className="w-11 h-11 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 hover:text-black transition-colors">
+                    <Plus size={14} />
                   </button>
                 </div>
                 <span className="text-sm font-black w-20 text-right">${((product.price * quantity) / 100).toFixed(2)}</span>
-                <button onClick={() => removeItem(product.id)} className="p-2 text-gray-200 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
+                <button onClick={() => removeItem(product.id)} className="p-2 text-gray-200 hover:text-red-500 transition-colors sm:opacity-0 sm:group-hover:opacity-100">
                   <Trash2 size={14} />
                 </button>
               </div>
@@ -174,7 +174,7 @@ const GlobalCheckoutView = () => {
 
         {/* Order Summary */}
         <m.div variants={itemVariants} className="lg:col-span-5">
-          <div className="bg-white border border-gray-100 rounded-[3rem] p-10 sticky top-32 shadow-2xl">
+          <div className="bg-white border border-gray-100 rounded-[3rem] p-10 lg:sticky lg:top-32 shadow-2xl">
             <h4 className="text-[10px] font-black uppercase tracking-[0.4em] mb-10 text-gray-300 text-center">{t('checkout.orderSummary')}</h4>
 
             <div className="space-y-4 mb-10">

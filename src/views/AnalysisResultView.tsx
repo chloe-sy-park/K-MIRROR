@@ -99,7 +99,7 @@ const AnalysisResultView = () => {
   return (
     <m.div
       initial="hidden" animate="visible" variants={containerVariants}
-      className="space-y-32 pb-20 px-6"
+      className="space-y-16 sm:space-y-32 pb-20 px-6"
     >
       <m.section variants={itemVariants} className="border-b border-black pb-20">
         <div className="flex justify-between items-start mb-12">
@@ -126,7 +126,7 @@ const AnalysisResultView = () => {
           </div>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-end">
-          <h2 className="text-[60px] lg:text-[100px] heading-font leading-[0.85] tracking-[-0.05em] uppercase text-balance">
+          <h2 className="text-[32px] sm:text-[60px] lg:text-[100px] heading-font leading-[0.85] tracking-[-0.05em] uppercase text-balance">
             {t('result.neuralIdentity')}
           </h2>
           <div className="space-y-6 max-w-sm w-full">
@@ -183,7 +183,7 @@ const AnalysisResultView = () => {
               <m.div
                 key={idx}
                 whileHover={{ y: -5 }}
-                className="p-10 border border-gray-100 rounded-[3rem] bg-[#FDFDFE] flex flex-col gap-8 transition-all hover:bg-white hover:shadow-xl"
+                className="p-10 border border-gray-100 rounded-[3rem] bg-[#FDFDFE] flex flex-col gap-8 transition-all hover:bg-white hover:shadow-xl active:bg-white active:shadow-xl"
               >
                 <div className="text-[#FF4D8D]">{item.icon}</div>
                 <div>
@@ -235,7 +235,7 @@ const AnalysisResultView = () => {
                   {product.matchScore}% MATCH
                 </div>
                 <Sparkles size={24} className="text-gray-100 absolute" />
-                <div className="w-full h-full bg-gray-100/50 mix-blend-multiply rounded-lg group-hover:scale-110 transition-transform duration-700" />
+                <div className="w-full h-full bg-gray-100/50 mix-blend-multiply rounded-lg group-hover:scale-110 group-active:scale-110 transition-transform duration-700" />
               </div>
               {result.tone.skinHexCode && (
                 <div className="flex items-center gap-2 mb-6">
@@ -324,7 +324,7 @@ const AnalysisResultView = () => {
                   href={getYouTubeVideoUrl(video.videoId)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="relative group cursor-pointer overflow-hidden rounded-[3rem] h-[350px] shadow-xl block"
+                  className="relative group cursor-pointer overflow-hidden rounded-[3rem] h-[250px] sm:h-[350px] shadow-xl block"
                 >
                   {/* Real thumbnail */}
                   <img
@@ -372,7 +372,7 @@ const AnalysisResultView = () => {
                   href={`https://www.youtube.com/results?search_query=${encodeURIComponent(`${video.title} ${video.creator} K-beauty tutorial`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="relative group cursor-pointer overflow-hidden rounded-[3rem] h-[350px] shadow-xl block"
+                  className="relative group cursor-pointer overflow-hidden rounded-[3rem] h-[250px] sm:h-[350px] shadow-xl block"
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center">
                     <div className="text-[120px] font-black heading-font text-white/5 uppercase select-none">{idx + 1}</div>

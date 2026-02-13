@@ -51,9 +51,9 @@ const ScanView = () => {
             >
               <Beaker size={20} />
             </m.div>
-            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap text-[8px] font-black text-pink-500 opacity-0 group-hover:opacity-100 transition-opacity uppercase uppercase">{t('scan.previewDemo')}</div>
+            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap text-[8px] font-black text-pink-500 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity uppercase uppercase">{t('scan.previewDemo')}</div>
           </button>
-          <h2 className="text-6xl lg:text-8xl font-black heading-font leading-[0.9] tracking-tighter uppercase mb-10 text-balance">{t('scan.title')}<br/><span className="text-gray-300 text-balance">{t('scan.titleAccent')}</span></h2>
+          <h2 className="text-4xl sm:text-6xl lg:text-8xl font-black heading-font leading-[0.9] tracking-tighter uppercase mb-10 text-balance">{t('scan.title')}<br/><span className="text-gray-300 text-balance">{t('scan.titleAccent')}</span></h2>
           <p className="text-base lg:text-lg text-gray-500 mb-12 max-w-md leading-relaxed mx-auto lg:mx-0 font-medium italic uppercase tracking-tighter text-balance whitespace-pre-line">{t('scan.subtitle')}</p>
         </div>
         <div className="grid grid-cols-2 gap-6 md:gap-10 mb-12">

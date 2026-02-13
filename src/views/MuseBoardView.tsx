@@ -219,7 +219,7 @@ const MuseBoardView = () => {
     >
       {/* Header */}
       <m.div variants={itemVariants} className="text-center space-y-4">
-        <h2 className="text-[50px] lg:text-[80px] heading-font leading-[0.85] tracking-[-0.05em] uppercase">
+        <h2 className="text-[32px] sm:text-[50px] lg:text-[80px] heading-font leading-[0.85] tracking-[-0.05em] uppercase">
           {t('muse.title')}
         </h2>
         <p className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-400">
@@ -229,7 +229,7 @@ const MuseBoardView = () => {
 
       {/* Board Tabs */}
       <m.div variants={itemVariants}>
-        <div className="flex items-center gap-4 overflow-x-auto pb-4 scrollbar-hide">
+        <div className="flex items-center gap-4 overflow-x-auto pb-4">
           {activeBoardId && (
             <button
               onClick={() => setActiveBoard(null)}
@@ -424,7 +424,7 @@ const MuseBoardView = () => {
               </div>
 
               {/* Hover action buttons */}
-              <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
+              <div className="absolute top-4 right-4 flex gap-2 sm:opacity-0 sm:group-hover:opacity-100 transition-all">
                 <button
                   onClick={(e) => { e.stopPropagation(); openMoveModal(muse); }}
                   className="p-2 bg-white/80 backdrop-blur-sm rounded-xl text-gray-300 hover:text-blue-500 transition-all"
@@ -549,7 +549,7 @@ const MuseBoardView = () => {
               </button>
 
               {/* Images side by side */}
-              <div className="grid grid-cols-2 h-64 rounded-t-[3rem] overflow-hidden">
+              <div className="grid grid-cols-2 h-48 sm:h-64 rounded-t-[3rem] overflow-hidden">
                 <div className="relative bg-gray-100">
                   {selectedMuse.userImage ? (
                     <img src={getImageSrc(selectedMuse.userImage)} alt="Your selfie" className="w-full h-full object-cover" />
