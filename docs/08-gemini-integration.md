@@ -11,14 +11,16 @@
 | 항목 | 값 |
 |------|-----|
 | 서비스 파일 | `services/geminiService.ts` |
-| Export | `analyzeKBeauty()` (단일 함수) |
+| Export | `analyzeSkin()` (1차), `matchProducts()` (2차), `analyzeKBeauty()` (fallback) |
+| 아키텍처 | 2-step pipeline: analyzeSkin → matchProducts + YouTube (병렬) |
+| 백엔드 | Supabase Edge Functions (`analyze-skin`, `analyze-kbeauty`, `match-products`) |
 | 모델 | `gemini-3-pro-preview` (멀티모달) |
-| SDK | `@google/genai` (`GoogleGenAI` 클래스) |
-| 출력 형식 | Structured JSON (`responseMimeType: "application/json"`) |
-| 타임아웃 | 30초 (AbortController) |
-| 재시도 | 최대 2회, 지수 백오프 (1s → 3s) |
+| 출력 형식 | Structured JSON (Zod v4 런타임 검증) |
+| 타임아웃 | 분석 30초, 제품 매칭 10초 (AbortController) |
+| 재시도 | analyzeKBeauty: 최대 2회, 지수 백오프 (1s → 3s) |
 | 레이트 리미팅 | 분당 2회 (토큰 버킷) |
-| 에러 분류 | 8종 (`AnalysisErrorCode`) |
+| 에러 분류 | 7종 (`AnalysisErrorCode`) |
+| 결과 캐싱 | sessionStorage LRU (5개, 30분 TTL) — `cacheService.ts` |
 
 ---
 
@@ -134,23 +136,34 @@ return validated;
 
 ## 5. 이미지 전송
 
+### 클라이언트 → Edge Function
+
 ```typescript
-// geminiService.ts:40-45
-contents: {
-  parts: [
-    { text: systemInstruction },
-    { inlineData: { mimeType: 'image/jpeg', data: userImageBase64 } },
-    { inlineData: { mimeType: 'image/jpeg', data: celebImageBase64 } }
-  ]
-}
+// geminiService.ts — analyzeSkin/analyzeKBeauty
+body: JSON.stringify({
+  userImageBase64, celebImageBase64,
+  userMimeType,    celebMimeType,     // ← mimeType 전파
+  isSensitive, prefs, selectedCelebName,
+})
+```
+
+### Edge Function → Gemini API
+
+```typescript
+// supabase/functions/analyze-skin/index.ts
+contents: [
+  { inlineData: { mimeType: userMimeType || 'image/jpeg', data: userImageBase64 } },
+  { inlineData: { mimeType: celebMimeType || 'image/jpeg', data: celebImageBase64 } },
+  { text: prompt }
+]
 ```
 
 | 속성 | 값 | 비고 |
 |------|-----|------|
-| `mimeType` | `'image/jpeg'` (고정) | PNG, WebP 업로드 시에도 jpeg으로 전송 |
-| `data` | raw base64 | `data:image/...;base64,` prefix 없음 (LuxuryFileUpload에서 제거) |
+| `mimeType` | 동적 (기본: `image/jpeg`) | `imageService.ts`에서 JPEG로 변환되므로 일반적으로 `image/jpeg` |
+| `data` | raw base64 | `data:image/...;base64,` prefix 없음 |
 | 이미지 수 | 2개 (user + celeb) | 순서 중요: 첫 번째가 사용자, 두 번째가 셀럽 |
-| 크기 제한 | 없음 (코드 레벨) | Gemini API의 입력 제한에 의존 |
+| 이미지 리사이즈 | 최대 1024px | `imageService.processImage()` — Canvas API + JPEG 0.85 |
 
 ---
 
@@ -297,12 +310,17 @@ AI 분석에 새 필드를 추가할 때 반드시 업데이트해야 하는 6�
 | 요청 취소 | AbortSignal 전파 (scanStore → geminiService) |
 | Zod 검증 | `schemas/analysisResult.ts` 런타임 검증 |
 
+### 해소됨 (Sprint 3) ✅
+
+| 항목 | 구현 |
+|------|------|
+| 결과 캐싱 | sessionStorage LRU (5개, 30분 TTL) — `cacheService.ts` |
+| mimeType 전파 | `imageService.ts` → scanStore → geminiService → Edge Function 전체 파이프라인 |
+| 이미지 압축 | Canvas API 리사이즈 (1024px) + JPEG 0.85 — `imageService.ts` |
+| 2-step 파이프라인 | `analyzeSkin` → `matchProducts` + YouTube 병렬 |
+
 ### 남은 개선 기회
 
 | 항목 | 현재 | 개선 방향 |
 |------|------|----------|
-| 결과 캐싱 | 없음 | 동일 입력 → 로컬 캐시 반환 |
-| 클라이언트 재사용 | 매번 new | 싱글톤 GoogleGenAI 인스턴스 |
-| mimeType 감지 | jpeg 고정 | FileReader + 실제 파일 타입 반영 |
-| 이미지 압축 | 없음 | Canvas API로 리사이즈 후 전송 |
 | 프롬프트 버전 관리 | 없음 | 버전 상수 + 변경 로그 |

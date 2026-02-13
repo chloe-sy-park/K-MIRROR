@@ -108,7 +108,7 @@ Zustand v5 + `persist` 미들웨어
 
 | 스토어 | 역할 | persist |
 |--------|------|---------|
-| `scanStore` | 스캔 phase, 이미지, AI 결과, 에러 | No |
+| `scanStore` | 스캔 phase, 이미지(+mimeType), AI 결과, 매칭 제품, 에러 | No |
 | `settingsStore` | 온보딩, 선호도, 민감피부, 언어 | Yes (`kmirror_settings`) |
 | `cartStore` | 장바구니 CRUD, 주문 | No |
 | `authStore` | 인증 상태 | No |
@@ -183,7 +183,7 @@ Vitest v4 + @testing-library/react + @testing-library/jest-dom
 
 ### 현재 상태 ✅
 
-- 65개 테스트 (유닛 41 + 통합 24)
+- 47개 테스트 파일, 390개 테스트
 - 글로벌 모킹: framer-motion, react-i18next, @google/genai, @supabase/supabase-js
 - `@/` path alias 설정으로 소스 코드와 동일한 import
 
@@ -279,8 +279,9 @@ Vercel에 배포 (main 브랜치 자동 배포)
 
 - 13개 뷰 모두 `lazy(() => import(...))`로 전환
 - `LazyFallback` 스피너 컴포넌트 (브랜드 핑크 링)
-- 메인 번들: 833KB → 733KB
+- 메인 번들: 833KB → 317KB (React.lazy + vendor 청크 분리)
 - 뷰별 청크 자동 생성 (Vite 빌드)
+- Vendor 청크 분리: react, motion, supabase, i18n, stripe, sentry (`vite.config.ts` `manualChunks`)
 
 ---
 
@@ -301,7 +302,8 @@ Vercel에 배포 (main 브랜치 자동 배포)
 |----------|------------|
 | `Toggle.tsx` | `role="switch"`, `aria-checked`, `aria-label`, `onKeyDown(Enter/Space)`, `focus-visible:ring-2` |
 | `LuxuryFileUpload.tsx` | `aria-label`, `sr-only` input, `focus-within:ring-2` |
-| `AuthModal.tsx` | `role="dialog"`, `aria-modal`, `aria-label`, Escape 키, `htmlFor`, `autoComplete` |
+| `AuthModal.tsx` | `role="dialog"`, `aria-modal`, `aria-label`, `useFocusTrap` (포커스 트랩 + 복원), `htmlFor`, `autoComplete` |
+| `BiometricConsentModal.tsx` | `role="dialog"`, `aria-modal`, `aria-labelledby`, `useFocusTrap` (포커스 트랩 + 복원) |
 | `Navbar.tsx` | `aria-current="page"`, `aria-expanded`, `aria-label` (동적 카트 수량) |
 | `OnboardingView.tsx` | `role="radiogroup"`, `role="radio"`, `aria-checked`, `aria-labelledby` |
 | `CelebGalleryView.tsx` | `role="radiogroup"`, `role="radio"`, `role="button"`, `tabIndex(0)`, `onKeyDown` |
@@ -312,7 +314,6 @@ Vercel에 배포 (main 브랜치 자동 배포)
 
 - Skip to content 링크
 - 페이지 전환 시 `document.title` 업데이트
-- 모달 포커스 트랩 강화
 
 ---
 
@@ -402,7 +403,7 @@ GitHub Actions로 CI 파이프라인 구축
 
 | 항목 | 이전 상태 | 현재 상태 |
 |------|----------|----------|
-| 번들 크기 | 833KB 단일 번들 | 733KB + 뷰별 청크 (React.lazy) |
+| 번들 크기 | 833KB 단일 번들 | 317KB + vendor 청크 분리 + 뷰별 청크 (React.lazy + manualChunks) |
 | 접근성 | ARIA 속성 0개 | Toggle, Modal, Navbar, Gallery 등 ARIA + 키보드 적용 |
 | Gemini 복원력 | retry/timeout 없음 | 재시도 2회 + 30초 타임아웃 + 레이트 리미팅 |
 | Checkout 폼 | input value/onChange 미연결 | 폼 상태 바인딩 + 유효성 검사 |
@@ -412,14 +413,22 @@ GitHub Actions로 CI 파이프라인 구축
 | i18n 커버리지 | 에러/검증/접근성 라벨 누락 | errors, validation, a11y 섹션 완성 |
 | SEO | OG 태그 없음 | Open Graph + Twitter Card 추가 |
 
+## 해소된 기술 부채 (Sprint 3)
+
+| 항목 | 이전 상태 | 현재 상태 |
+|------|----------|----------|
+| 번들 크기 | 733KB (React.lazy만) | 317KB + vendor 6청크 (`manualChunks`) |
+| 이미지 최적화 | 리사이즈/압축 없음, mimeType 고정 | Canvas API 리사이즈 (1024px) + JPEG 압축 (0.85) + mimeType 전파 |
+| 모달 포커스 트랩 | 인라인 코드 중복 | `useFocusTrap` 훅 추출 (AuthModal, BiometricConsentModal 적용) |
+| 결과 캐싱 | 동일 입력 재분석 | sessionStorage LRU 캐시 (5개, 30분 TTL) |
+| 보드 자동 저장 | MuseBoard에서 스캔 시 보드 미연결 | `targetBoardId` → scanStore → AnalysisResultView 사전 선택 |
+| 테스트 커버리지 | 65개 테스트 | 390개 테스트 (47개 파일) |
+
 ## 남은 기술 부채
 
 | 항목 | 심각도 | 설명 |
 |------|--------|------|
 | TypeScript strict | 낮음 | `strict: true` 미활성화 |
 | 이미지 저장 없음 | 중간 | Muse Board, 가상피팅 결과 보관 불가 |
-| ESLint 미설정 | 낮음 | 린팅 규칙 강제 없음 (Prettier만 있음) |
 | Framer Motion 번들 | 낮음 | 트리 셰이킹 미적용 (LazyMotion 미사용) |
-| 테스트 커버리지 | 중간 | geminiService, scanStore 등 테스트 미작성 |
 | 포커스 관리 | 낮음 | Skip to content, document.title 업데이트 미구현 |
-| mimeType 감지 | 낮음 | 이미지 업로드 시 항상 jpeg으로 전송 |

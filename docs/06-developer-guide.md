@@ -125,8 +125,13 @@ K-MIRROR/
 │   │   ├── museStore.ts           # Muse Board 데이터
 │   │   └── authStore.ts           # 인증 상태
 │   │
+│   ├── hooks/
+│   │   └── useFocusTrap.ts        # 모달 포커스 트랩 + 자동 포커스 + 복원
+│   │
 │   ├── services/
-│   │   ├── geminiService.ts       # Gemini AI 분석 (프롬프트 v5.1, retry/timeout/rate limit)
+│   │   ├── geminiService.ts       # Gemini AI 분석 (2-step: analyzeSkin + matchProducts)
+│   │   ├── imageService.ts        # 이미지 리사이즈 (1024px) + JPEG 압축 (0.85)
+│   │   ├── cacheService.ts        # 분석 결과 캐싱 (sessionStorage LRU, 5개, 30분 TTL)
 │   │   ├── colorService.ts        # 멜라닌 기반 Multiply/Screen 블렌딩
 │   │   ├── productService.ts      # AI 추천 → 카탈로그 매칭
 │   │   └── museService.ts         # Muse Board CRUD (Supabase)
@@ -169,7 +174,7 @@ K-MIRROR/
 
 | 스토어 | 주요 상태 | persist |
 |--------|----------|---------|
-| `scanStore` | `phase`, `userImage`, `celebImage`, `result`, `error`, `selectedCelebName` | No |
+| `scanStore` | `phase`, `userImage`(+mimeType), `celebImage`(+mimeType), `result`, `matchedProducts`, `youtubeVideos`, `targetBoardId`, `error`, `selectedCelebName` | No |
 | `settingsStore` | `isOnboarded`, `isSensitive`, `prefs`, `language` | Yes (`kmirror_settings`) |
 | `cartStore` | `items[]`, `orders[]` | No |
 | `authStore` | `user`, `isAuthenticated` | No |
@@ -266,15 +271,23 @@ npm run test:run  # 1회 실행
 
 ### 현재 테스트 커버리지
 
+**47개 파일 / 390개 테스트**
+
+주요 테스트 파일:
+
 | 파일 | 테스트 수 | 테스트 대상 |
 |------|----------|------------|
-| `colorService.test.ts` | 19 | hexToRgb, rgbToHex, melaninAdjustedOpacity, renderColorOnSkin, renderSwatchSet |
-| `cartStore.test.ts` | 10 | addItem, remove, updateQuantity, subtotal, shipping, total, placeOrder |
-| `analysisResult.test.ts` | 7 | Zod 스키마 검증 (DEMO_RESULT, 필수 필드 누락, 타입 검증) |
-| `productService.test.ts` | 5 | 제품 매칭 (정확 매칭, 브랜드 폴백, 기본 폴백) |
-| `AnalysisResultView.test.tsx` | 10 | 헤더, 톤 정보, 제품, 비디오, 카트, 네비게이션, 리셋 |
-| `CelebGalleryView.test.tsx` | 8 | 헤더, 필터(장르/무드), 네비게이션, 빈 상태 |
-| `ScanView.test.tsx` | 6 | 렌더링, 버튼 활성화, 셀럽 뱃지, 데모 모드 |
+| `scoringService.test.ts` | 32 | 스코어링 알고리즘 |
+| `museStore.test.ts` | 30 | 보드 CRUD, 뮤즈 CRUD, 로딩 상태 |
+| `geminiService.test.ts` | 24 | analyzeSkin, analyzeKBeauty, matchProducts, retry, timeout |
+| `scanStore.test.ts` | 20 | analyze 파이프라인, 캐시, mimeType, 데모 모드 |
+| `colorService.test.ts` | 19 | hexToRgb, rgbToHex, 블렌딩 |
+| `ShopView.test.tsx` | 14 | 제품 목록, 필터, 카트 |
+| `OrdersView.test.tsx` | 16 | 주문 내역, 상태 표시 |
+| `GlobalCheckoutView.test.tsx` | 13 | 결제 폼, 유효성 검사 |
+| `OnboardingView.test.tsx` | 12 | 온보딩 단계, 환경/스킬/무드 선택 |
+| `cacheService.test.ts` | 11 | hashInputs, LRU 퇴거, TTL 만료 |
+| `AnalysisResultView.test.tsx` | 10 | 톤 정보, 제품, 비디오, 카트, 보드 사전 선택 |
 
 ---
 
@@ -311,9 +324,9 @@ npm run test:run  # 1회 실행
 
 ### 번들 크기
 
-- 메인 JS 번들 ~733KB — `React.lazy()` 코드 스플리팅 적용
+- 메인 JS 번들 ~317KB (gzip ~99KB) — `React.lazy()` + `manualChunks` vendor 분리
+- Vendor 청크: react(48KB), motion(78KB), supabase(173KB), i18n(50KB), stripe(1.5KB), sentry(0.04KB)
 - 뷰별 청크 자동 생성 (Vite 빌드)
-- `@google/genai`, `framer-motion`이 주요 크기 기여
 - Framer Motion 트리 셰이킹(`LazyMotion`)은 미적용
 
 ### Supabase 비활성 경고
@@ -327,10 +340,11 @@ npm run test:run  # 1회 실행
 - 대용량 이미지 → 브라우저 메모리 부담
 - 세션 종료/새로고침 시 스캔 관련 이미지 소멸 (persist 안함)
 
-### mimeType
+### 이미지 처리
 
-- 이미지 업로드 시 `accept="image/*"`로 모든 포맷 허용
-- Gemini API 전송 시 항상 `mimeType: 'image/jpeg'` — Gemini가 자동 감지하므로 대부분 동작
+- `imageService.ts`가 업로드 이미지를 Canvas API로 리사이즈 (최대 1024px) + JPEG 압축 (quality 0.85)
+- mimeType이 파이프라인 전체에 전파: LuxuryFileUpload → scanStore → geminiService → Edge Function → Gemini API
+- 항상 JPEG로 출력하므로 일관된 payload 크기
 
 ### TypeScript Strict 모드
 
@@ -368,3 +382,14 @@ npm run test:run  # 1회 실행
 | i18n 누락 | 에러/검증 메시지 미번역 | errors, validation, a11y 섹션 완성 |
 | SEO 미설정 | OG 태그 없음 | Open Graph + Twitter Card |
 | Footer 아이콘 | onClick 없음 | 네비게이션 연결 + aria-label |
+
+### Sprint 3
+
+| 항목 | 이전 상태 | 현재 상태 |
+|------|----------|----------|
+| 이미지 최적화 | 리사이즈/압축 없음, mimeType 고정 | Canvas API 리사이즈 (1024px) + JPEG 압축 + mimeType 전파 |
+| 번들 크기 | 733KB (React.lazy만) | 317KB + vendor 6청크 (`manualChunks`) |
+| 보드 자동 저장 | MuseBoard→스캔 시 보드 미연결 | `targetBoardId` in scanStore → 보드 사전 선택 |
+| 모달 포커스 트랩 | AuthModal/BiometricConsentModal에 인라인 중복 | `useFocusTrap` 훅 (포커스 트랩 + 자동 포커스 + 복원) |
+| 결과 캐싱 | 동일 입력 매번 재분석 | sessionStorage LRU 캐시 (5개, 30분 TTL) |
+| 테스트 커버리지 | 65개 테스트 | 390개 테스트 (47개 파일) |

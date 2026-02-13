@@ -16,9 +16,11 @@
 | 컴포넌트 | 파일 | Props | 용도 | 접근성 |
 |----------|------|-------|------|--------|
 | `Toggle` | `Toggle.tsx` | `checked`, `onChange`, `label?` | on/off 스위치 | `role="switch"`, `aria-checked`, 키보드 Enter/Space |
-| `LuxuryFileUpload` | `LuxuryFileUpload.tsx` | `label`, `secondaryLabel`, `preview`, `onImageSelect` | 이미지 업로드 | `aria-label`, `sr-only` input |
+| `LuxuryFileUpload` | `LuxuryFileUpload.tsx` | `label`, `secondaryLabel`, `preview`, `onImageSelect(base64, mimeType)` | 이미지 업로드 + 리사이즈 | `aria-label`, `sr-only` input |
+| `BiometricConsentModal` | `BiometricConsentModal.tsx` | `isOpen`, `onAccept`, `onDecline` | 생체정보 동의 모달 | `role="dialog"`, `aria-modal`, `useFocusTrap` |
+| `CookieConsentBanner` | `CookieConsentBanner.tsx` | — | 쿠키 동의 배너 | — |
 | `ErrorToast` | `ErrorToast.tsx` | `message`, `onDismiss` | 에러 알림 토스트 | — |
-| `AuthModal` | `AuthModal.tsx` | `onClose` | 인증 모달 | `role="dialog"`, `aria-modal`, Escape 닫기 |
+| `AuthModal` | `AuthModal.tsx` | — (전역 스토어 사용) | 인증 모달 | `role="dialog"`, `aria-modal`, `useFocusTrap` (포커스 트랩 + 복원) |
 
 ### 1-2. Layout Components (`components/layout/`)
 
@@ -374,15 +376,33 @@ const CommunityView = lazy(() => import('@/views/CommunityView'));
 </div>
 ```
 
-### 8-3. 모달/다이얼로그
+### 8-3. 모달/다이얼로그 (useFocusTrap 훅)
 
 ```tsx
-<div role="dialog" aria-modal="true" aria-label="Sign In" onKeyDown={(e) => e.key === 'Escape' && onClose()}>
-  <button aria-label="Close dialog" onClick={onClose}>...</button>
-  <label htmlFor="email">Email</label>
-  <input id="email" autoComplete="email" />
-</div>
+import { useFocusTrap } from '@/hooks/useFocusTrap';
+
+const Modal = ({ isOpen, onClose }) => {
+  const { dialogRef, handleKeyDown } = useFocusTrap({ isOpen, onEscape: onClose });
+
+  return (
+    <div onKeyDown={handleKeyDown}>
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Dialog">
+        {/* 첫 번째 focusable 요소에 자동 포커스 */}
+        <button aria-label="Close dialog" onClick={onClose}>×</button>
+        {/* Tab 키로 순환, Escape로 닫기, 닫힐 때 트리거 요소로 포커스 복원 */}
+      </div>
+    </div>
+  );
+};
 ```
+
+`useFocusTrap` 훅 기능:
+- **자동 포커스**: 모달 열릴 때 첫 번째 focusable 요소에 포커스
+- **포커스 트랩**: Tab/Shift+Tab으로 모달 내부 순환 (빠져나가지 않음)
+- **포커스 복원**: 모달 닫힐 때 열기 전 포커스 위치로 복원
+- **Escape 키**: `onEscape` 콜백 실행
+
+적용된 컴포넌트: `AuthModal`, `BiometricConsentModal`
 
 ### 8-4. 인터랙티브 카드
 

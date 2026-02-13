@@ -83,18 +83,26 @@
 |------|------|------|
 | `phase` | `'idle' \| 'analyzing' \| 'result'` | 현재 스캔 단계 |
 | `userImage` | `string \| null` | 사용자 이미지 (base64) |
+| `userImageMimeType` | `string` | 사용자 이미지 MIME 타입 (기본: `image/jpeg`) |
 | `celebImage` | `string \| null` | 셀럽 이미지 (base64) |
-| `result` | `AnalysisResult \| null` | AI 분석 결과 |
-| `error` | `string \| null` | 에러 메시지 |
+| `celebImageMimeType` | `string` | 셀럽 이미지 MIME 타입 (기본: `image/jpeg`) |
 | `selectedCelebName` | `string \| null` | 갤러리에서 선택한 셀럽 이름 |
+| `targetBoardId` | `string \| null` | MuseBoard에서 넘어온 보드 ID (자동 저장용) |
+| `result` | `AnalysisResult \| null` | AI 분석 결과 |
+| `analysisId` | `string \| null` | DB 저장된 분석 ID (피드백 연결용) |
+| `matchedProducts` | `MatchedProduct[]` | DB 매칭된 제품 목록 |
+| `youtubeVideos` | `YouTubeVideo[]` | 검색된 YouTube 비디오 |
+| `error` | `string \| null` | 에러 메시지 |
 
 | 액션 | 설명 |
 |------|------|
-| `analyze()` | Gemini API 호출 (AbortController 포함) |
+| `analyze()` | 2-step AI 분석 (analyzeSkin → matchProducts + YouTube) + 캐시 |
 | `demoMode()` | 2초 지연 후 DEMO_RESULT 로드 |
-| `reset()` | 모든 스캔 상태 초기화 + 타이머 클리어 |
-| `setUserImage()` | 사용자 이미지 설정 |
-| `setCelebImage()` | 셀럽 이미지 설정 |
+| `reset()` | 모든 스캔 상태 초기화 + 타이머/분석 취소 |
+| `setUserImage(base64, mimeType?)` | 사용자 이미지 + mimeType 설정 |
+| `setCelebImage(base64, mimeType?)` | 셀럽 이미지 + mimeType 설정 |
+| `setTargetBoard(boardId)` | 대상 보드 ID 설정 (MuseBoard → 스캔 플로우) |
+| `setCelebFromGallery(celeb)` | 갤러리 셀럽 이미지 fetch + 설정 |
 
 ### 2-2. settingsStore (persist)
 
@@ -160,43 +168,63 @@ Muse Board 관리.
 
 ```
 settingsStore.prefs (온보딩에서 설정)
-  + scanStore.userImage  (base64, LuxuryFileUpload에서 업로드)
-  + scanStore.celebImage (base64, LuxuryFileUpload에서 업로드 또는 갤러리에서 선택)
+  + scanStore.userImage  (base64, imageService.processImage로 리사이즈/압축)
+  + scanStore.userImageMimeType (mimeType, LuxuryFileUpload에서 전달)
+  + scanStore.celebImage (base64, 업로드 또는 갤러리 fetch)
   + settingsStore.isSensitive (boolean, Toggle에서 설정)
       │
-      ▼
-  analyzeKBeauty(userImage, celebImage, isSensitive, prefs, selectedCelebName?, signal?)
-      │  (services/geminiService.ts — retry + timeout + rate limit)
+      ▼  캐시 체크 (hashInputs → getCachedResult)
+      │
+      ▼  캐시 miss 시:
+  Step 1: analyzeSkin(userImage, celebImage, isSensitive, prefs, ...)
+      │  (services/geminiService.ts → Supabase Edge Function → Gemini API)
       ▼
   AnalysisResult (Zod 검증 통과)
+      │
+      ▼  Step 2 (병렬):
+  matchProducts(result.tone, signal)  +  searchYouTubeVideos(queries)
+      │                                      │
+      ▼                                      ▼
+  MatchedProduct[]                     YouTubeVideo[]
 ```
 
-### 3-2. API 호출 흐름
+### 3-2. API 호출 흐름 (2-step pipeline + 캐시)
 
 ```typescript
 // scanStore.ts — analyze()
-const controller = new AbortController();
-set({ phase: 'analyzing', error: null });
+// 1. 캐시 확인
+const cacheKey = hashInputs(userImage, celebImage);
+const cached = getCachedResult(cacheKey);
+if (cached) { set({ result: cached, phase: 'result' }); return; }
 
+// 2. 분석 실행
+const controller = new AbortController();
 try {
-  const result = await analyzeKBeauty(
-    userImage, celebImage, isSensitive, prefs,
-    selectedCelebName, controller.signal
-  );
-  set({ result, phase: 'result' });
-} catch (err) {
-  if (err instanceof AnalysisError) {
-    set({ error: err.message, errorCode: err.code, phase: 'idle' });
-  }
+  // Step 1: AI 분석
+  const res = await analyzeSkin(userImage, celebImage, ...);
+
+  // Step 2: 제품 매칭 + YouTube (병렬)
+  const [products, videos] = await Promise.all([
+    matchProducts(res.tone, signal),
+    searchYouTubeVideos(res.youtubeSearch.queries),
+  ]);
+
+  set({ result: res, matchedProducts: products, phase: 'result' });
+  setCachedResult(cacheKey, res);  // 캐시 저장
+} catch (skinErr) {
+  // Fallback: analyzeKBeauty (레거시 엔드포인트)
+  const res = await analyzeKBeauty(userImage, celebImage, ...);
+  set({ result: res, phase: 'result' });
 }
 ```
 
 복원력 레이어:
-1. **레이트 리미터** 체크 (분당 2회)
-2. **타임아웃** 30초 AbortController
-3. **API 호출** → Gemini 3 Pro
-4. **재시도** NETWORK/TIMEOUT 시 최대 2회 (1s → 3s 백오프)
+1. **결과 캐시** 확인 (sessionStorage LRU, 5개, 30분 TTL)
+2. **레이트 리미터** 체크 (분당 2회)
+3. **타임아웃** 30초 AbortController
+4. **API 호출** → analyzeSkin (→ analyzeKBeauty fallback)
 5. **Zod 검증** → AnalysisResult 반환
+6. **캐시 저장** → 동일 입력 재분석 방지
 
 ### 3-3. 결과 소비
 
@@ -279,19 +307,18 @@ React Router `NavLink`를 사용하여 URL 기반 네비게이션:
 
 ## 6. 이미지 핸들링 디테일
 
-### 업로드 → Store
+### 업로드 → 리사이즈 → Store
 
 ```typescript
 // LuxuryFileUpload.tsx
-const reader = new FileReader();
-reader.readAsDataURL(file);
-reader.onloadend = () => {
-  const base64String = (reader.result as string).split(',')[1];
-  onImageSelect(base64String);  // → scanStore.setUserImage() 또는 setCelebImage()
-};
+const { base64, mimeType } = await processImage(file);
+//  ↑ imageService.ts: Canvas API 리사이즈 (1024px max) + JPEG 압축 (0.85)
+onImageSelect(base64, mimeType);  // → scanStore.setUserImage(base64, mimeType)
 ```
 
-**왜 prefix를 제거하는가?** Gemini API의 `inlineData`는 raw base64만 받고 `mimeType`을 별도 필드로 전달하기 때문.
+- `processImage()`: Canvas API로 이미지를 최대 1024px로 리사이즈, JPEG quality 0.85로 압축
+- 항상 JPEG 출력 → 일관된 mimeType (`image/jpeg`)
+- base64는 `data:` prefix 없는 순수 base64
 
 ### Store → 화면 표시
 
@@ -299,19 +326,22 @@ reader.onloadend = () => {
 <img src={`data:image/jpeg;base64,${preview}`} />
 ```
 
-### Store → API 전송
+### Store → Edge Function → Gemini API
 
 ```typescript
-// geminiService.ts
-{ inlineData: { mimeType: 'image/jpeg', data: userImageBase64 } }
-{ inlineData: { mimeType: 'image/jpeg', data: celebImageBase64 } }
+// geminiService.ts → Edge Function
+{ userImageBase64, celebImageBase64, userMimeType, celebMimeType, ... }
+
+// Edge Function → Gemini API
+{ inlineData: { mimeType: userMimeType || 'image/jpeg', data: userImageBase64 } }
+{ inlineData: { mimeType: celebMimeType || 'image/jpeg', data: celebImageBase64 } }
 ```
+
+mimeType이 파이프라인 전체에 전파: `LuxuryFileUpload → scanStore → geminiService → Edge Function → Gemini API`
 
 ### 주의사항
 
 | 이슈 | 설명 |
 |------|------|
-| mimeType 고정 | PNG, WebP를 올려도 `image/jpeg`로 전송. Gemini가 자동 감지하므로 대부분 동작 |
-| 메모리 보관 | base64 문자열이 Zustand state에 상주. 대용량 이미지 → 브라우저 메모리 부담 |
+| 메모리 보관 | base64 문자열이 Zustand state에 상주. 리사이즈로 완화되었지만 여전히 주의 |
 | 영속성 없음 | 새로고침 시 스캔 이미지 소멸 (persist 안 함) |
-| 크기 제한 없음 | 업로드 이미지 리사이즈/압축 없음. Gemini API 입력 제한에 의존 |
