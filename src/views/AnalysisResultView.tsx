@@ -4,7 +4,7 @@ import { AnimatePresence } from 'framer-motion';
 import * as m from 'framer-motion/m';
 import {
   RotateCcw, Cpu, Palette, Droplets, Eye, Activity,
-  Check, Sparkles, Plus, Play, ExternalLink, Lightbulb,
+  Check, Sparkles, Plus, Play, Lightbulb,
   Bookmark, X, Target, Youtube, Wand2,
 } from 'lucide-react';
 import { containerVariants, itemVariants } from '@/constants/animations';
@@ -33,9 +33,10 @@ const AnalysisResultView = () => {
   const [reportId] = useState(generateReportId);
 
   // Find best-matching board based on autoTags (must be before early return)
+  const autoTags = result?.autoTags;
   const suggestedBoard = useMemo(() => {
-    if (!result?.autoTags?.length || !boards.length) return null;
-    const tags = result.autoTags.map((t) => t.toLowerCase());
+    if (!autoTags?.length || !boards.length) return null;
+    const tags = autoTags.map((t) => t.toLowerCase());
     let bestBoard = null;
     let bestScore = 0;
     for (const board of boards) {
@@ -47,7 +48,7 @@ const AnalysisResultView = () => {
       }
     }
     return bestBoard;
-  }, [result?.autoTags, boards]);
+  }, [autoTags, boards]);
 
   if (!result) return null;
 
@@ -309,7 +310,7 @@ const AnalysisResultView = () => {
         {/* Real YouTube Videos (if available) */}
         {hasRealVideos ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-            {youtubeVideos.map((video, idx) => (
+            {youtubeVideos.map((video) => (
               <m.div
                 key={video.videoId}
                 initial={{ opacity: 0, scale: 0.95 }}
