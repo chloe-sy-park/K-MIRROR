@@ -1,9 +1,9 @@
-import { useEffect, useRef, useCallback } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import * as m from 'framer-motion/m';
 import { ShieldCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 interface BiometricConsentModalProps {
   isOpen: boolean;
@@ -11,57 +11,9 @@ interface BiometricConsentModalProps {
   onDecline: () => void;
 }
 
-const FOCUSABLE =
-  'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
 const BiometricConsentModal = ({ isOpen, onAccept, onDecline }: BiometricConsentModalProps) => {
   const { t } = useTranslation();
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<Element | null>(null);
-
-  // Save the element that opened the modal so we can restore focus on close
-  useEffect(() => {
-    if (isOpen) {
-      triggerRef.current = document.activeElement;
-    } else if (triggerRef.current instanceof HTMLElement) {
-      triggerRef.current.focus();
-      triggerRef.current = null;
-    }
-  }, [isOpen]);
-
-  // Auto-focus the first focusable element when modal opens
-  useEffect(() => {
-    if (isOpen && dialogRef.current) {
-      const first = dialogRef.current.querySelector<HTMLElement>(FOCUSABLE);
-      first?.focus();
-    }
-  }, [isOpen]);
-
-  // Focus trap: cycle Tab within the dialog
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onDecline();
-        return;
-      }
-      if (e.key !== 'Tab' || !dialogRef.current) return;
-
-      const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>(FOCUSABLE));
-      if (focusable.length === 0) return;
-
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last!.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first!.focus();
-      }
-    },
-    [onDecline],
-  );
+  const { dialogRef, handleKeyDown } = useFocusTrap({ isOpen, onEscape: onDecline });
 
   const titleId = 'biometric-consent-title';
 

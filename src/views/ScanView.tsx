@@ -14,21 +14,26 @@ import type { CelebProfile } from '@/data/celebGallery';
 
 const ScanView = () => {
   const { t } = useTranslation();
-  const { userImage, celebImage, selectedCelebName, setUserImage, setCelebImage, setCelebFromGallery, analyze, demoMode } = useScanStore();
+  const { userImage, celebImage, selectedCelebName, setUserImage, setCelebImage, setCelebFromGallery, setTargetBoard, analyze, demoMode } = useScanStore();
   const { isSensitive, toggleSensitive, prefs } = useSettingsStore();
   const [showConsent, setShowConsent] = useState(false);
   const { biometricConsent, acceptBiometric } = useConsentStore();
   const location = useLocation();
 
-  // Accept celeb from CelebGalleryView navigation
+  // Accept celeb from CelebGalleryView and fromBoard from MuseBoardView
   useEffect(() => {
-    const state = location.state as { selectedCeleb?: CelebProfile } | null;
+    const state = location.state as { selectedCeleb?: CelebProfile; fromBoard?: string } | null;
     if (state?.selectedCeleb) {
       setCelebFromGallery(state.selectedCeleb);
-      // Clear the state so it doesn't re-trigger on navigation
+    }
+    if (state?.fromBoard) {
+      setTargetBoard(state.fromBoard);
+    }
+    // Clear the state so it doesn't re-trigger on navigation
+    if (state?.selectedCeleb || state?.fromBoard) {
       window.history.replaceState({}, '');
     }
-  }, [location.state, setCelebFromGallery]);
+  }, [location.state, setCelebFromGallery, setTargetBoard]);
 
   const handleAnalyze = () => {
     if (!biometricConsent) {

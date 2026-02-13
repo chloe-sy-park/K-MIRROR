@@ -72,7 +72,9 @@ export const analyzeSkin = async (
   isSensitive: boolean,
   prefs: UserPreferences,
   selectedCelebName?: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  userMimeType = 'image/jpeg',
+  celebMimeType = 'image/jpeg',
 ): Promise<AnalysisResult> => {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -102,6 +104,8 @@ export const analyzeSkin = async (
       body: JSON.stringify({
         userImageBase64,
         celebImageBase64,
+        userMimeType,
+        celebMimeType,
         isSensitive,
         prefs,
         selectedCelebName,
@@ -191,7 +195,9 @@ export const analyzeKBeauty = async (
   isSensitive: boolean,
   prefs: UserPreferences,
   selectedCelebName?: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  userMimeType = 'image/jpeg',
+  celebMimeType = 'image/jpeg',
 ): Promise<AnalysisResult> => {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -222,6 +228,8 @@ export const analyzeKBeauty = async (
         body: JSON.stringify({
           userImageBase64,
           celebImageBase64,
+          userMimeType,
+          celebMimeType,
           isSensitive,
           prefs,
           selectedCelebName,

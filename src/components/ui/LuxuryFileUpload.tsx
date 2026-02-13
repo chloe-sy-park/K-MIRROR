@@ -3,6 +3,7 @@ import * as m from 'framer-motion/m';
 import { Camera, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { pulseVariants } from '@/constants/animations';
+import { processImage } from '@/services/imageService';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -11,7 +12,7 @@ interface LuxuryFileUploadProps {
   label: string;
   secondaryLabel: string;
   preview: string | null;
-  onImageSelect: (base64: string) => void;
+  onImageSelect: (base64: string, mimeType: string) => void;
   capture?: 'user' | 'environment';
 }
 
@@ -19,7 +20,7 @@ const LuxuryFileUpload = ({ label, secondaryLabel, preview, onImageSelect, captu
   const { t } = useTranslation();
   const [fileError, setFileError] = useState<string | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setFileError(null);
     const file = e.target.files?.[0];
     if (!file) return;
@@ -33,14 +34,12 @@ const LuxuryFileUpload = ({ label, secondaryLabel, preview, onImageSelect, captu
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64String = (reader.result as string).split(',')[1];
-      if (base64String) {
-        onImageSelect(base64String);
-      }
-    };
-    reader.readAsDataURL(file);
+    try {
+      const { base64, mimeType } = await processImage(file);
+      onImageSelect(base64, mimeType);
+    } catch {
+      setFileError(t('validation.fileFormat'));
+    }
   };
 
   return (

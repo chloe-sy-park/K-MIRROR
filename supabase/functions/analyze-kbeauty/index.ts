@@ -166,12 +166,16 @@ serve(async (req) => {
     const {
       userImageBase64,
       celebImageBase64,
+      userMimeType,
+      celebMimeType,
       isSensitive,
       prefs,
       selectedCelebName,
     } = body as {
       userImageBase64: string;
       celebImageBase64: string;
+      userMimeType?: string;
+      celebMimeType?: string;
       isSensitive: boolean;
       prefs: { environment: string; skill: string; mood: string };
       selectedCelebName?: string;
@@ -249,8 +253,8 @@ serve(async (req) => {
             {
               text: "Analyze these two images. Image 1 is the user's bare face. Image 2 is the K-Celeb style muse.",
             },
-            { inlineData: { mimeType: 'image/jpeg', data: userImage } },
-            { inlineData: { mimeType: 'image/jpeg', data: celebImage } },
+            { inlineData: { mimeType: userMimeType || 'image/jpeg', data: userImage } },
+            { inlineData: { mimeType: celebMimeType || 'image/jpeg', data: celebImage } },
           ],
         },
       ],

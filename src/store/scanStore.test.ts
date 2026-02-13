@@ -25,6 +25,13 @@ vi.mock('@/services/analysisService', () => ({
   extractProductIds: vi.fn().mockReturnValue([]),
 }));
 
+// Mock cacheService (prevent cross-test cache pollution)
+vi.mock('@/services/cacheService', () => ({
+  hashInputs: vi.fn().mockReturnValue('test-hash'),
+  getCachedResult: vi.fn().mockReturnValue(null),
+  setCachedResult: vi.fn(),
+}));
+
 // Mock sentry (captureError used in error handler)
 vi.mock('@/lib/sentry', () => ({
   captureError: vi.fn(),
@@ -69,6 +76,29 @@ describe('scanStore', () => {
       useScanStore.getState().setUserImage('base64data');
       expect(useScanStore.getState().userImage).toBe('base64data');
     });
+
+    it('sets user image with mimeType', () => {
+      useScanStore.getState().setUserImage('base64data', 'image/png');
+      expect(useScanStore.getState().userImageMimeType).toBe('image/png');
+    });
+
+    it('defaults mimeType to image/jpeg', () => {
+      useScanStore.getState().setUserImage('base64data');
+      expect(useScanStore.getState().userImageMimeType).toBe('image/jpeg');
+    });
+  });
+
+  describe('setTargetBoard', () => {
+    it('sets target board id', () => {
+      useScanStore.getState().setTargetBoard('board-123');
+      expect(useScanStore.getState().targetBoardId).toBe('board-123');
+    });
+
+    it('clears target board id', () => {
+      useScanStore.setState({ targetBoardId: 'board-123' });
+      useScanStore.getState().setTargetBoard(null);
+      expect(useScanStore.getState().targetBoardId).toBeNull();
+    });
   });
 
   describe('setCelebImage', () => {
@@ -77,6 +107,11 @@ describe('scanStore', () => {
       useScanStore.getState().setCelebImage('celebdata');
       expect(useScanStore.getState().celebImage).toBe('celebdata');
       expect(useScanStore.getState().selectedCelebName).toBeNull();
+    });
+
+    it('sets celeb image with mimeType', () => {
+      useScanStore.getState().setCelebImage('celebdata', 'image/webp');
+      expect(useScanStore.getState().celebImageMimeType).toBe('image/webp');
     });
   });
 
@@ -164,7 +199,7 @@ describe('scanStore', () => {
       expect(useScanStore.getState().error).toBe('timeout');
     });
 
-    it('passes selectedCelebName to analyzeKBeauty in fallback path', async () => {
+    it('passes selectedCelebName and mimeTypes to analyzeKBeauty in fallback path', async () => {
       useScanStore.setState({ userImage: 'user', celebImage: 'celeb', selectedCelebName: 'Jisoo' });
       mockAnalyzeKBeauty.mockResolvedValue(DEMO_RESULT);
 
@@ -175,6 +210,8 @@ describe('scanStore', () => {
         { environment: 'Studio', skill: 'Pro', mood: 'Powerful' },
         'Jisoo',
         expect.any(Object), // AbortSignal
+        'image/jpeg', // userMimeType
+        'image/jpeg', // celebMimeType
       );
     });
 

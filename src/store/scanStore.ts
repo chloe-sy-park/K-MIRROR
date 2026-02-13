@@ -6,6 +6,7 @@ import type { MatchedProduct } from '@/services/geminiService';
 import { searchYouTubeVideos, isYouTubeConfigured } from '@/services/youtubeService';
 import { saveAnalysis, extractProductIds } from '@/services/analysisService';
 import { DEMO_RESULT } from '@/data/demoResult';
+import { hashInputs, getCachedResult, setCachedResult } from '@/services/cacheService';
 import type { CelebProfile } from '@/data/celebGallery';
 
 export type ScanPhase = 'idle' | 'analyzing' | 'result';
@@ -13,16 +14,20 @@ export type ScanPhase = 'idle' | 'analyzing' | 'result';
 interface ScanState {
   phase: ScanPhase;
   userImage: string | null;
+  userImageMimeType: string;
   celebImage: string | null;
+  celebImageMimeType: string;
   selectedCelebName: string | null;
+  targetBoardId: string | null;
   result: AnalysisResult | null;
   analysisId: string | null;
   matchedProducts: MatchedProduct[];
   youtubeVideos: YouTubeVideo[];
   error: string | null;
 
-  setUserImage: (base64: string) => void;
-  setCelebImage: (base64: string) => void;
+  setUserImage: (base64: string, mimeType?: string) => void;
+  setCelebImage: (base64: string, mimeType?: string) => void;
+  setTargetBoard: (boardId: string | null) => void;
   setCelebFromGallery: (celeb: CelebProfile) => Promise<void>;
   analyze: (isSensitive: boolean, prefs: UserPreferences) => Promise<void>;
   demoMode: () => void;
@@ -47,16 +52,20 @@ let analyzeController: AbortController | null = null;
 export const useScanStore = create<ScanState>((set, get) => ({
   phase: 'idle',
   userImage: null,
+  userImageMimeType: 'image/jpeg',
   celebImage: null,
+  celebImageMimeType: 'image/jpeg',
   selectedCelebName: null,
+  targetBoardId: null,
   result: null,
   analysisId: null,
   matchedProducts: [],
   youtubeVideos: [],
   error: null,
 
-  setUserImage: (base64) => set({ userImage: base64 }),
-  setCelebImage: (base64) => set({ celebImage: base64, selectedCelebName: null }),
+  setUserImage: (base64, mimeType) => set({ userImage: base64, userImageMimeType: mimeType ?? 'image/jpeg' }),
+  setCelebImage: (base64, mimeType) => set({ celebImage: base64, celebImageMimeType: mimeType ?? 'image/jpeg', selectedCelebName: null }),
+  setTargetBoard: (boardId) => set({ targetBoardId: boardId }),
 
   setCelebFromGallery: async (celeb) => {
     set({ selectedCelebName: celeb.name });
@@ -71,8 +80,16 @@ export const useScanStore = create<ScanState>((set, get) => ({
   },
 
   analyze: async (isSensitive, prefs) => {
-    const { userImage, celebImage, selectedCelebName } = get();
+    const { userImage, userImageMimeType, celebImage, celebImageMimeType, selectedCelebName } = get();
     if (!userImage || !celebImage) return;
+
+    // Check cache for identical inputs
+    const cacheKey = hashInputs(userImage, celebImage);
+    const cached = getCachedResult<AnalysisResult>(cacheKey);
+    if (cached) {
+      set({ result: cached, phase: 'result', error: null });
+      return;
+    }
 
     // Abort any previous in-flight analysis
     analyzeController?.abort();
@@ -87,7 +104,7 @@ export const useScanStore = create<ScanState>((set, get) => ({
 
       try {
         // New 2-step pipeline: analyze-skin -> match-products + YouTube in parallel
-        res = await analyzeSkin(userImage, celebImage, isSensitive, prefs, selectedCelebName ?? undefined, controller.signal);
+        res = await analyzeSkin(userImage, celebImage, isSensitive, prefs, selectedCelebName ?? undefined, controller.signal, userImageMimeType, celebImageMimeType);
 
         if (!controller.signal.aborted) {
           // Phase 2: products + YouTube in parallel
@@ -108,7 +125,7 @@ export const useScanStore = create<ScanState>((set, get) => ({
         if (skinErr instanceof AnalysisError && skinErr.code === 'ABORTED') throw skinErr;
         if (import.meta.env.DEV) console.warn('analyze-skin failed, falling back to analyze-kbeauty:', skinErr);
 
-        res = await analyzeKBeauty(userImage, celebImage, isSensitive, prefs, selectedCelebName ?? undefined, controller.signal);
+        res = await analyzeKBeauty(userImage, celebImage, isSensitive, prefs, selectedCelebName ?? undefined, controller.signal, userImageMimeType, celebImageMimeType);
 
         // Legacy YouTube (non-blocking)
         if (isYouTubeConfigured && res.youtubeSearch?.queries?.length) {
@@ -120,6 +137,9 @@ export const useScanStore = create<ScanState>((set, get) => ({
 
       if (!controller.signal.aborted) {
         set({ result: res, matchedProducts: products, phase: 'result' });
+
+        // Cache the result for identical future inputs
+        setCachedResult(cacheKey, res);
 
         // Save to DB (non-blocking) — analysisId is used for feedback
         saveAnalysis(res, extractProductIds(products)).then((id) => {
@@ -151,7 +171,7 @@ export const useScanStore = create<ScanState>((set, get) => ({
     if (demoTimer) { clearTimeout(demoTimer); demoTimer = null; }
     analyzeController?.abort();
     analyzeController = null;
-    set({ result: null, analysisId: null, youtubeVideos: [], matchedProducts: [], phase: 'idle', error: null, selectedCelebName: null });
+    set({ result: null, analysisId: null, youtubeVideos: [], matchedProducts: [], phase: 'idle', error: null, selectedCelebName: null, targetBoardId: null, userImageMimeType: 'image/jpeg', celebImageMimeType: 'image/jpeg' });
   },
   clearError: () => set({ error: null }),
 }));
