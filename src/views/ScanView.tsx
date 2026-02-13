@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as m from 'framer-motion/m';
 import { Sparkles, Beaker, X } from 'lucide-react';
@@ -6,14 +6,18 @@ import { useLocation } from 'react-router-dom';
 import { containerVariants, itemVariants } from '@/constants/animations';
 import { useScanStore } from '@/store/scanStore';
 import { useSettingsStore } from '@/store/settingsStore';
+import { useConsentStore } from '@/store/consentStore';
 import LuxuryFileUpload from '@/components/ui/LuxuryFileUpload';
 import Toggle from '@/components/ui/Toggle';
+import BiometricConsentModal from '@/components/ui/BiometricConsentModal';
 import type { CelebProfile } from '@/data/celebGallery';
 
 const ScanView = () => {
   const { t } = useTranslation();
   const { userImage, celebImage, selectedCelebName, setUserImage, setCelebImage, setCelebFromGallery, analyze, demoMode } = useScanStore();
   const { isSensitive, toggleSensitive, prefs } = useSettingsStore();
+  const [showConsent, setShowConsent] = useState(false);
+  const { biometricConsent, acceptBiometric } = useConsentStore();
   const location = useLocation();
 
   // Accept celeb from CelebGalleryView navigation
@@ -27,6 +31,16 @@ const ScanView = () => {
   }, [location.state, setCelebFromGallery]);
 
   const handleAnalyze = () => {
+    if (!biometricConsent) {
+      setShowConsent(true);
+      return;
+    }
+    analyze(isSensitive, prefs);
+  };
+
+  const handleConsentAccept = () => {
+    acceptBiometric();
+    setShowConsent(false);
     analyze(isSensitive, prefs);
   };
 
@@ -36,6 +50,7 @@ const ScanView = () => {
   };
 
   return (
+    <>
     <m.div
       key="idle" initial="hidden" animate="visible" variants={containerVariants}
       className="flex flex-col lg:flex-row items-center gap-16 lg:py-12"
@@ -94,6 +109,12 @@ const ScanView = () => {
         </div>
       </m.div>
     </m.div>
+    <BiometricConsentModal
+      isOpen={showConsent}
+      onAccept={handleConsentAccept}
+      onDecline={() => setShowConsent(false)}
+    />
+    </>
   );
 };
 
