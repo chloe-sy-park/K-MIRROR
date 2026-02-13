@@ -1,5 +1,6 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
 import { RotateCcw, Home } from 'lucide-react';
+import { captureError } from '@/lib/sentry';
 
 interface Props {
   children: ReactNode;
@@ -24,6 +25,7 @@ class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error('ErrorBoundary caught:', error, info.componentStack);
+    captureError(error, { componentStack: info.componentStack ?? undefined });
   }
 
   private handleRetry = () => {

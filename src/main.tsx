@@ -5,6 +5,9 @@ import App from './App';
 import ErrorBoundary from './components/ErrorBoundary';
 import './i18n';
 import './index.css';
+import { initSentry } from './lib/sentry';
+
+initSentry();
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
