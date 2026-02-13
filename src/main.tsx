@@ -5,9 +5,11 @@ import App from './App';
 import ErrorBoundary from './components/ErrorBoundary';
 import './i18n';
 import './index.css';
+import { initAnalytics } from './lib/analytics';
 import { initSentry } from './lib/sentry';
 
 initSentry();
+initAnalytics();
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
