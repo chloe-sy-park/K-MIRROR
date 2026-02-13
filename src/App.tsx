@@ -10,6 +10,7 @@ import Footer from '@/components/layout/Footer';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import ErrorToast from '@/components/ui/ErrorToast';
 import AuthModal from '@/components/ui/AuthModal';
+import CookieConsentBanner from '@/components/ui/CookieConsentBanner';
 
 // Lazy-loaded views for code splitting
 const OnboardingView = lazy(() => import('@/views/OnboardingView'));
@@ -120,6 +121,7 @@ const App = () => {
       <Footer />
       <ErrorToast message={error} onDismiss={clearError} />
       <AuthModal />
+      <CookieConsentBanner />
     </div>
     </LazyMotion>
   );
