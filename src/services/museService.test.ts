@@ -46,7 +46,7 @@ describe('museService (localStorage fallback)', () => {
 
       const boards = await fetchBoards();
       expect(boards).toHaveLength(1);
-      expect(boards[0].count).toBe(2);
+      expect(boards[0]!.count).toBe(2);
     });
   });
 
@@ -80,8 +80,8 @@ describe('museService (localStorage fallback)', () => {
 
       const muses = await fetchMuses();
       expect(muses).toHaveLength(1);
-      expect(muses[0].id).toBe(muse.id);
-      expect(muses[0].boardId).toBeUndefined();
+      expect(muses[0]!.id).toBe(muse.id);
+      expect(muses[0]!.boardId).toBeUndefined();
     });
   });
 
@@ -103,7 +103,7 @@ describe('museService (localStorage fallback)', () => {
 
       const filtered = await fetchMuses(board.id);
       expect(filtered).toHaveLength(1);
-      expect(filtered[0].boardId).toBe(board.id);
+      expect(filtered[0]!.boardId).toBe(board.id);
     });
   });
 
@@ -182,7 +182,7 @@ describe('museService (localStorage fallback)', () => {
 
       const muses = await fetchMuses(boardB.id);
       expect(muses).toHaveLength(1);
-      expect(muses[0].id).toBe(muse.id);
+      expect(muses[0]!.id).toBe(muse.id);
     });
 
     it('throws for non-existent muse id', async () => {

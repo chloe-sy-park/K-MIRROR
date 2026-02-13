@@ -145,11 +145,11 @@ describe('scanStore', () => {
       useScanStore.setState({ userImage: 'user', celebImage: 'celeb', selectedCelebName: 'Jisoo' });
       mockAnalyzeKBeauty.mockResolvedValue(DEMO_RESULT);
 
-      await useScanStore.getState().analyze(true, { environment: 'Party', skill: 'Pro', mood: 'Dramatic' });
+      await useScanStore.getState().analyze(true, { environment: 'Studio', skill: 'Pro', mood: 'Powerful' });
 
       expect(mockAnalyzeKBeauty).toHaveBeenCalledWith(
         'user', 'celeb', true,
-        { environment: 'Party', skill: 'Pro', mood: 'Dramatic' },
+        { environment: 'Studio', skill: 'Pro', mood: 'Powerful' },
         'Jisoo',
         expect.any(Object), // AbortSignal
       );

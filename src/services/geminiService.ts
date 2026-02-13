@@ -133,7 +133,7 @@ export const analyzeKBeauty = async (
       lastError = err;
       if (err instanceof AnalysisError && err.code === 'ABORTED') throw err;
       if (attempt < MAX_RETRIES && isRetryable(err)) {
-        await sleep(RETRY_DELAYS[attempt]);
+        await sleep(RETRY_DELAYS[attempt]!);
         continue;
       }
       throw err;

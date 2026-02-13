@@ -1,7 +1,8 @@
+import type React from 'react';
 import { render, screen } from '@testing-library/react';
 import ErrorBoundary from './ErrorBoundary';
 
-function ThrowingChild({ message }: { message: string }) {
+function ThrowingChild({ message }: { message: string }): React.ReactNode {
   throw new Error(message);
 }
 

@@ -18,10 +18,13 @@ const testProduct: Product = {
   name: 'Test Serum',
   brand: 'TestBrand',
   price: 3000,
+  priceDisplay: '$30.00',
   desc: 'A test product',
   matchScore: 90,
   ingredients: ['Hyaluronic Acid'],
   safetyRating: 'EWG Green',
+  category: 'skincare',
+  melaninRange: [1, 6],
 };
 
 describe('Navbar', () => {

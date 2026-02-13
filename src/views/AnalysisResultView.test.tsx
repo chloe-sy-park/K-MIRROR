@@ -87,7 +87,7 @@ describe('AnalysisResultView', () => {
     const addButtons = screen.getAllByTitle('Add to cart');
     expect(addButtons.length).toBeGreaterThan(0);
 
-    fireEvent.click(addButtons[0]);
+    fireEvent.click(addButtons[0]!);
     const cartState = useCartStore.getState();
     expect(cartState).toBeDefined();
   });

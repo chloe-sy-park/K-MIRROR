@@ -58,7 +58,7 @@ describe('SettingsView', () => {
     renderSettings();
 
     const toggles = screen.getAllByRole('switch');
-    fireEvent.click(toggles[0]);
+    fireEvent.click(toggles[0]!);
     expect(toggleSpy).toHaveBeenCalled();
   });
 

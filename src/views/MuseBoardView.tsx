@@ -175,7 +175,7 @@ const MuseBoardView = () => {
 
   const handleAddExtraImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!selectedMuse || !e.target.files?.length) return;
-    const file = e.target.files[0];
+    const file = e.target.files[0]!;
     const reader = new FileReader();
     reader.onloadend = async () => {
       const base64 = reader.result as string;

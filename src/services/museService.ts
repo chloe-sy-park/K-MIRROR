@@ -221,9 +221,9 @@ export async function updateBoard(id: string, updates: { name?: string; icon?: s
     const boards = lsGet<MuseBoard>(LS_BOARDS_KEY);
     const idx = boards.findIndex((b) => b.id === id);
     if (idx === -1) throw new Error('Board not found');
-    boards[idx] = { ...boards[idx], ...updates };
+    boards[idx] = { ...boards[idx]!, ...updates };
     lsSet(LS_BOARDS_KEY, boards);
-    return boards[idx];
+    return boards[idx]!;
   }
 
   const { data, error } = await supabase
@@ -248,9 +248,9 @@ export async function updateMuse(
     const muses = lsGet<SavedMuse>(LS_MUSES_KEY);
     const idx = muses.findIndex((m) => m.id === id);
     if (idx === -1) throw new Error('Muse not found');
-    muses[idx] = { ...muses[idx], ...updates };
+    muses[idx] = { ...muses[idx]!, ...updates };
     lsSet(LS_MUSES_KEY, muses);
-    return muses[idx];
+    return muses[idx]!;
   }
 
   const dbUpdates: Record<string, unknown> = {};
@@ -288,7 +288,7 @@ export async function moveMuse(id: string, newBoardId: string | null): Promise<v
     const muses = lsGet<SavedMuse>(LS_MUSES_KEY);
     const idx = muses.findIndex((m) => m.id === id);
     if (idx === -1) throw new Error('Muse not found');
-    muses[idx] = { ...muses[idx], boardId: newBoardId ?? undefined };
+    muses[idx] = { ...muses[idx]!, boardId: newBoardId ?? undefined };
     lsSet(LS_MUSES_KEY, muses);
     return;
   }

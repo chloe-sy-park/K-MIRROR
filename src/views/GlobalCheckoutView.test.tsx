@@ -24,10 +24,13 @@ const testProduct: Product = {
   name: 'Test Cushion',
   brand: 'TestBrand',
   price: 2500,
+  priceDisplay: '$25.00',
   desc: 'A test product',
   matchScore: 95,
   ingredients: ['Niacinamide'],
   safetyRating: 'EWG Green',
+  category: 'base',
+  melaninRange: [1, 6],
 };
 
 function addTestItem(qty = 1) {

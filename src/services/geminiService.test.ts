@@ -90,7 +90,7 @@ describe('geminiService', () => {
       mockFetch.mockResolvedValue(okResponse(DEMO_RESULT));
       await analyzeKBeauty('img1', 'img2', false, defaultPrefs, 'Jisoo');
       expect(mockFetch).toHaveBeenCalledOnce();
-      const callArgs = mockFetch.mock.calls[0];
+      const callArgs = mockFetch.mock.calls[0]!;
       const body = JSON.parse(callArgs[1].body);
       expect(body.selectedCelebName).toBe('Jisoo');
     });
@@ -98,7 +98,7 @@ describe('geminiService', () => {
     it('sends isSensitive in request body', async () => {
       mockFetch.mockResolvedValue(okResponse(DEMO_RESULT));
       await analyzeKBeauty('img1', 'img2', true, defaultPrefs);
-      const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+      const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
       expect(body.isSensitive).toBe(true);
     });
 
@@ -116,7 +116,7 @@ describe('geminiService', () => {
     it('sends correct headers', async () => {
       mockFetch.mockResolvedValue(okResponse(DEMO_RESULT));
       await analyzeKBeauty('img1', 'img2', false, defaultPrefs);
-      const [url, options] = mockFetch.mock.calls[0];
+      const [url, options] = mockFetch.mock.calls[0]!;
       expect(url).toBe('https://test.supabase.co/functions/v1/analyze-kbeauty');
       expect(options.headers['Authorization']).toBe('Bearer test-anon-key');
       expect(options.headers['apikey']).toBe('test-anon-key');

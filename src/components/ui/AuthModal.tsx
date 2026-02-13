@@ -57,10 +57,10 @@ const AuthModal = () => {
 
     if (e.shiftKey && document.activeElement === first) {
       e.preventDefault();
-      last.focus();
+      last!.focus();
     } else if (!e.shiftKey && document.activeElement === last) {
       e.preventDefault();
-      first.focus();
+      first!.focus();
     }
   }, [closeAuthModal]);
 

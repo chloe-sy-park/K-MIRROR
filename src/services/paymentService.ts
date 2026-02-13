@@ -32,10 +32,15 @@ export async function createCheckoutSession(params: CheckoutParams): Promise<str
 /**
  * Redirects to Stripe Checkout. Call after createCheckoutSession
  * if you want to use Stripe.js redirect instead of window.location.
+ *
+ * Note: `redirectToCheckout` was removed from Stripe.js v8 types but may
+ * still exist at runtime. We cast to access the legacy method.
  */
 export async function redirectToCheckout(sessionId: string): Promise<void> {
   const stripe = await getStripe();
   if (!stripe) throw new Error('Stripe not loaded');
-  const { error } = await stripe.redirectToCheckout({ sessionId });
+  const { error } = await (stripe as unknown as {
+    redirectToCheckout: (opts: { sessionId: string }) => Promise<{ error?: { message: string } }>;
+  }).redirectToCheckout({ sessionId });
   if (error) throw new Error(error.message);
 }
