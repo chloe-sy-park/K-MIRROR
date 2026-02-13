@@ -128,7 +128,9 @@
     "viewOrders": "View Orders",
     "items": "items",
     "businessDays3_5": "3-5 Business Days",
-    "businessDays7_14": "7-14 Business Days"
+    "businessDays7_14": "7-14 Business Days",
+    "processing": "Processing...",
+    "redirectingToStripe": "Redirecting to Stripe..."
   },
   "orders": {
     "title": "ORDER HISTORY",

@@ -128,7 +128,9 @@
     "viewOrders": "주문 내역",
     "items": "개",
     "businessDays3_5": "영업일 3-5일",
-    "businessDays7_14": "영업일 7-14일"
+    "businessDays7_14": "영업일 7-14일",
+    "processing": "처리 중...",
+    "redirectingToStripe": "Stripe로 이동 중..."
   },
   "orders": {
     "title": "주문 내역",
