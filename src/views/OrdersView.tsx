@@ -1,9 +1,11 @@
+import { useEffect, useState } from 'react';
 import * as m from 'framer-motion/m';
 import { Package, Clock, Truck, CheckCircle, ShoppingBag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { containerVariants, itemVariants } from '@/constants/animations';
-import { useCartStore } from '@/store/cartStore';
+import { fetchOrders } from '@/services/orderService';
+import type { Order } from '@/types';
 
 const STATUS_CONFIG = {
   pending: { icon: <Clock size={14} />, label: 'Pending', color: 'text-yellow-500 bg-yellow-50' },
@@ -15,7 +17,23 @@ const STATUS_CONFIG = {
 const OrdersView = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const orders = useCartStore((s) => s.orders);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchOrders()
+      .then(setOrders)
+      .catch(() => setOrders([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-32">
+        <div className="w-8 h-8 border-2 border-gray-200 border-t-[#FF4D8D] rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   if (orders.length === 0) {
     return (
