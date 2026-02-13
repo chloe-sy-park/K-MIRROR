@@ -113,7 +113,11 @@ export interface Order {
   shipping: number;
   total: number;
   shippingMethod: 'dhl' | 'ems';
+  shippingName?: string;
+  shippingCountry?: string;
+  shippingAddress?: string;
   status: 'pending' | 'paid' | 'shipped' | 'delivered';
+  stripeSessionId?: string;
   createdAt: string;
 }
 
