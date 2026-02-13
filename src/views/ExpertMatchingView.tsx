@@ -51,6 +51,7 @@ const ExpertMatchingView = () => {
                   src={expert.imageUrl}
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
                   alt={expert.name}
+                  loading="lazy"
                 />
                 <div className="absolute top-2 right-2 w-4 h-4 bg-green-500 border-2 border-white rounded-full" />
               </div>

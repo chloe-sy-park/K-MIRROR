@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { AnalysisResult, UserPreferences, YouTubeVideo } from '@/types';
 import { analyzeKBeauty, analyzeSkin, matchProducts, AnalysisError } from '@/services/geminiService';
+import { captureError } from '@/lib/sentry';
 import type { MatchedProduct } from '@/services/geminiService';
 import { searchYouTubeVideos, isYouTubeConfigured } from '@/services/youtubeService';
 import { saveAnalysis, extractProductIds } from '@/services/analysisService';
@@ -65,7 +66,7 @@ export const useScanStore = create<ScanState>((set, get) => ({
       set({ celebImage: base64 });
     } catch {
       // CORS or network error — user can still upload manually
-      console.warn(`Could not fetch celeb image for ${celeb.name}. User can upload manually.`);
+      if (import.meta.env.DEV) console.warn(`Could not fetch celeb image for ${celeb.name}`);
     }
   },
 
@@ -105,7 +106,7 @@ export const useScanStore = create<ScanState>((set, get) => ({
         // Fallback to legacy analyze-kbeauty endpoint
         if (controller.signal.aborted) throw skinErr;
         if (skinErr instanceof AnalysisError && skinErr.code === 'ABORTED') throw skinErr;
-        console.warn('analyze-skin failed, falling back to analyze-kbeauty:', skinErr);
+        if (import.meta.env.DEV) console.warn('analyze-skin failed, falling back to analyze-kbeauty:', skinErr);
 
         res = await analyzeKBeauty(userImage, celebImage, isSensitive, prefs, selectedCelebName ?? undefined, controller.signal);
 
@@ -127,7 +128,7 @@ export const useScanStore = create<ScanState>((set, get) => ({
       }
     } catch (err) {
       if (controller.signal.aborted) return;
-      console.error(err);
+      if (err instanceof Error) captureError(err, { phase: 'analyze' });
       const message = err instanceof AnalysisError
         ? err.message
         : 'An unexpected error occurred. Please try again.';

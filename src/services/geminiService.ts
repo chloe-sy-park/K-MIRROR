@@ -118,7 +118,7 @@ export const analyzeSkin = async (
     const validated = analysisResultSchema.safeParse(response);
 
     if (!validated.success) {
-      console.error('Zod validation errors:', validated.error.issues);
+      if (import.meta.env.DEV) console.error('Zod validation errors:', validated.error.issues);
       throw new AnalysisError(
         'AI response did not match expected format. Please try again.',
         'VALIDATION'
@@ -263,7 +263,7 @@ export const analyzeKBeauty = async (
       const validated = analysisResultSchema.safeParse(response);
 
       if (!validated.success) {
-        console.error('Zod validation errors:', validated.error.issues);
+        if (import.meta.env.DEV) console.error('Zod validation errors:', validated.error.issues);
         throw new AnalysisError(
           'AI response did not match expected format. Please try again.',
           'VALIDATION'

@@ -366,6 +366,7 @@ const MuseBoardView = () => {
                     src={getImageSrc(muse.userImage)}
                     alt="Uploaded selfie"
                     className="w-full h-full object-cover"
+                    loading="lazy"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
@@ -552,7 +553,7 @@ const MuseBoardView = () => {
               <div className="grid grid-cols-2 h-48 sm:h-64 rounded-t-[3rem] overflow-hidden">
                 <div className="relative bg-gray-100">
                   {selectedMuse.userImage ? (
-                    <img src={getImageSrc(selectedMuse.userImage)} alt="Your selfie" className="w-full h-full object-cover" />
+                    <img src={getImageSrc(selectedMuse.userImage)} alt="Your selfie" className="w-full h-full object-cover" loading="lazy" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center"><User size={40} className="text-gray-300" /></div>
                   )}
@@ -560,7 +561,7 @@ const MuseBoardView = () => {
                 </div>
                 <div className="relative bg-gray-100">
                   {selectedMuse.celebImage ? (
-                    <img src={getImageSrc(selectedMuse.celebImage)} alt={selectedMuse.celebName} className="w-full h-full object-cover" />
+                    <img src={getImageSrc(selectedMuse.celebImage)} alt={selectedMuse.celebName} className="w-full h-full object-cover" loading="lazy" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center"><Star size={40} className="text-gray-300" /></div>
                   )}
@@ -680,7 +681,7 @@ const MuseBoardView = () => {
                     <div className="grid grid-cols-3 gap-3">
                       {selectedMuse.extraImages.map((img, idx) => (
                         <div key={idx} className="relative group/img aspect-square rounded-2xl overflow-hidden bg-gray-50">
-                          <img src={getImageSrc(img)} alt={`Extra ${idx + 1}`} className="w-full h-full object-cover" />
+                          <img src={getImageSrc(img)} alt={`Extra ${idx + 1}`} className="w-full h-full object-cover" loading="lazy" />
                           <button
                             onClick={() => handleRemoveExtraImage(idx)}
                             className="absolute top-2 right-2 p-1.5 bg-white/80 backdrop-blur-sm rounded-lg opacity-0 group-hover/img:opacity-100 text-gray-400 hover:text-red-500 transition-all"

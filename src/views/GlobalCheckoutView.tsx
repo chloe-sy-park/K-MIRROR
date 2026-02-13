@@ -46,7 +46,7 @@ const GlobalCheckoutView = () => {
           return;
         }
       } catch (err) {
-        console.error('Checkout error:', err);
+        if (import.meta.env.DEV) console.error('Checkout error:', err);
         setIsProcessing(false);
         return;
       }
@@ -128,7 +128,7 @@ const GlobalCheckoutView = () => {
               <div key={product.id} className="flex items-center flex-wrap sm:flex-nowrap gap-4 sm:gap-6 p-4 sm:p-6 bg-white rounded-3xl border border-gray-100 group">
                 <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden">
                   {product.imageUrl ? (
-                    <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+                    <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" loading="lazy" />
                   ) : (
                     <Sparkles size={18} className="text-gray-200" />
                   )}

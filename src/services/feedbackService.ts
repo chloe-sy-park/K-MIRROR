@@ -17,7 +17,7 @@ export async function submitAnalysisFeedback(
     analysis_helpful: helpful,
   });
   if (error) {
-    console.error('Failed to submit analysis feedback:', error.message);
+    if (import.meta.env.DEV) console.error('Failed to submit analysis feedback:', error.message);
     return false;
   }
   return true;
@@ -37,7 +37,7 @@ export async function submitProductFeedback(
     product_relevant: relevant,
   });
   if (error) {
-    console.error('Failed to submit product feedback:', error.message);
+    if (import.meta.env.DEV) console.error('Failed to submit product feedback:', error.message);
     return false;
   }
   return true;

@@ -26,7 +26,7 @@ export async function uploadImage(
     });
 
   if (error) {
-    console.error('Storage upload failed:', error.message);
+    if (import.meta.env.DEV) console.error('Storage upload failed:', error.message);
     return base64; // graceful fallback
   }
 

@@ -102,6 +102,7 @@ const MethodologyView = ({ onBookSession }: MethodologyViewProps) => {
                   src={pillar.img}
                   className="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:scale-110 transition-all duration-[1.5s]"
                   alt={pillar.title}
+                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 <div className="absolute bottom-10 left-10 text-white">

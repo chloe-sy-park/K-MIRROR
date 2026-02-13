@@ -35,7 +35,7 @@ export async function searchYouTubeVideos(
 
       const res = await fetch(`${YOUTUBE_API_BASE}/search?${params}`);
       if (!res.ok) {
-        console.warn(`YouTube API search failed for "${query}":`, res.status);
+        if (import.meta.env.DEV) console.warn(`YouTube API search failed for "${query}":`, res.status);
         continue;
       }
 
@@ -60,7 +60,7 @@ export async function searchYouTubeVideos(
         });
       }
     } catch (err) {
-      console.warn(`YouTube API error for "${query}":`, err);
+      if (import.meta.env.DEV) console.warn(`YouTube API error for "${query}":`, err);
     }
   }
 

@@ -25,6 +25,11 @@ vi.mock('@/services/analysisService', () => ({
   extractProductIds: vi.fn().mockReturnValue([]),
 }));
 
+// Mock sentry (captureError used in error handler)
+vi.mock('@/lib/sentry', () => ({
+  captureError: vi.fn(),
+}));
+
 describe('scanStore', () => {
   beforeEach(() => {
     vi.useFakeTimers();

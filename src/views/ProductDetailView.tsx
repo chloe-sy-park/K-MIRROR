@@ -52,7 +52,7 @@ const ProductDetailView = () => {
         <m.div variants={itemVariants}>
           <div className="aspect-square bg-gray-50 rounded-[3.5rem] flex items-center justify-center relative overflow-hidden">
             {product.imageUrl ? (
-              <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+              <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" loading="lazy" />
             ) : (
               <Sparkles size={64} className="text-gray-200" />
             )}

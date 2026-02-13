@@ -39,7 +39,7 @@ export async function saveAnalysis(
     .single();
 
   if (error) {
-    console.error('Failed to save analysis:', error.message);
+    if (import.meta.env.DEV) console.error('Failed to save analysis:', error.message);
     return null;
   }
 

@@ -91,7 +91,7 @@ const ShopView = () => {
                     {product.category}
                   </div>
                   {product.imageUrl ? (
-                    <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 group-active:scale-110 transition-transform duration-500" />
+                    <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 group-active:scale-110 transition-transform duration-500" loading="lazy" />
                   ) : (
                     <Sparkles size={32} className="text-gray-200 group-hover:text-[#FF4D8D] transition-colors" />
                   )}

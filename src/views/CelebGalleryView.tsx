@@ -149,6 +149,7 @@ const CelebGalleryView = () => {
                   src={celeb.imageUrl}
                   alt={celeb.name}
                   className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover mb-6 shadow-lg ring-2 ring-gray-100 group-hover:ring-[#FF4D8D] transition-all"
+                  loading="lazy"
                   onError={(e) => {
                     const target = e.currentTarget;
                     target.style.display = 'none';
