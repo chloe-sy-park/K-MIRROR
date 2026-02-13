@@ -7,6 +7,7 @@ import {
   RotateCcw, Cpu, Palette, Droplets, Eye, Activity,
   Check, Sparkles, Plus, Play, Lightbulb,
   Bookmark, X, Target, Youtube, Wand2,
+  ThumbsUp, ThumbsDown,
 } from 'lucide-react';
 import { containerVariants, itemVariants } from '@/constants/animations';
 import { useScanStore } from '@/store/scanStore';
@@ -14,7 +15,9 @@ import { useMuseStore } from '@/store/museStore';
 import { useCartStore } from '@/store/cartStore';
 import { renderColorOnSkin } from '@/services/colorService';
 import { matchRecommendedProducts } from '@/services/productService';
+import { submitAnalysisFeedback, submitProductFeedback } from '@/services/feedbackService';
 import { PRODUCT_CATALOG } from '@/data/productCatalog';
+import type { Product } from '@/types';
 import { getYouTubeVideoUrl, formatViewCount } from '@/services/youtubeService';
 import SherlockProportionVisualizer from '@/components/sherlock/ProportionVisualizer';
 
@@ -22,15 +25,18 @@ let nextReportId = 0;
 const generateReportId = () => ++nextReportId;
 
 const AnalysisResultView = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { result, userImage, celebImage, youtubeVideos, reset } = useScanStore();
+  const { result, userImage, celebImage, youtubeVideos, matchedProducts: dbProducts, reset } = useScanStore();
   const { boards, saveMuse, fetchBoards } = useMuseStore();
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [selectedBoardId, setSelectedBoardId] = useState<string | undefined>();
   const [isSaved, setIsSaved] = useState(false);
 
   const { addItem } = useCartStore();
+
+  const [analysisFeedback, setAnalysisFeedback] = useState<boolean | null>(null);
+  const [productFeedbacks, setProductFeedbacks] = useState<Record<string, boolean>>({});
 
   const [reportId] = useState(generateReportId);
 
@@ -52,22 +58,82 @@ const AnalysisResultView = () => {
     return bestBoard;
   }, [autoTags, boards]);
 
+  const displayProducts = useMemo(() => {
+    if (!result) return [];
+    if (dbProducts.length > 0) {
+      return dbProducts.map(p => ({
+        name: i18n.language === 'ko' ? p.name_ko : p.name_en,
+        brand: p.brand,
+        price: `$${Number(p.price_usd).toFixed(2)}`,
+        desc: '',
+        matchScore: p.matchScore,
+        safetyRating: p.safety_rating ?? '',
+        ingredients: p.ingredients ?? [],
+        shadeHex: p.shade_hex,
+        category: p.category,
+        dbId: p.id,
+      }));
+    }
+    return result.recommendations.products.map(p => ({
+      name: p.name,
+      brand: p.brand,
+      price: p.price,
+      desc: p.desc,
+      matchScore: p.matchScore,
+      safetyRating: p.safetyRating,
+      ingredients: p.ingredients,
+      shadeHex: null as string | null,
+      category: null as string | null,
+      dbId: null as string | null,
+    }));
+  }, [dbProducts, result, i18n.language]);
+
   if (!result) return null;
 
-  const matchedProducts = matchRecommendedProducts(result.recommendations.products, PRODUCT_CATALOG);
   const hasRealVideos = youtubeVideos.length > 0;
   const focusPoints = result.youtubeSearch?.focusPoints || [];
   const channelSuggestions = result.youtubeSearch?.channelSuggestions || [];
 
   const handleAddToCart = (idx: number) => {
-    const catalogProduct = matchedProducts[idx];
-    if (catalogProduct) {
-      addItem(catalogProduct);
+    const dp = displayProducts[idx];
+    if (!dp) return;
+
+    if (dp.dbId && dbProducts.length > 0) {
+      const dbProduct = dbProducts.find(p => p.id === dp.dbId);
+      if (dbProduct) {
+        addItem({
+          id: dbProduct.id,
+          name: dp.name,
+          brand: dbProduct.brand,
+          price: Math.round(dbProduct.price_usd * 100),
+          priceDisplay: dp.price,
+          desc: dp.desc,
+          matchScore: dp.matchScore,
+          ingredients: dp.ingredients,
+          safetyRating: dp.safetyRating,
+          category: dbProduct.category as Product['category'],
+          melaninRange: [dbProduct.melanin_min, dbProduct.melanin_max],
+        });
+        return;
+      }
     }
+    // Fallback: legacy catalog matching
+    const catalogProduct = matchRecommendedProducts(result!.recommendations.products, PRODUCT_CATALOG)[idx];
+    if (catalogProduct) addItem(catalogProduct);
   };
 
   const handleReset = () => {
     reset();
+  };
+
+  const handleAnalysisFeedback = async (helpful: boolean) => {
+    setAnalysisFeedback(helpful);
+    await submitAnalysisFeedback('placeholder', helpful);
+  };
+
+  const handleProductFeedback = async (productId: string, relevant: boolean) => {
+    setProductFeedbacks(prev => ({ ...prev, [productId]: relevant }));
+    await submitProductFeedback('placeholder', productId, relevant);
   };
 
   const handleCheckout = () => {
@@ -148,6 +214,23 @@ const AnalysisResultView = () => {
             </div>
           </div>
         </div>
+        {analysisFeedback === null ? (
+          <div className="flex items-center gap-4 mt-8 pt-8 border-t border-gray-50">
+            <span className="text-[10px] font-black uppercase tracking-widest text-gray-300">
+              {t('result.feedbackQuestion')}
+            </span>
+            <button onClick={() => handleAnalysisFeedback(true)} className="p-2 hover:bg-green-50 rounded-full transition-colors">
+              <ThumbsUp size={14} className="text-gray-300 hover:text-green-500" />
+            </button>
+            <button onClick={() => handleAnalysisFeedback(false)} className="p-2 hover:bg-red-50 rounded-full transition-colors">
+              <ThumbsDown size={14} className="text-gray-300 hover:text-red-400" />
+            </button>
+          </div>
+        ) : (
+          <p className="text-[10px] font-black uppercase tracking-widest text-gray-200 mt-8 pt-8 border-t border-gray-50">
+            {t('result.feedbackThanks')}
+          </p>
+        )}
       </m.section>
 
       <m.section variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-32">
@@ -224,7 +307,7 @@ const AnalysisResultView = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[2px] bg-black/5 border border-black/5 overflow-hidden rounded-[2.5rem]">
-          {result.recommendations.products.map((product, idx) => (
+          {displayProducts.map((product, idx) => (
             <m.div
               key={idx}
               whileHover={{ backgroundColor: "#F9F9F9" }}
@@ -268,6 +351,27 @@ const AnalysisResultView = () => {
                     <Plus size={16} />
                   </m.button>
                 </div>
+                {product.dbId && (
+                  <div className="flex items-center gap-3 mt-4 pt-4 border-t border-gray-50">
+                    {productFeedbacks[product.dbId] === undefined ? (
+                      <>
+                        <span className="text-[8px] font-black uppercase tracking-widest text-gray-300">
+                          {t('result.feedbackProductQuestion')}
+                        </span>
+                        <button onClick={() => handleProductFeedback(product.dbId!, true)} className="p-1.5 hover:bg-green-50 rounded-full transition-colors">
+                          <ThumbsUp size={10} className="text-gray-300 hover:text-green-500" />
+                        </button>
+                        <button onClick={() => handleProductFeedback(product.dbId!, false)} className="p-1.5 hover:bg-red-50 rounded-full transition-colors">
+                          <ThumbsDown size={10} className="text-gray-300 hover:text-red-400" />
+                        </button>
+                      </>
+                    ) : (
+                      <span className="text-[8px] font-black uppercase tracking-widest text-gray-200">
+                        {t('result.feedbackThanks')}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             </m.div>
           ))}

@@ -55,7 +55,12 @@
     "aiAutoTags": "AI 자동 태그",
     "aiSuggests": "AI 추천",
     "saveToMuseBoard": "뮤즈 보드에 저장",
-    "views": "조회"
+    "views": "조회",
+    "feedbackQuestion": "이 분석이 도움이 됐나요?",
+    "feedbackProductQuestion": "내 피부에 맞을까요?",
+    "feedbackThanks": "피드백 감사합니다!",
+    "feedbackYes": "네",
+    "feedbackNo": "아니오"
   },
   "muse": {
     "title": "뮤즈 보드",

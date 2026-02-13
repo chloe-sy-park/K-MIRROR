@@ -55,7 +55,12 @@
     "aiAutoTags": "AI Auto Tags",
     "aiSuggests": "AI Suggests",
     "saveToMuseBoard": "Save to Muse Board",
-    "views": "views"
+    "views": "views",
+    "feedbackQuestion": "Was this analysis helpful?",
+    "feedbackProductQuestion": "Right for your skin?",
+    "feedbackThanks": "Thanks for your feedback!",
+    "feedbackYes": "Yes",
+    "feedbackNo": "No"
   },
   "muse": {
     "title": "MUSE BOARD",
