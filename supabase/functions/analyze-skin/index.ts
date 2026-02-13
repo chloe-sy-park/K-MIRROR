@@ -1,0 +1,321 @@
+// supabase/functions/analyze-skin/index.ts
+import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
+
+const ALLOWED_ORIGINS = [
+  'https://k-mirror.vercel.app',
+  'http://localhost:3000',
+];
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get('origin') ?? '';
+  return {
+    'Access-Control-Allow-Origin': ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0],
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  };
+}
+
+/** Strip the optional data-URI prefix from a base64 string. */
+function stripBase64Prefix(b64: string): string {
+  const idx = b64.indexOf(',');
+  if (idx !== -1 && b64.slice(0, idx).includes('base64')) {
+    return b64.slice(idx + 1);
+  }
+  return b64;
+}
+
+/** Build the Gemini response schema with expanded skin profile fields. */
+function buildResponseSchema() {
+  return {
+    type: 'OBJECT',
+    properties: {
+      tone: {
+        type: 'OBJECT',
+        properties: {
+          melaninIndex: { type: 'NUMBER' },
+          undertone: { type: 'STRING', description: 'Warm, Cool, or Neutral' },
+          skinHexCode: { type: 'STRING', description: 'Average skin color as #RRGGBB hex' },
+          skinConcerns: { type: 'ARRAY', items: { type: 'STRING' } },
+          description: { type: 'STRING' },
+          skinType: { type: 'STRING', description: 'dry, oily, combination, or normal' },
+          sensitivityLevel: { type: 'NUMBER', description: 'Sensitivity level from 1 (low) to 5 (high)' },
+          moistureLevel: { type: 'STRING', description: 'low, medium, or high' },
+          sebumLevel: { type: 'STRING', description: 'low, medium, or high' },
+          poreSize: { type: 'STRING', description: 'small, medium, or large' },
+          skinThickness: { type: 'STRING', description: 'thin, medium, or thick' },
+        },
+        required: [
+          'melaninIndex',
+          'undertone',
+          'skinHexCode',
+          'skinConcerns',
+          'description',
+          'skinType',
+          'sensitivityLevel',
+          'moistureLevel',
+          'sebumLevel',
+          'poreSize',
+          'skinThickness',
+        ],
+      },
+      sherlock: {
+        type: 'OBJECT',
+        properties: {
+          proportions: {
+            type: 'OBJECT',
+            properties: {
+              upper: { type: 'STRING' },
+              middle: { type: 'STRING' },
+              lower: { type: 'STRING' },
+            },
+            required: ['upper', 'middle', 'lower'],
+          },
+          eyeAngle: { type: 'STRING' },
+          boneStructure: { type: 'STRING' },
+          facialVibe: { type: 'STRING' },
+        },
+        required: ['proportions', 'eyeAngle', 'boneStructure', 'facialVibe'],
+      },
+      kMatch: {
+        type: 'OBJECT',
+        properties: {
+          celebName: { type: 'STRING' },
+          adaptationLogic: {
+            type: 'OBJECT',
+            properties: {
+              base: { type: 'STRING' },
+              lip: { type: 'STRING' },
+              point: { type: 'STRING' },
+            },
+            required: ['base', 'lip', 'point'],
+          },
+          styleExplanation: { type: 'STRING' },
+          aiStylePoints: { type: 'ARRAY', items: { type: 'STRING' } },
+        },
+        required: ['celebName', 'adaptationLogic', 'styleExplanation', 'aiStylePoints'],
+      },
+      recommendations: {
+        type: 'OBJECT',
+        properties: {
+          ingredients: { type: 'ARRAY', items: { type: 'STRING' } },
+          sensitiveSafe: { type: 'BOOLEAN' },
+        },
+        required: ['ingredients', 'sensitiveSafe'],
+      },
+      autoTags: {
+        type: 'ARRAY',
+        items: { type: 'STRING' },
+        description: '3-5 short descriptive tags for auto-categorization',
+      },
+      youtubeSearch: {
+        type: 'OBJECT',
+        properties: {
+          queries: {
+            type: 'ARRAY',
+            items: { type: 'STRING' },
+            description: '2-3 Korean YouTube search queries',
+          },
+          focusPoints: {
+            type: 'ARRAY',
+            items: { type: 'STRING' },
+            description: '3-5 technique tips to watch for',
+          },
+          channelSuggestions: {
+            type: 'ARRAY',
+            items: { type: 'STRING' },
+            description: '2-3 popular Korean beauty YouTube channels',
+          },
+        },
+        required: ['queries', 'focusPoints', 'channelSuggestions'],
+      },
+    },
+    required: ['tone', 'sherlock', 'kMatch', 'recommendations', 'autoTags', 'youtubeSearch'],
+  };
+}
+
+serve(async (req) => {
+  // Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: getCorsHeaders(req) });
+  }
+
+  try {
+    const apiKey = Deno.env.get('GEMINI_API_KEY');
+    if (!apiKey) {
+      return new Response(JSON.stringify({ error: 'Gemini API key not configured' }), {
+        status: 500,
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
+      });
+    }
+
+    const body = await req.json();
+    const {
+      userImageBase64,
+      celebImageBase64,
+      isSensitive,
+      prefs,
+      selectedCelebName,
+    } = body as {
+      userImageBase64: string;
+      celebImageBase64: string;
+      isSensitive: boolean;
+      prefs: { environment: string; skill: string; mood: string };
+      selectedCelebName?: string;
+    };
+
+    // Build the celeb context string
+    const celebContext = selectedCelebName
+      ? `The user has selected "${selectedCelebName}" as their style muse.`
+      : 'The user uploaded a K-Celeb inspiration photo.';
+
+    // Full system prompt — v6.0 with extended skin profile analysis
+    const systemInstruction = `
+    You are a Global K-Beauty Stylist and Face Analysis Expert (Neural Stylist v6.0).
+    Analyze the two images provided:
+    1. The user's bare face.
+    2. ${celebContext}
+
+    User Profile & Preferences:
+    - Environment: ${prefs.environment} (Tailor makeup longevity and finish)
+    - Skill Level: ${prefs.skill} (Suggest techniques appropriate for this skill)
+    - Desired Mood: ${prefs.mood} (Influence the overall aesthetic direction)
+    - Sensitive Skin: ${isSensitive ? 'Yes' : 'No'}
+
+    ═══ INCLUSIVITY DIRECTIVES (MANDATORY) ═══
+    1. NEVER suggest lightening or whitening the user's skin tone.
+       Use "luminosity" or "radiance" instead of "brightening."
+    2. NEVER compare ethnic features as superior or inferior.
+    3. Adapt the K-celeb style TO the user's features, not the other way around.
+       The user's identity is the constant; the K-style is the variable.
+    4. For deep skin tones (L4-L6), increase chromatic saturation of
+       product colors by 30-50% to achieve equivalent visual impact.
+    5. Preserve the user's natural features (moles, scars, unique markings).
+    6. Never use terms: "fix", "correct", "improve" for ethnic features.
+       Use: "enhance", "accentuate", "harmonize".
+
+    ═══ MELANIN-AWARE COLOR ADAPTATION ═══
+    - L1-L2: Standard K-beauty shades apply directly.
+    - L3: Shift warm tones +10% saturation.
+    - L4: Replace pastel shades with medium-chroma equivalents. Avoid gray-based foundations.
+    - L5: Replace light pastels with deep-chroma variants. Use gold-infused primers to counter ashiness.
+    - L6: Maximum chromatic density. Berry > Coral. Black-Cherry > Rose. Deep Gold > Champagne.
+
+    ═══ STRUCTURE-AWARE PLACEMENT ═══
+    - Prominent zygomatic arches: Place highlighter on the highest point, not the K-beauty apple position.
+    - Deep orbital sockets: Reduce crease color depth, focus on lid.
+    - Flat nasal bridges: Skip K-style nose contour; enhance brow bone instead.
+    - Full lips (common in L4-L6): Embrace fullness. Never suggest "thinning" techniques.
+      Adapt K-gradient lip to full lip shape.
+
+    ═══ EXTENDED SKIN PROFILE ANALYSIS ═══
+    Analyze the following skin characteristics carefully:
+    - skinType: Determine if skin is dry, oily, combination, or normal based on visible shine zones, texture, and pore appearance.
+    - sensitivityLevel (1-5): Assess based on visible redness, thin capillaries, reactivity indicators.
+    - moistureLevel (low/medium/high): Evaluate from skin plumpness, fine lines, surface texture.
+    - sebumLevel (low/medium/high): Assess from T-zone shine, pore congestion, visible oil.
+    - poreSize (small/medium/large): Evaluate visible pore diameter on cheeks and nose.
+    - skinThickness (thin/medium/thick): Assess from visibility of blood vessels, texture resilience, bounce.
+
+    ═══ ANALYSIS TASKS ═══
+    1. Tone Analysis: Melanin index (1-6), Undertone (Warm/Cool/Neutral), Skin Hex Code (average of cheek/forehead/chin as #RRGGBB), skin concerns, plus all extended skin profile fields above.
+    2. Sherlock Face Analysis: Facial proportions (Upper/Mid/Lower ratio descriptions), Eye Angle (Cat/Puppy/Doe), Bone Structure, Facial Vibe.
+    3. Style Transfer Logic: Reinterpret the K-celeb's style for the user's unique ethnicity and bone structure. Apply melanin-aware color adaptation rules above.
+    4. Ingredient Recommendations: Suggest beneficial skincare ingredients based on the skin profile. For L4-L6, ensure ingredients address chromatic depth needs.
+    5. Auto Tags: Generate 3-5 short descriptive tags that categorize this analysis (e.g., "Natural Glow", "Bold Lip", "Cool Tone", "Office Ready", celebrity name). These will be used for automatic board categorization.
+    6. YouTube Search Hints: Generate the following for Korean YouTube tutorial curation:
+       - queries: 2-3 Korean-language YouTube search queries to find the best matching tutorials (e.g., "한소희 메이크업 튜토리얼", "쿨톤 데일리 메이크업 브이로그")
+       - focusPoints: 3-5 specific technique tips the user should watch for in these tutorials (in Korean, e.g., "눈꼬리 라인 올리는 각도", "쿠션 반만 묻혀 얇게 레이어링")
+       - channelSuggestions: 2-3 real popular Korean beauty YouTube channel names (e.g., "이사배", "PONY Syndrome", "회사원A")
+
+    NOTE: Do NOT recommend specific products. Product matching is handled separately.
+
+    Output MUST be in valid JSON format only.
+  `;
+
+    // Strip base64 prefixes if present
+    const userImage = stripBase64Prefix(userImageBase64);
+    const celebImage = stripBase64Prefix(celebImageBase64);
+
+    // Build Gemini request body
+    const geminiRequestBody = {
+      contents: [
+        {
+          parts: [
+            { text: systemInstruction },
+            {
+              text: "Analyze these two images. Image 1 is the user's bare face. Image 2 is the K-Celeb style muse.",
+            },
+            { inlineData: { mimeType: 'image/jpeg', data: userImage } },
+            { inlineData: { mimeType: 'image/jpeg', data: celebImage } },
+          ],
+        },
+      ],
+      generationConfig: {
+        temperature: 0.4,
+        responseMimeType: 'application/json',
+        responseSchema: buildResponseSchema(),
+      },
+    };
+
+    // Call Gemini REST API with 45s timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 45_000);
+
+    let geminiRes: Response;
+    try {
+      geminiRes = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(geminiRequestBody),
+          signal: controller.signal,
+        },
+      );
+    } catch (fetchErr) {
+      if ((fetchErr as Error).name === 'AbortError') {
+        return new Response(JSON.stringify({ error: 'Gemini API request timed out (45s)' }), {
+          status: 504,
+          headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
+        });
+      }
+      throw fetchErr;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+
+    if (!geminiRes.ok) {
+      const errBody = await geminiRes.text();
+      return new Response(
+        JSON.stringify({ error: `Gemini API error (${geminiRes.status})`, details: errBody }),
+        {
+          status: geminiRes.status,
+          headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
+        },
+      );
+    }
+
+    const geminiData = await geminiRes.json();
+
+    // Extract the generated text from Gemini response
+    const text = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) {
+      return new Response(JSON.stringify({ error: 'Gemini returned an empty response' }), {
+        status: 502,
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Parse the JSON text and return it
+    const result = JSON.parse(text);
+
+    return new Response(JSON.stringify(result), {
+      status: 200,
+      headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
+    });
+  } catch (err) {
+    return new Response(JSON.stringify({ error: (err as Error).message }), {
+      status: 400,
+      headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
+    });
+  }
+});
