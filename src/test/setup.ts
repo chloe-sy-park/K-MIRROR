@@ -1,5 +1,22 @@
 import '@testing-library/jest-dom';
 
+// zustand persist + Vitest 호환을 위한 localStorage 모킹
+// Node.js 내장 localStorage가 zustand v5의 persist 미들웨어와 호환되지 않는 문제 해결
+const createStorageMock = (): Storage => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: (key: string) => store[key] ?? null,
+    setItem: (key: string, value: string) => { store[key] = value; },
+    removeItem: (key: string) => { delete store[key]; },
+    clear: () => { store = {}; },
+    get length() { return Object.keys(store).length; },
+    key: (index: number) => Object.keys(store)[index] ?? null,
+  };
+};
+
+Object.defineProperty(globalThis, 'localStorage', { value: createStorageMock(), writable: true });
+Object.defineProperty(globalThis, 'sessionStorage', { value: createStorageMock(), writable: true });
+
 // Mock @google/genai — heavy SDK that hangs in jsdom
 vi.mock('@google/genai', () => ({
   GoogleGenAI: class {
