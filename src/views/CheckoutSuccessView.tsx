@@ -13,9 +13,8 @@ const CheckoutSuccessView = () => {
   const [searchParams] = useSearchParams();
   const clearCart = useCartStore((s) => s.clearCart);
   const [order, setOrder] = useState<Order | null>(null);
-  const [loading, setLoading] = useState(true);
-
   const sessionId = searchParams.get('session_id');
+  const [loading, setLoading] = useState(Boolean(sessionId));
 
   useEffect(() => {
     clearCart();
@@ -24,8 +23,6 @@ const CheckoutSuccessView = () => {
       getOrderBySessionId(sessionId)
         .then((o) => setOrder(o))
         .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
     }
   }, [sessionId, clearCart]);
 
