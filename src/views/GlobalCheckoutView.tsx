@@ -8,16 +8,19 @@ import {
 } from 'lucide-react';
 import { containerVariants, itemVariants } from '@/constants/animations';
 import { useCartStore } from '@/store/cartStore';
+import { isPaymentEnabled, createCheckoutSession } from '@/services/paymentService';
+import { createLocalOrder } from '@/services/orderService';
 
 const GlobalCheckoutView = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const {
     items, shippingMethod, setShippingMethod,
-    removeItem, updateQuantity, placeOrder,
+    removeItem, updateQuantity, clearCart,
     subtotal, shippingCost, total, itemCount,
   } = useCartStore();
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const [fullName, setFullName] = useState('');
   const [country, setCountry] = useState('United States');
@@ -25,9 +28,42 @@ const GlobalCheckoutView = () => {
 
   const isFormValid = fullName.trim().length >= 2 && address.trim().length >= 5;
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (items.length === 0 || !isFormValid) return;
-    placeOrder();
+
+    if (isPaymentEnabled) {
+      setIsProcessing(true);
+      try {
+        const url = await createCheckoutSession({
+          items,
+          shippingMethod,
+          shippingName: fullName,
+          shippingCountry: country,
+          shippingAddress: address,
+        });
+        if (url) {
+          window.location.href = url;
+          return;
+        }
+      } catch (err) {
+        console.error('Checkout error:', err);
+        setIsProcessing(false);
+        return;
+      }
+    }
+
+    // Fallback: local order
+    createLocalOrder({
+      items,
+      subtotal: subtotal(),
+      shipping: shippingCost(),
+      total: total(),
+      shippingMethod,
+      shippingName: fullName,
+      shippingCountry: country,
+      shippingAddress: address,
+    });
+    clearCart();
     setOrderPlaced(true);
   };
 
@@ -206,10 +242,14 @@ const GlobalCheckoutView = () => {
 
             <button
               onClick={handlePlaceOrder}
-              disabled={!isFormValid}
-              className={`w-full py-6 rounded-2xl font-black text-xs tracking-[0.3em] uppercase transition-all mb-4 shadow-xl ${isFormValid ? 'bg-black text-white hover:bg-[#FF4D8D]' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
+              disabled={!isFormValid || isProcessing}
+              className={`w-full py-6 rounded-2xl font-black text-xs tracking-[0.3em] uppercase transition-all mb-4 shadow-xl ${
+                isFormValid && !isProcessing
+                  ? 'bg-black text-white hover:bg-[#FF4D8D]'
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              }`}
             >
-              {t('checkout.completePayment')}
+              {isProcessing ? t('checkout.processing') : t('checkout.completePayment')}
             </button>
             {!isFormValid && (
               <p className="text-[9px] text-center text-gray-400 mb-2">{t('validation.fillFormToContinue')}</p>
