@@ -1,16 +1,6 @@
 import { analyzeKBeauty, AnalysisError } from './geminiService';
-import type { UserPreferences } from '@/types';
 import { DEMO_RESULT } from '@/data/demoResult';
-
-// Override the @google/genai mock from setup.ts with our controllable mock
-const mockGenerateContent = vi.fn();
-
-vi.mock('@google/genai', () => ({
-  GoogleGenAI: class {
-    models = { generateContent: (...args: unknown[]) => mockGenerateContent(...args) };
-  },
-  Type: { OBJECT: 'OBJECT', STRING: 'STRING', NUMBER: 'NUMBER', ARRAY: 'ARRAY', BOOLEAN: 'BOOLEAN' },
-}));
+import type { UserPreferences } from '@/types';
 
 const defaultPrefs: UserPreferences = {
   environment: 'Office',
@@ -18,74 +8,73 @@ const defaultPrefs: UserPreferences = {
   mood: 'Natural',
 };
 
+// Helper: mock successful Edge Function response
+function okResponse(data: unknown) {
+  return {
+    ok: true,
+    json: () => Promise.resolve(data),
+  };
+}
+
+// Helper: mock error Edge Function response
+function errorResponse(status: number, error: string) {
+  return {
+    ok: false,
+    status,
+    json: () => Promise.resolve({ error }),
+  };
+}
+
 describe('geminiService', () => {
   let timeOffset = 0;
+  const originalFetch = globalThis.fetch;
+  const mockFetch = vi.fn();
 
   beforeEach(() => {
     vi.useFakeTimers();
-    mockGenerateContent.mockReset();
+    mockFetch.mockReset();
+    globalThis.fetch = mockFetch;
     // Advance system time by 61s per test to reset the rate limiter window
     timeOffset += 61_000;
     vi.setSystemTime(new Date(Date.now() + timeOffset));
-    // Set API_KEY for tests
-    process.env.API_KEY = 'test-api-key';
+    // Set Supabase env vars
+    vi.stubEnv('VITE_SUPABASE_URL', 'https://test.supabase.co');
+    vi.stubEnv('VITE_SUPABASE_ANON_KEY', 'test-anon-key');
   });
 
   afterEach(() => {
-    delete process.env.API_KEY;
+    globalThis.fetch = originalFetch;
+    vi.unstubAllEnvs();
     vi.useRealTimers();
   });
 
   describe('analyzeKBeauty', () => {
-    it('throws API error when API key is missing', async () => {
-      delete process.env.API_KEY;
+    it('throws API error when Supabase not configured', async () => {
+      vi.stubEnv('VITE_SUPABASE_URL', '');
       await expect(
-        analyzeKBeauty('userImg', 'celebImg', false, defaultPrefs),
+        analyzeKBeauty('img1', 'img2', false, defaultPrefs),
       ).rejects.toMatchObject({ code: 'API' });
     });
 
     it('returns validated result on success', async () => {
-      mockGenerateContent.mockResolvedValue({ text: JSON.stringify(DEMO_RESULT) });
-      const result = await analyzeKBeauty('userImg', 'celebImg', false, defaultPrefs);
+      mockFetch.mockResolvedValue(okResponse(DEMO_RESULT));
+      const result = await analyzeKBeauty('img1', 'img2', false, defaultPrefs);
       expect(result.tone.melaninIndex).toBe(5);
       expect(result.kMatch.celebName).toBe('Wonyoung (IVE)');
     });
 
-    it('throws EMPTY_RESPONSE when AI returns empty text', async () => {
-      mockGenerateContent.mockResolvedValue({ text: '' });
+    it('throws VALIDATION when response does not match Zod schema', async () => {
+      mockFetch.mockResolvedValue(okResponse({ tone: { melaninIndex: 999 } }));
       await expect(
-        analyzeKBeauty('userImg', 'celebImg', false, defaultPrefs),
-      ).rejects.toMatchObject({ code: 'EMPTY_RESPONSE' });
-    });
-
-    it('throws EMPTY_RESPONSE when text is null', async () => {
-      mockGenerateContent.mockResolvedValue({ text: null });
-      await expect(
-        analyzeKBeauty('userImg', 'celebImg', false, defaultPrefs),
-      ).rejects.toMatchObject({ code: 'EMPTY_RESPONSE' });
-    });
-
-    it('throws VALIDATION when AI returns invalid JSON', async () => {
-      mockGenerateContent.mockResolvedValue({ text: 'not json at all' });
-      await expect(
-        analyzeKBeauty('userImg', 'celebImg', false, defaultPrefs),
-      ).rejects.toMatchObject({ code: 'VALIDATION' });
-    });
-
-    it('throws VALIDATION when Zod schema validation fails', async () => {
-      const invalidResult = { tone: { melaninIndex: 999 } };
-      mockGenerateContent.mockResolvedValue({ text: JSON.stringify(invalidResult) });
-      await expect(
-        analyzeKBeauty('userImg', 'celebImg', false, defaultPrefs),
+        analyzeKBeauty('img1', 'img2', false, defaultPrefs),
       ).rejects.toMatchObject({ code: 'VALIDATION' });
     });
 
     it('throws NETWORK error on fetch failures', async () => {
-      // Use real timers — retry delays are 1s+3s, well within the 10s timeout
       vi.useRealTimers();
-      mockGenerateContent.mockRejectedValue(new Error('fetch failed'));
+      mockFetch.mockRejectedValue(new Error('fetch failed'));
       await expect(
-        analyzeKBeauty('userImg', 'celebImg', false, defaultPrefs),
+        analyzeKBeauty('img1', 'img2', false, defaultPrefs),
       ).rejects.toMatchObject({ code: 'NETWORK' });
     }, 10_000);
 
@@ -93,36 +82,52 @@ describe('geminiService', () => {
       const controller = new AbortController();
       controller.abort();
       await expect(
-        analyzeKBeauty('userImg', 'celebImg', false, defaultPrefs, undefined, controller.signal),
+        analyzeKBeauty('img1', 'img2', false, defaultPrefs, undefined, controller.signal),
       ).rejects.toMatchObject({ code: 'ABORTED' });
     });
 
-    it('passes selectedCelebName to the prompt', async () => {
-      mockGenerateContent.mockResolvedValue({ text: JSON.stringify(DEMO_RESULT) });
-      await analyzeKBeauty('userImg', 'celebImg', false, defaultPrefs, 'Jisoo');
-      expect(mockGenerateContent).toHaveBeenCalled();
-      const callArgs = mockGenerateContent.mock.calls[0]![0];
-      const textPart = callArgs.contents.parts[0].text;
-      expect(textPart).toContain('Jisoo');
+    it('sends correct request body with selectedCelebName', async () => {
+      mockFetch.mockResolvedValue(okResponse(DEMO_RESULT));
+      await analyzeKBeauty('img1', 'img2', false, defaultPrefs, 'Jisoo');
+      expect(mockFetch).toHaveBeenCalledOnce();
+      const callArgs = mockFetch.mock.calls[0];
+      const body = JSON.parse(callArgs[1].body);
+      expect(body.selectedCelebName).toBe('Jisoo');
     });
 
-    it('includes sensitivity info in prompt', async () => {
-      mockGenerateContent.mockResolvedValue({ text: JSON.stringify(DEMO_RESULT) });
-      await analyzeKBeauty('userImg', 'celebImg', true, defaultPrefs);
-      const callArgs = mockGenerateContent.mock.calls[0]![0];
-      const textPart = callArgs.contents.parts[0].text;
-      expect(textPart).toContain('Sensitive Skin: Yes');
+    it('sends isSensitive in request body', async () => {
+      mockFetch.mockResolvedValue(okResponse(DEMO_RESULT));
+      await analyzeKBeauty('img1', 'img2', true, defaultPrefs);
+      const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+      expect(body.isSensitive).toBe(true);
     });
 
     it('throws RATE_LIMITED when limit exceeded', async () => {
-      mockGenerateContent.mockResolvedValue({ text: JSON.stringify(DEMO_RESULT) });
+      mockFetch.mockResolvedValue(okResponse(DEMO_RESULT));
       // First two calls should succeed (rate limit = 2/min)
-      await analyzeKBeauty('userImg', 'celebImg', false, defaultPrefs);
-      await analyzeKBeauty('userImg', 'celebImg', false, defaultPrefs);
+      await analyzeKBeauty('img1', 'img2', false, defaultPrefs);
+      await analyzeKBeauty('img1', 'img2', false, defaultPrefs);
       // Third call should be rate-limited
       await expect(
-        analyzeKBeauty('userImg', 'celebImg', false, defaultPrefs),
+        analyzeKBeauty('img1', 'img2', false, defaultPrefs),
       ).rejects.toMatchObject({ code: 'RATE_LIMITED' });
+    });
+
+    it('sends correct headers', async () => {
+      mockFetch.mockResolvedValue(okResponse(DEMO_RESULT));
+      await analyzeKBeauty('img1', 'img2', false, defaultPrefs);
+      const [url, options] = mockFetch.mock.calls[0];
+      expect(url).toBe('https://test.supabase.co/functions/v1/analyze-kbeauty');
+      expect(options.headers['Authorization']).toBe('Bearer test-anon-key');
+      expect(options.headers['apikey']).toBe('test-anon-key');
+      expect(options.headers['Content-Type']).toBe('application/json');
+    });
+
+    it('handles Edge Function error responses', async () => {
+      mockFetch.mockResolvedValue(errorResponse(500, 'Gemini API key not configured'));
+      await expect(
+        analyzeKBeauty('img1', 'img2', false, defaultPrefs),
+      ).rejects.toMatchObject({ code: 'API', message: 'Gemini API key not configured' });
     });
   });
 
