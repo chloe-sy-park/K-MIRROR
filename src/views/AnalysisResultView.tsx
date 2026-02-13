@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import * as m from 'framer-motion/m';
 import {
   RotateCcw, Cpu, Palette, Droplets, Eye, Activity,
   Check, Sparkles, Plus, Play, ExternalLink, Lightbulb,
-  Bookmark, X
+  Bookmark, X, Target, Youtube, Wand2,
 } from 'lucide-react';
 import { containerVariants, itemVariants } from '@/constants/animations';
 import { useScanStore } from '@/store/scanStore';
@@ -14,6 +14,7 @@ import { useCartStore } from '@/store/cartStore';
 import { renderColorOnSkin } from '@/services/colorService';
 import { matchRecommendedProducts } from '@/services/productService';
 import { PRODUCT_CATALOG } from '@/data/productCatalog';
+import { getYouTubeVideoUrl, formatViewCount } from '@/services/youtubeService';
 import SherlockProportionVisualizer from '@/components/sherlock/ProportionVisualizer';
 
 let nextReportId = 0;
@@ -21,7 +22,7 @@ const generateReportId = () => ++nextReportId;
 
 const AnalysisResultView = () => {
   const navigate = useNavigate();
-  const { result, userImage, celebImage, reset } = useScanStore();
+  const { result, userImage, celebImage, youtubeVideos, reset } = useScanStore();
   const { boards, saveMuse, fetchBoards } = useMuseStore();
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [selectedBoardId, setSelectedBoardId] = useState<string | undefined>();
@@ -31,9 +32,29 @@ const AnalysisResultView = () => {
 
   const [reportId] = useState(generateReportId);
 
+  // Find best-matching board based on autoTags (must be before early return)
+  const suggestedBoard = useMemo(() => {
+    if (!result?.autoTags?.length || !boards.length) return null;
+    const tags = result.autoTags.map((t) => t.toLowerCase());
+    let bestBoard = null;
+    let bestScore = 0;
+    for (const board of boards) {
+      const nameWords = board.name.toLowerCase().split(/\s+/);
+      const score = nameWords.filter((w) => tags.some((t) => t.includes(w) || w.includes(t))).length;
+      if (score > bestScore) {
+        bestScore = score;
+        bestBoard = board;
+      }
+    }
+    return bestBoard;
+  }, [result?.autoTags, boards]);
+
   if (!result) return null;
 
   const matchedProducts = matchRecommendedProducts(result.recommendations.products, PRODUCT_CATALOG);
+  const hasRealVideos = youtubeVideos.length > 0;
+  const focusPoints = result.youtubeSearch?.focusPoints || [];
+  const channelSuggestions = result.youtubeSearch?.channelSuggestions || [];
 
   const handleAddToCart = (idx: number) => {
     const catalogProduct = matchedProducts[idx];
@@ -50,9 +71,6 @@ const AnalysisResultView = () => {
     navigate('/checkout');
   };
 
-  const getYouTubeSearchUrl = (title: string, creator: string) =>
-    `https://www.youtube.com/results?search_query=${encodeURIComponent(`${title} ${creator} K-beauty tutorial`)}`;
-
   const handleOpenSave = async () => {
     await fetchBoards();
     setShowSaveModal(true);
@@ -67,6 +85,9 @@ const AnalysisResultView = () => {
       vibe: result.sherlock.facialVibe,
       boardId: selectedBoardId,
       aiStylePoints: result.kMatch.aiStylePoints,
+      tags: result.autoTags || [],
+      notes: '',
+      extraImages: [],
     });
     setIsSaved(true);
     setShowSaveModal(false);
@@ -251,75 +272,178 @@ const AnalysisResultView = () => {
       </m.section>
 
       <m.section variants={itemVariants}>
-        <h3 className="text-[40px] heading-font italic mb-16 text-center uppercase">Curated Education</h3>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          {result.recommendations.videos && result.recommendations.videos.map((video, idx) => (
-            <m.div
-              key={idx}
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              className="flex flex-col gap-6"
-            >
-              <a
-                href={getYouTubeSearchUrl(video.title, video.creator)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="relative group cursor-pointer overflow-hidden rounded-[3rem] h-[450px] shadow-xl block"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center">
-                  <div className="text-[120px] font-black heading-font text-white/5 uppercase select-none">{idx + 1}</div>
-                </div>
-                <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center transition-all group-hover:bg-black/20">
-                  <m.div
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    className="w-20 h-20 rounded-full bg-red-600/80 backdrop-blur-md flex items-center justify-center border border-red-400/30"
-                  >
-                    <Play fill="white" className="text-white translate-x-1" size={28} />
-                  </m.div>
-                  <span className="text-[9px] font-black uppercase tracking-widest text-white/60 mt-4">Watch on YouTube</span>
-                </div>
-                <div className="absolute top-10 left-10">
-                  <div className="px-4 py-2 bg-[#FF4D8D] text-white rounded-full text-[8px] font-black uppercase tracking-[0.2em] shadow-lg uppercase">
-                    {video.matchPercentage}% AI MATCH
-                  </div>
-                </div>
-                <div className="absolute bottom-12 left-12 right-12 flex justify-between items-end text-white">
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-[9px] font-black uppercase tracking-[0.4em] opacity-60 mb-2 uppercase">{video.creator} • {video.views} views</p>
-                      <h4 className="text-2xl heading-font italic leading-tight uppercase max-w-sm text-balance">{video.title}</h4>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-lg text-[8px] font-black uppercase uppercase">{video.tag}</span>
-                      <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-lg text-[8px] font-black uppercase uppercase">{video.skillLevel}</span>
-                    </div>
-                  </div>
-                  <div className="w-12 h-12 rounded-full border border-white/40 flex items-center justify-center backdrop-blur-sm group-hover:bg-white group-hover:text-black transition-all">
-                    <ExternalLink size={18} />
-                  </div>
-                </div>
-              </a>
-              {video.aiCoaching && (
-                <m.div
-                  initial={{ opacity: 0, x: -10 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  className="bg-pink-50 border border-pink-100 p-8 rounded-[2.5rem] flex gap-6 items-start"
-                >
-                  <div className="w-10 h-10 bg-white rounded-full flex-shrink-0 flex items-center justify-center text-[#FF4D8D] shadow-sm">
-                    <Lightbulb size={20} />
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-[#FF4D8D] uppercase">AI Coaching Protocol</p>
-                    <p className="text-xs text-gray-600 leading-relaxed font-medium italic text-balance">"{video.aiCoaching}"</p>
-                  </div>
-                </m.div>
-              )}
-            </m.div>
-          ))}
+        <div className="text-center mb-16 space-y-4">
+          <h3 className="text-[40px] heading-font italic uppercase">Curated Tutorials</h3>
+          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400">
+            K-Beauty YouTube content handpicked for your look
+          </p>
         </div>
+
+        {/* Focus Points — what to watch for */}
+        {focusPoints.length > 0 && (
+          <m.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-12 p-8 bg-gradient-to-r from-[#FF4D8D]/5 to-purple-50 border border-[#FF4D8D]/10 rounded-[2.5rem]"
+          >
+            <div className="flex items-center gap-3 mb-5">
+              <Target size={16} className="text-[#FF4D8D]" />
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#FF4D8D]">
+                Focus Points — Tips to Watch For
+              </span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {focusPoints.map((point, idx) => (
+                <div key={idx} className="flex items-start gap-3">
+                  <span className="w-5 h-5 rounded-full bg-[#FF4D8D]/10 text-[#FF4D8D] flex items-center justify-center flex-shrink-0 text-[9px] font-black mt-0.5">
+                    {idx + 1}
+                  </span>
+                  <p className="text-sm text-gray-700 font-medium leading-relaxed">{point}</p>
+                </div>
+              ))}
+            </div>
+          </m.div>
+        )}
+
+        {/* Real YouTube Videos (if available) */}
+        {hasRealVideos ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            {youtubeVideos.map((video, idx) => (
+              <m.div
+                key={video.videoId}
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                className="flex flex-col gap-6"
+              >
+                <a
+                  href={getYouTubeVideoUrl(video.videoId)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="relative group cursor-pointer overflow-hidden rounded-[3rem] h-[350px] shadow-xl block"
+                >
+                  {/* Real thumbnail */}
+                  <img
+                    src={video.thumbnail}
+                    alt={video.title}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-all" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <m.div
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="w-16 h-16 rounded-full bg-red-600/90 backdrop-blur-md flex items-center justify-center border border-red-400/30 shadow-lg"
+                    >
+                      <Play fill="white" className="text-white translate-x-0.5" size={24} />
+                    </m.div>
+                  </div>
+                  {video.duration && (
+                    <div className="absolute top-6 right-6 px-3 py-1 bg-black/70 text-white rounded-lg text-[9px] font-black">
+                      {video.duration}
+                    </div>
+                  )}
+                  <div className="absolute bottom-8 left-8 right-8 text-white">
+                    <p className="text-[9px] font-black uppercase tracking-[0.3em] opacity-70 mb-2">
+                      {video.channelTitle} {video.viewCount ? `• ${formatViewCount(video.viewCount)} views` : ''}
+                    </p>
+                    <h4 className="text-lg font-bold leading-tight line-clamp-2">{video.title}</h4>
+                  </div>
+                </a>
+              </m.div>
+            ))}
+          </div>
+        ) : (
+          /* Fallback: AI-generated video recommendations with YouTube search links */
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            {result.recommendations.videos && result.recommendations.videos.map((video, idx) => (
+              <m.div
+                key={idx}
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                className="flex flex-col gap-6"
+              >
+                <a
+                  href={`https://www.youtube.com/results?search_query=${encodeURIComponent(`${video.title} ${video.creator} K-beauty tutorial`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="relative group cursor-pointer overflow-hidden rounded-[3rem] h-[350px] shadow-xl block"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center">
+                    <div className="text-[120px] font-black heading-font text-white/5 uppercase select-none">{idx + 1}</div>
+                  </div>
+                  <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center transition-all group-hover:bg-black/20">
+                    <m.div
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="w-16 h-16 rounded-full bg-red-600/80 backdrop-blur-md flex items-center justify-center border border-red-400/30"
+                    >
+                      <Play fill="white" className="text-white translate-x-0.5" size={24} />
+                    </m.div>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-white/60 mt-4">Search on YouTube</span>
+                  </div>
+                  <div className="absolute top-8 left-8">
+                    <div className="px-4 py-2 bg-[#FF4D8D] text-white rounded-full text-[8px] font-black uppercase tracking-[0.2em] shadow-lg">
+                      {video.matchPercentage}% AI MATCH
+                    </div>
+                  </div>
+                  <div className="absolute bottom-8 left-8 right-8 text-white">
+                    <p className="text-[9px] font-black uppercase tracking-[0.3em] opacity-60 mb-2">{video.creator} • {video.views} views</p>
+                    <h4 className="text-xl heading-font italic leading-tight uppercase max-w-sm text-balance">{video.title}</h4>
+                    <div className="flex items-center gap-3 mt-3">
+                      <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-lg text-[8px] font-black uppercase">{video.tag}</span>
+                      <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-lg text-[8px] font-black uppercase">{video.skillLevel}</span>
+                    </div>
+                  </div>
+                </a>
+                {video.aiCoaching && (
+                  <m.div
+                    initial={{ opacity: 0, x: -10 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    className="bg-pink-50 border border-pink-100 p-8 rounded-[2.5rem] flex gap-6 items-start"
+                  >
+                    <div className="w-10 h-10 bg-white rounded-full flex-shrink-0 flex items-center justify-center text-[#FF4D8D] shadow-sm">
+                      <Lightbulb size={20} />
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-[#FF4D8D]">AI Coaching Protocol</p>
+                      <p className="text-xs text-gray-600 leading-relaxed font-medium italic text-balance">"{video.aiCoaching}"</p>
+                    </div>
+                  </m.div>
+                )}
+              </m.div>
+            ))}
+          </div>
+        )}
+
+        {/* Recommended Channels */}
+        {channelSuggestions.length > 0 && (
+          <m.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mt-12 text-center space-y-4"
+          >
+            <p className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400">Recommended Channels</p>
+            <div className="flex items-center justify-center gap-4 flex-wrap">
+              {channelSuggestions.map((channel) => (
+                <a
+                  key={channel}
+                  href={`https://www.youtube.com/results?search_query=${encodeURIComponent(channel)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-5 py-3 bg-gray-50 border border-gray-100 rounded-2xl hover:border-red-200 hover:bg-red-50 transition-all group"
+                >
+                  <Youtube size={14} className="text-gray-400 group-hover:text-red-500 transition-colors" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-gray-600 group-hover:text-red-600 transition-colors">{channel}</span>
+                </a>
+              ))}
+            </div>
+          </m.div>
+        )}
       </m.section>
       {/* Save to Muse Board Modal */}
       <AnimatePresence>
@@ -341,7 +465,7 @@ const AnalysisResultView = () => {
                 <X size={20} />
               </button>
 
-              <div className="text-center mb-10">
+              <div className="text-center mb-8">
                 <h2 className="text-3xl heading-font uppercase tracking-tight">
                   Save to <span className="italic text-[#FF4D8D]">Muse Board</span>
                 </h2>
@@ -349,6 +473,44 @@ const AnalysisResultView = () => {
                   {result.kMatch.celebName} — {result.sherlock.facialVibe}
                 </p>
               </div>
+
+              {/* AI Auto Tags */}
+              {result.autoTags && result.autoTags.length > 0 && (
+                <div className="mb-6 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Wand2 size={12} className="text-[#FF4D8D]" />
+                    <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">AI Auto Tags</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {result.autoTags.map((tag) => (
+                      <span key={tag} className="text-[9px] font-bold text-[#FF4D8D] bg-[#FF4D8D]/10 px-3 py-1 rounded-full">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* AI Suggested Board */}
+              {suggestedBoard && (
+                <div className="mb-4 p-4 bg-[#FF4D8D]/5 border border-[#FF4D8D]/10 rounded-2xl">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Wand2 size={12} className="text-[#FF4D8D]" />
+                    <span className="text-[9px] font-black uppercase tracking-widest text-[#FF4D8D]">AI Suggests</span>
+                  </div>
+                  <button
+                    onClick={() => setSelectedBoardId(suggestedBoard.id)}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left ${
+                      selectedBoardId === suggestedBoard.id
+                        ? 'bg-[#FF4D8D] text-white'
+                        : 'bg-white hover:bg-[#FF4D8D]/10'
+                    }`}
+                  >
+                    <span className="text-lg">{suggestedBoard.icon}</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest">{suggestedBoard.name}</span>
+                  </button>
+                </div>
+              )}
 
               <div className="space-y-3 mb-8 max-h-60 overflow-y-auto">
                 <button

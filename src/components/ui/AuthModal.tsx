@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import * as m from 'framer-motion/m';
 import { X, Mail, Chrome } from 'lucide-react';
@@ -6,6 +6,8 @@ import { useAuthStore } from '@/store/authStore';
 import { isSupabaseConfigured } from '@/lib/supabase';
 
 type AuthMode = 'signin' | 'signup';
+
+const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 const AuthModal = () => {
   const {
@@ -16,6 +18,49 @@ const AuthModal = () => {
   const [mode, setMode] = useState<AuthMode>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<Element | null>(null);
+
+  // Save the element that opened the modal so we can restore focus on close
+  useEffect(() => {
+    if (isAuthModalOpen) {
+      triggerRef.current = document.activeElement;
+    } else if (triggerRef.current instanceof HTMLElement) {
+      triggerRef.current.focus();
+      triggerRef.current = null;
+    }
+  }, [isAuthModalOpen]);
+
+  // Auto-focus the first focusable element when modal opens
+  useEffect(() => {
+    if (isAuthModalOpen && dialogRef.current) {
+      const first = dialogRef.current.querySelector<HTMLElement>(FOCUSABLE);
+      first?.focus();
+    }
+  }, [isAuthModalOpen]);
+
+  // Focus trap: cycle Tab within the dialog
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      closeAuthModal();
+      return;
+    }
+    if (e.key !== 'Tab' || !dialogRef.current) return;
+
+    const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>(FOCUSABLE));
+    if (focusable.length === 0) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }, [closeAuthModal]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,9 +85,10 @@ const AuthModal = () => {
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[250] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
           onClick={closeAuthModal}
-          onKeyDown={(e) => { if (e.key === 'Escape') closeAuthModal(); }}
+          onKeyDown={handleKeyDown}
         >
           <m.div
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-label={mode === 'signin' ? 'Sign in to K-MIRROR' : 'Create K-MIRROR account'}

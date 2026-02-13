@@ -113,6 +113,11 @@ export const analyzeKBeauty = async (
     3. Style Transfer Logic: Reinterpret the K-celeb's style for the user's unique ethnicity and bone structure. Apply melanin-aware color adaptation rules above.
     4. Product Curation: 3-4 K-beauty products with match scores and safety ratings. For L4-L6, ensure product shades have sufficient chromatic depth.
     5. Video Curation: 2 tutorials that teach this adapted look at the user's skill level.
+    6. Auto Tags: Generate 3-5 short descriptive tags that categorize this analysis (e.g., "Natural Glow", "Bold Lip", "Cool Tone", "Office Ready", celebrity name). These will be used for automatic board categorization.
+    7. YouTube Search Hints: Generate the following for Korean YouTube tutorial curation:
+       - queries: 2-3 Korean-language YouTube search queries to find the best matching tutorials (e.g., "한소희 메이크업 튜토리얼", "쿨톤 데일리 메이크업 브이로그")
+       - focusPoints: 3-5 specific technique tips the user should watch for in these tutorials (in Korean, e.g., "눈꼬리 라인 올리는 각도", "쿠션 반만 묻혀 얇게 레이어링")
+       - channelSuggestions: 2-3 real popular Korean beauty YouTube channel names (e.g., "이사배", "PONY Syndrome", "회사원A")
 
     Output MUST be in valid JSON format only.
   `;
@@ -233,9 +238,35 @@ export const analyzeKBeauty = async (
                 sensitiveSafe: { type: Type.BOOLEAN }
               },
               required: ['ingredients', 'products', 'videos', 'sensitiveSafe']
+            },
+            autoTags: {
+              type: Type.ARRAY,
+              items: { type: Type.STRING },
+              description: "3-5 short descriptive tags for auto-categorization"
+            },
+            youtubeSearch: {
+              type: Type.OBJECT,
+              properties: {
+                queries: {
+                  type: Type.ARRAY,
+                  items: { type: Type.STRING },
+                  description: "2-3 Korean YouTube search queries"
+                },
+                focusPoints: {
+                  type: Type.ARRAY,
+                  items: { type: Type.STRING },
+                  description: "3-5 technique tips to watch for"
+                },
+                channelSuggestions: {
+                  type: Type.ARRAY,
+                  items: { type: Type.STRING },
+                  description: "2-3 popular Korean beauty YouTube channels"
+                }
+              },
+              required: ['queries', 'focusPoints', 'channelSuggestions']
             }
           },
-          required: ['tone', 'sherlock', 'kMatch', 'recommendations']
+          required: ['tone', 'sherlock', 'kMatch', 'recommendations', 'autoTags', 'youtubeSearch']
         }
       }
     });

@@ -24,6 +24,7 @@ function renderWithResult() {
     result: DEMO_RESULT,
     userImage: 'data:image/png;base64,user',
     celebImage: 'data:image/png;base64,celeb',
+    youtubeVideos: [],
     error: null,
   });
   return render(
@@ -75,7 +76,7 @@ describe('AnalysisResultView', () => {
 
   it('shows video tutorials', () => {
     renderWithResult();
-    expect(screen.getByText(/Curated Education/i)).toBeInTheDocument();
+    expect(screen.getByText(/Curated Tutorials/i)).toBeInTheDocument();
     DEMO_RESULT.recommendations.videos?.forEach((v) => {
       expect(screen.getByText(v.title)).toBeInTheDocument();
     });

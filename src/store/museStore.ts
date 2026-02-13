@@ -12,8 +12,11 @@ interface MuseState {
   fetchBoards: () => Promise<void>;
   fetchMuses: (boardId?: string) => Promise<void>;
   createBoard: (name: string, icon: string) => Promise<void>;
+  updateBoard: (id: string, updates: { name?: string; icon?: string }) => Promise<void>;
   deleteBoard: (id: string) => Promise<void>;
   saveMuse: (muse: Omit<SavedMuse, 'id'>) => Promise<void>;
+  updateMuse: (id: string, updates: { notes?: string; extraImages?: string[]; tags?: string[] }) => Promise<void>;
+  moveMuse: (id: string, newBoardId: string | null) => Promise<void>;
   deleteMuse: (id: string) => Promise<void>;
   setActiveBoard: (id: string | null) => void;
   clearError: () => void;
@@ -96,6 +99,51 @@ export const useMuseStore = create<MuseState>((set, get) => ({
         boards: s.boards.map((b) =>
           muse?.boardId && b.id === muse.boardId ? { ...b, count: Math.max(0, b.count - 1) } : b
         ),
+      }));
+    } catch (err) {
+      set({ error: (err as Error).message });
+    }
+  },
+
+  updateBoard: async (id, updates) => {
+    set({ error: null });
+    try {
+      const updated = await museService.updateBoard(id, updates);
+      set((s) => ({
+        boards: s.boards.map((b) => (b.id === id ? updated : b)),
+      }));
+    } catch (err) {
+      set({ error: (err as Error).message });
+    }
+  },
+
+  updateMuse: async (id, updates) => {
+    set({ error: null });
+    try {
+      const updated = await museService.updateMuse(id, updates);
+      set((s) => ({
+        muses: s.muses.map((m) => (m.id === id ? updated : m)),
+      }));
+    } catch (err) {
+      set({ error: (err as Error).message });
+    }
+  },
+
+  moveMuse: async (id, newBoardId) => {
+    set({ error: null });
+    try {
+      const muse = get().muses.find((m) => m.id === id);
+      const oldBoardId = muse?.boardId;
+      await museService.moveMuse(id, newBoardId);
+      set((s) => ({
+        muses: s.muses.map((m) =>
+          m.id === id ? { ...m, boardId: newBoardId ?? undefined } : m
+        ),
+        boards: s.boards.map((b) => {
+          if (oldBoardId && b.id === oldBoardId) return { ...b, count: Math.max(0, b.count - 1) };
+          if (newBoardId && b.id === newBoardId) return { ...b, count: b.count + 1 };
+          return b;
+        }),
       }));
     } catch (err) {
       set({ error: (err as Error).message });

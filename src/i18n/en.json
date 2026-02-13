@@ -93,7 +93,10 @@
   "orders": {
     "title": "ORDER HISTORY",
     "noOrders": "No Orders Yet",
-    "noOrdersDesc": "Start shopping to see your order history here."
+    "noOrdersDesc": "Start shopping to see your order history here.",
+    "browseShop": "Browse Shop",
+    "ordersPlaced": "orders placed",
+    "orderPlaced": "order placed"
   },
   "settings": {
     "title": "Settings",
@@ -125,7 +128,30 @@
     "addressMinLength": "Address must be at least 5 characters",
     "fillFormToContinue": "Please fill in your name and address to continue"
   },
+  "celebs": {
+    "title": "K-CELEB GALLERY",
+    "subtitle": "Browse trending K-Beauty icons. Select your style muse to start a personalized analysis.",
+    "filterByGenre": "Filter by Genre",
+    "filterByMood": "Filter by Mood",
+    "noResults": "No celebs match your filters. Try a different combination.",
+    "selectAsMuse": "Select as Muse",
+    "all": "All"
+  },
+  "onboarding": {
+    "title": "Calibrate Your Stylist.",
+    "tagline": "Initialization",
+    "environment": "Target Environment",
+    "skill": "Makeup Skill Level",
+    "mood": "Preferred Vibe",
+    "start": "Initialize Engine"
+  },
+  "methodology": {
+    "title": "SHERLOCK METHODOLOGY",
+    "subtitle": "The science behind your style analysis",
+    "bookSession": "Book Expert Session"
+  },
   "a11y": {
+    "skipToContent": "Skip to content",
     "inclusionGuard": "Inclusion Guard",
     "neuralSafetyFilter": "Neural Safety Filter",
     "uploadImage": "Upload image",
@@ -135,7 +161,12 @@
     "shoppingCart": "Shopping cart",
     "signIn": "Sign in",
     "signOut": "Sign out",
-    "selectAsMuse": "Select as style muse"
+    "selectAsMuse": "Select as style muse",
+    "deleteBoard": "Delete board",
+    "deleteMuse": "Delete muse",
+    "removeItem": "Remove item",
+    "increaseQuantity": "Increase quantity",
+    "decreaseQuantity": "Decrease quantity"
   },
   "common": {
     "loading": "Loading...",
@@ -144,6 +175,11 @@
     "items": "items",
     "match": "Match",
     "retry": "Try Again",
-    "goHome": "Go Home"
+    "goHome": "Go Home",
+    "newScan": "New Scan",
+    "browseShop": "Browse Shop",
+    "browseCelebs": "Browse Celebs",
+    "startScan": "Start a Scan",
+    "saved": "saved"
   }
 }
