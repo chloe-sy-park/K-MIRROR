@@ -34,6 +34,12 @@ export const analysisResultSchema = z.object({
     skinHexCode: z.string().regex(/^#[0-9A-Fa-f]{6}$/).default('#C8A98B'),
     skinConcerns: z.array(z.string()),
     description: z.string(),
+    skinType: z.enum(['dry', 'oily', 'combination', 'normal']).optional(),
+    sensitivityLevel: z.number().min(1).max(5).optional(),
+    moistureLevel: z.enum(['low', 'medium', 'high']).optional(),
+    sebumLevel: z.enum(['low', 'medium', 'high']).optional(),
+    poreSize: z.enum(['small', 'medium', 'large']).optional(),
+    skinThickness: z.enum(['thin', 'medium', 'thick']).optional(),
   }),
   sherlock: z.object({
     proportions: z.object({

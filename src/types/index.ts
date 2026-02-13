@@ -60,14 +60,22 @@ export interface UserPreferences {
   mood: 'Natural' | 'Elegant' | 'Powerful';
 }
 
+export interface SkinProfile {
+  melaninIndex: number;
+  undertone: 'Warm' | 'Cool' | 'Neutral';
+  skinHexCode: string;
+  skinConcerns: string[];
+  description: string;
+  skinType?: 'dry' | 'oily' | 'combination' | 'normal';
+  sensitivityLevel?: number;
+  moistureLevel?: 'low' | 'medium' | 'high';
+  sebumLevel?: 'low' | 'medium' | 'high';
+  poreSize?: 'small' | 'medium' | 'large';
+  skinThickness?: 'thin' | 'medium' | 'thick';
+}
+
 export interface AnalysisResult {
-  tone: {
-    melaninIndex: number; // 1-6
-    undertone: 'Warm' | 'Cool' | 'Neutral';
-    skinHexCode: string; // e.g. "#C8A98B"
-    skinConcerns: string[];
-    description: string;
-  };
+  tone: SkinProfile;
   sherlock: {
     proportions: {
       upper: string;
