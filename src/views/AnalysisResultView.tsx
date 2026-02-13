@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { AnimatePresence } from 'framer-motion';
 import * as m from 'framer-motion/m';
 import {
@@ -21,6 +22,7 @@ let nextReportId = 0;
 const generateReportId = () => ++nextReportId;
 
 const AnalysisResultView = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { result, userImage, celebImage, youtubeVideos, reset } = useScanStore();
   const { boards, saveMuse, fetchBoards } = useMuseStore();
@@ -102,7 +104,7 @@ const AnalysisResultView = () => {
       <m.section variants={itemVariants} className="border-b border-black pb-20">
         <div className="flex justify-between items-start mb-12">
           <div className="flex flex-col gap-1">
-            <p className="text-[10px] font-black tracking-[0.5em] text-[#FF4D8D] uppercase italic">Diagnostic Report — ID:{reportId}</p>
+            <p className="text-[10px] font-black tracking-[0.5em] text-[#FF4D8D] uppercase italic">{t('result.diagnosticReport')} — ID:{reportId}</p>
             <div className="flex items-center gap-2 text-[8px] font-bold text-gray-400 uppercase tracking-widest">
               <Cpu size={10} /> Neural Stylist v5.0-inclusive
             </div>
@@ -116,20 +118,20 @@ const AnalysisResultView = () => {
                 isSaved ? 'text-[#FF4D8D]' : 'text-gray-400 hover:text-[#FF4D8D]'
               }`}
             >
-              <Bookmark size={12} fill={isSaved ? 'currentColor' : 'none'} /> {isSaved ? 'Saved' : 'Save'}
+              <Bookmark size={12} fill={isSaved ? 'currentColor' : 'none'} /> {isSaved ? t('result.saved') : t('result.save')}
             </m.button>
             <button onClick={handleReset} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-black transition-colors">
-              <RotateCcw size={12} /> New Scan
+              <RotateCcw size={12} /> {t('result.newScan')}
             </button>
           </div>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-end">
           <h2 className="text-[60px] lg:text-[100px] heading-font leading-[0.85] tracking-[-0.05em] uppercase text-balance">
-            NEURAL <br/><span className="italic">IDENTITY.</span>
+            {t('result.neuralIdentity')}
           </h2>
           <div className="space-y-6 max-w-sm w-full">
             <div className="flex justify-between border-b border-gray-100 pb-4 items-center">
-              <span className="text-[10px] font-black uppercase text-gray-300">Tone Mapping</span>
+              <span className="text-[10px] font-black uppercase text-gray-300">{t('result.toneMapping')}</span>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full border border-gray-200" style={{ backgroundColor: result.tone.skinHexCode }} />
                 <span className="text-xs font-bold uppercase">{result.tone.undertone} / L{result.tone.melaninIndex}</span>
@@ -137,11 +139,11 @@ const AnalysisResultView = () => {
               </div>
             </div>
             <div className="flex justify-between border-b border-gray-100 pb-4">
-              <span className="text-[10px] font-black uppercase text-gray-300">Osteo-Structure</span>
+              <span className="text-[10px] font-black uppercase text-gray-300">{t('result.osteoStructure')}</span>
               <span className="text-xs font-bold uppercase">{result.sherlock.boneStructure}</span>
             </div>
             <div className="flex justify-between border-b border-gray-100 pb-4">
-              <span className="text-[10px] font-black uppercase text-gray-300">Aesthetic Vibe</span>
+              <span className="text-[10px] font-black uppercase text-gray-300">{t('result.aestheticVibe')}</span>
               <span className="text-xs font-bold uppercase">{result.sherlock.facialVibe}</span>
             </div>
           </div>
@@ -156,7 +158,7 @@ const AnalysisResultView = () => {
           >
             <div className="flex justify-between items-start mb-12 border-b border-gray-50 pb-10">
               <div className="space-y-2">
-                <h3 className="text-[11px] font-black uppercase tracking-[0.6em] text-gray-300 uppercase">Forensic Mapping</h3>
+                <h3 className="text-[11px] font-black uppercase tracking-[0.6em] text-gray-300">{t('result.forensicMapping')}</h3>
                 <p className="text-[10px] font-black text-[#FF4D8D] uppercase tracking-widest">Sherlock Profile v4.2</p>
               </div>
               <SherlockProportionVisualizer proportions={result.sherlock.proportions} />
@@ -174,9 +176,9 @@ const AnalysisResultView = () => {
         <div className="lg:col-span-7 space-y-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { label: 'Neural Base', val: result.kMatch.adaptationLogic.base, icon: <Palette size={22}/> },
-              { label: 'Lip Strategy', val: result.kMatch.adaptationLogic.lip, icon: <Droplets size={22}/> },
-              { label: 'Vector Focus', val: result.kMatch.adaptationLogic.point, icon: <Eye size={22}/> }
+              { label: t('result.neuralBase'), val: result.kMatch.adaptationLogic.base, icon: <Palette size={22}/> },
+              { label: t('result.lipStrategy'), val: result.kMatch.adaptationLogic.lip, icon: <Droplets size={22}/> },
+              { label: t('result.vectorFocus'), val: result.kMatch.adaptationLogic.point, icon: <Eye size={22}/> }
             ].map((item, idx) => (
               <m.div
                 key={idx}
@@ -198,7 +200,7 @@ const AnalysisResultView = () => {
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#FF4D8D]/10 blur-[100px]"></div>
             <div className="flex items-center gap-3 mb-8">
               <Activity size={16} className="text-[#FF4D8D]" />
-              <h4 className="text-[11px] font-black uppercase tracking-[0.7em] text-[#FF4D8D] uppercase">Laboratory Adaptation Notes</h4>
+              <h4 className="text-[11px] font-black uppercase tracking-[0.7em] text-[#FF4D8D]">{t('result.adaptationNotes')}</h4>
             </div>
             <p className="text-xl lg:text-3xl font-medium leading-[1.3] italic tracking-tight text-gray-100 text-balance">
               "{result.kMatch.styleExplanation}"
@@ -217,8 +219,8 @@ const AnalysisResultView = () => {
 
       <m.section variants={itemVariants}>
         <div className="flex justify-between items-end mb-16">
-          <h3 className="text-[40px] heading-font italic uppercase">Recommended Objects</h3>
-          <button onClick={handleCheckout} className="text-[10px] font-black border-b border-black pb-1 cursor-pointer uppercase tracking-widest hover:text-[#FF4D8D] hover:border-[#FF4D8D] transition-all uppercase">Shop the collection</button>
+          <h3 className="text-[40px] heading-font italic uppercase">{t('result.recommendedObjects')}</h3>
+          <button onClick={handleCheckout} className="text-[10px] font-black border-b border-black pb-1 cursor-pointer uppercase tracking-widest hover:text-[#FF4D8D] hover:border-[#FF4D8D] transition-all">{t('result.shopCollection')}</button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[2px] bg-black/5 border border-black/5 overflow-hidden rounded-[2.5rem]">
@@ -237,7 +239,7 @@ const AnalysisResultView = () => {
               </div>
               {result.tone.skinHexCode && (
                 <div className="flex items-center gap-2 mb-6">
-                  <span className="text-[8px] font-black text-gray-300 uppercase tracking-widest">Swatch</span>
+                  <span className="text-[8px] font-black text-gray-300 uppercase tracking-widest">{t('result.swatchPreview')}</span>
                   {(['tint', 'matte', 'cushion'] as const).map((type) => (
                     <div
                       key={type}
@@ -274,9 +276,9 @@ const AnalysisResultView = () => {
 
       <m.section variants={itemVariants}>
         <div className="text-center mb-16 space-y-4">
-          <h3 className="text-[40px] heading-font italic uppercase">Curated Tutorials</h3>
+          <h3 className="text-[40px] heading-font italic uppercase">{t('result.curatedTutorials')}</h3>
           <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400">
-            K-Beauty YouTube content handpicked for your look
+            {t('result.curatedTutorialsDesc')}
           </p>
         </div>
 
@@ -291,7 +293,7 @@ const AnalysisResultView = () => {
             <div className="flex items-center gap-3 mb-5">
               <Target size={16} className="text-[#FF4D8D]" />
               <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#FF4D8D]">
-                Focus Points — Tips to Watch For
+                {t('result.focusPoints')}
               </span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -347,7 +349,7 @@ const AnalysisResultView = () => {
                   )}
                   <div className="absolute bottom-8 left-8 right-8 text-white">
                     <p className="text-[9px] font-black uppercase tracking-[0.3em] opacity-70 mb-2">
-                      {video.channelTitle} {video.viewCount ? `• ${formatViewCount(video.viewCount)} views` : ''}
+                      {video.channelTitle} {video.viewCount ? `• ${formatViewCount(video.viewCount)} ${t('common.views')}` : ''}
                     </p>
                     <h4 className="text-lg font-bold leading-tight line-clamp-2">{video.title}</h4>
                   </div>
@@ -383,15 +385,15 @@ const AnalysisResultView = () => {
                     >
                       <Play fill="white" className="text-white translate-x-0.5" size={24} />
                     </m.div>
-                    <span className="text-[9px] font-black uppercase tracking-widest text-white/60 mt-4">Search on YouTube</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-white/60 mt-4">{t('result.searchOnYoutube')}</span>
                   </div>
                   <div className="absolute top-8 left-8">
                     <div className="px-4 py-2 bg-[#FF4D8D] text-white rounded-full text-[8px] font-black uppercase tracking-[0.2em] shadow-lg">
-                      {video.matchPercentage}% AI MATCH
+                      {video.matchPercentage}% {t('result.aiMatch')}
                     </div>
                   </div>
                   <div className="absolute bottom-8 left-8 right-8 text-white">
-                    <p className="text-[9px] font-black uppercase tracking-[0.3em] opacity-60 mb-2">{video.creator} • {video.views} views</p>
+                    <p className="text-[9px] font-black uppercase tracking-[0.3em] opacity-60 mb-2">{video.creator} • {video.views} {t('common.views')}</p>
                     <h4 className="text-xl heading-font italic leading-tight uppercase max-w-sm text-balance">{video.title}</h4>
                     <div className="flex items-center gap-3 mt-3">
                       <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-lg text-[8px] font-black uppercase">{video.tag}</span>
@@ -410,7 +412,7 @@ const AnalysisResultView = () => {
                       <Lightbulb size={20} />
                     </div>
                     <div className="space-y-2">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-[#FF4D8D]">AI Coaching Protocol</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-[#FF4D8D]">{t('result.aiCoachingProtocol')}</p>
                       <p className="text-xs text-gray-600 leading-relaxed font-medium italic text-balance">"{video.aiCoaching}"</p>
                     </div>
                   </m.div>
@@ -428,7 +430,7 @@ const AnalysisResultView = () => {
             viewport={{ once: true }}
             className="mt-12 text-center space-y-4"
           >
-            <p className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400">Recommended Channels</p>
+            <p className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400">{t('result.recommendedChannels')}</p>
             <div className="flex items-center justify-center gap-4 flex-wrap">
               {channelSuggestions.map((channel) => (
                 <a
@@ -468,7 +470,7 @@ const AnalysisResultView = () => {
 
               <div className="text-center mb-8">
                 <h2 className="text-3xl heading-font uppercase tracking-tight">
-                  Save to <span className="italic text-[#FF4D8D]">Muse Board</span>
+                  {t('result.saveToMuseBoard')}
                 </h2>
                 <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-3">
                   {result.kMatch.celebName} — {result.sherlock.facialVibe}
@@ -480,7 +482,7 @@ const AnalysisResultView = () => {
                 <div className="mb-6 space-y-2">
                   <div className="flex items-center gap-2">
                     <Wand2 size={12} className="text-[#FF4D8D]" />
-                    <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">AI Auto Tags</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">{t('result.aiAutoTags')}</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {result.autoTags.map((tag) => (
@@ -497,7 +499,7 @@ const AnalysisResultView = () => {
                 <div className="mb-4 p-4 bg-[#FF4D8D]/5 border border-[#FF4D8D]/10 rounded-2xl">
                   <div className="flex items-center gap-2 mb-2">
                     <Wand2 size={12} className="text-[#FF4D8D]" />
-                    <span className="text-[9px] font-black uppercase tracking-widest text-[#FF4D8D]">AI Suggests</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-[#FF4D8D]">{t('result.aiSuggests')}</span>
                   </div>
                   <button
                     onClick={() => setSelectedBoardId(suggestedBoard.id)}
@@ -521,7 +523,7 @@ const AnalysisResultView = () => {
                   }`}
                 >
                   <Bookmark size={16} />
-                  <span className="text-[10px] font-black uppercase tracking-widest">No board (general)</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest">{t('muse.noBoard')}</span>
                 </button>
                 {boards.map((board) => (
                   <button
@@ -535,7 +537,7 @@ const AnalysisResultView = () => {
                     <div>
                       <span className="text-[10px] font-black uppercase tracking-widest">{board.name}</span>
                       <span className={`ml-2 text-[8px] ${selectedBoardId === board.id ? 'text-gray-400' : 'text-gray-300'}`}>
-                        {board.count} muses
+                        {board.count} {t('common.muses')}
                       </span>
                     </div>
                   </button>
@@ -546,7 +548,7 @@ const AnalysisResultView = () => {
                 onClick={handleSaveMuse}
                 className="w-full py-5 bg-black text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] hover:bg-[#FF4D8D] transition-all"
               >
-                Save Muse
+                {t('muse.saveMuse')}
               </button>
             </m.div>
           </m.div>

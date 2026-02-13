@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import * as m from 'framer-motion/m';
 import { X, Mail, Chrome } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/authStore';
 import { isSupabaseConfigured } from '@/lib/supabase';
 
@@ -10,6 +11,7 @@ type AuthMode = 'signin' | 'signup';
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 const AuthModal = () => {
+  const { t } = useTranslation();
   const {
     isAuthModalOpen, closeAuthModal, error, clearError,
     signInWithEmail, signUpWithEmail, signInWithGoogle, loading
@@ -98,23 +100,23 @@ const AuthModal = () => {
             onClick={(e) => e.stopPropagation()}
             className="bg-white rounded-[3rem] p-10 max-w-md w-full shadow-2xl relative"
           >
-            <button onClick={closeAuthModal} aria-label="Close dialog" className="absolute top-6 right-6 p-2 text-gray-300 hover:text-black transition-colors">
+            <button onClick={closeAuthModal} aria-label={t('a11y.closeDialog')} className="absolute top-6 right-6 p-2 text-gray-300 hover:text-black transition-colors">
               <X size={20} />
             </button>
 
             <div className="text-center mb-10">
               <h2 className="text-3xl heading-font uppercase tracking-tight">
-                {mode === 'signin' ? 'Welcome Back' : 'Join'} <span className="italic text-[#FF4D8D]">K-MIRROR</span>
+                {mode === 'signin' ? t('auth.welcomeBack') : t('auth.join')} <span className="italic text-[#FF4D8D]">K-MIRROR</span>
               </h2>
               <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-3">
-                {mode === 'signin' ? 'Sign in to save your analysis' : 'Create your beauty profile'}
+                {mode === 'signin' ? t('auth.signInDesc') : t('auth.joinDesc')}
               </p>
             </div>
 
             {!isSupabaseConfigured && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-4 mb-6">
                 <p className="text-xs text-yellow-700 font-medium">
-                  Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env.local to enable auth.
+                  {t('auth.supabaseNotConfigured')}
                 </p>
               </div>
             )}
@@ -124,18 +126,18 @@ const AuthModal = () => {
               disabled={!isSupabaseConfigured || loading}
               className="w-full flex items-center justify-center gap-3 py-4 bg-gray-50 border border-gray-100 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-100 transition-all disabled:opacity-40 mb-6"
             >
-              <Chrome size={16} /> Continue with Google
+              <Chrome size={16} /> {t('auth.continueWithGoogle')}
             </button>
 
             <div className="flex items-center gap-4 mb-6">
               <div className="flex-1 h-px bg-gray-100" />
-              <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest">or</span>
+              <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest">{t('auth.or')}</span>
               <div className="flex-1 h-px bg-gray-100" />
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1">
-                <label htmlFor="auth-email" className="text-[9px] font-black uppercase text-gray-400 ml-2">Email</label>
+                <label htmlFor="auth-email" className="text-[9px] font-black uppercase text-gray-400 ml-2">{t('auth.email')}</label>
                 <div className="relative">
                   <Mail size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" aria-hidden="true" />
                   <input
@@ -151,13 +153,13 @@ const AuthModal = () => {
                 </div>
               </div>
               <div className="space-y-1">
-                <label htmlFor="auth-password" className="text-[9px] font-black uppercase text-gray-400 ml-2">Password</label>
+                <label htmlFor="auth-password" className="text-[9px] font-black uppercase text-gray-400 ml-2">{t('auth.password')}</label>
                 <input
                   id="auth-password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Min 6 characters"
+                  placeholder={t('auth.passwordPlaceholder')}
                   required
                   minLength={6}
                   autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
@@ -174,14 +176,14 @@ const AuthModal = () => {
                 disabled={!isSupabaseConfigured || loading}
                 className="w-full py-5 bg-black text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] hover:bg-[#FF4D8D] transition-all disabled:opacity-40"
               >
-                {loading ? 'Processing...' : mode === 'signin' ? 'Sign In' : 'Create Account'}
+                {loading ? t('auth.processing') : mode === 'signin' ? t('auth.signIn') : t('auth.signUp')}
               </button>
             </form>
 
             <p className="text-center mt-6 text-[10px] text-gray-400">
-              {mode === 'signin' ? "Don't have an account?" : 'Already have an account?'}{' '}
+              {mode === 'signin' ? t('auth.noAccount') : t('auth.hasAccount')}{' '}
               <button onClick={switchMode} className="font-black text-black hover:text-[#FF4D8D] transition-colors uppercase">
-                {mode === 'signin' ? 'Sign Up' : 'Sign In'}
+                {mode === 'signin' ? t('auth.signUp') : t('auth.signIn')}
               </button>
             </p>
           </m.div>

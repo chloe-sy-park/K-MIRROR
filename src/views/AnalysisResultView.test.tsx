@@ -50,13 +50,13 @@ describe('AnalysisResultView', () => {
 
   it('renders the diagnostic report header', () => {
     renderWithResult();
-    expect(screen.getByText(/Diagnostic Report/i)).toBeInTheDocument();
+    expect(screen.getByText(/result\.diagnosticReport/)).toBeInTheDocument();
     expect(screen.getByText(/Neural Stylist/i)).toBeInTheDocument();
   });
 
   it('displays tone information', () => {
     renderWithResult();
-    expect(screen.getByText(/Tone Mapping/i)).toBeInTheDocument();
+    expect(screen.getByText('result.toneMapping')).toBeInTheDocument();
     expect(screen.getByText(/Cool \/ L5/i)).toBeInTheDocument();
   });
 
@@ -68,7 +68,7 @@ describe('AnalysisResultView', () => {
 
   it('displays recommended products', () => {
     renderWithResult();
-    expect(screen.getByText(/Recommended Objects/i)).toBeInTheDocument();
+    expect(screen.getByText('result.recommendedObjects')).toBeInTheDocument();
     DEMO_RESULT.recommendations.products.forEach((p) => {
       expect(screen.getByText(p.name)).toBeInTheDocument();
     });
@@ -76,7 +76,7 @@ describe('AnalysisResultView', () => {
 
   it('shows video tutorials', () => {
     renderWithResult();
-    expect(screen.getByText(/Curated Tutorials/i)).toBeInTheDocument();
+    expect(screen.getByText('result.curatedTutorials')).toBeInTheDocument();
     DEMO_RESULT.recommendations.videos?.forEach((v) => {
       expect(screen.getByText(v.title)).toBeInTheDocument();
     });
@@ -94,14 +94,14 @@ describe('AnalysisResultView', () => {
 
   it('navigates to checkout when "Shop the collection" is clicked', () => {
     renderWithResult();
-    const shopBtn = screen.getByText(/Shop the collection/i);
+    const shopBtn = screen.getByText('result.shopCollection');
     fireEvent.click(shopBtn);
     expect(mockNavigate).toHaveBeenCalledWith('/checkout');
   });
 
   it('resets scan when "New Scan" is clicked', () => {
     renderWithResult();
-    const newScanBtn = screen.getByText(/New Scan/i);
+    const newScanBtn = screen.getByText('result.newScan');
     fireEvent.click(newScanBtn);
     expect(useScanStore.getState().phase).toBe('idle');
     expect(useScanStore.getState().result).toBeNull();

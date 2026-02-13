@@ -25,13 +25,13 @@ describe('ScanView', () => {
 
   it('renders the scan heading and demo button', () => {
     renderWithRouter();
-    expect(screen.getByText(/Reflect Your/i)).toBeInTheDocument();
-    expect(screen.getByText(/Preview Demo/i)).toBeInTheDocument();
+    expect(screen.getByText('scan.title')).toBeInTheDocument();
+    expect(screen.getByText('scan.previewDemo')).toBeInTheDocument();
   });
 
   it('shows Neural Scan button disabled when no images are set', () => {
     renderWithRouter();
-    const btn = screen.getByRole('button', { name: /Neural Scan/i });
+    const btn = screen.getByRole('button', { name: /scan\.neuralScan/i });
     expect(btn).toBeDisabled();
   });
 
@@ -41,7 +41,7 @@ describe('ScanView', () => {
       celebImage: 'data:image/png;base64,def',
     });
     renderWithRouter();
-    const btn = screen.getByRole('button', { name: /Neural Scan/i });
+    const btn = screen.getByRole('button', { name: /scan\.neuralScan/i });
     expect(btn).not.toBeDisabled();
   });
 
@@ -75,7 +75,7 @@ describe('ScanView', () => {
     useScanStore.setState({ demoMode: demoSpy } as never);
     renderWithRouter();
 
-    const demoButton = screen.getByText(/Preview Demo/i).closest('button');
+    const demoButton = screen.getByText('scan.previewDemo').closest('button');
     if (demoButton) fireEvent.click(demoButton);
     expect(demoSpy).toHaveBeenCalled();
   });

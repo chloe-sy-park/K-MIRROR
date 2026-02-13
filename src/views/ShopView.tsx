@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import * as m from 'framer-motion/m';
 import { Sparkles, ShoppingBag, Filter } from 'lucide-react';
 import { containerVariants, itemVariants } from '@/constants/animations';
@@ -10,10 +11,19 @@ import type { Product } from '@/types';
 const CATEGORIES = ['all', 'base', 'lip', 'eye', 'skincare'] as const;
 
 const ShopView = () => {
+  const { t } = useTranslation();
   const [products, setProducts] = useState<Product[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const addItem = useCartStore((s) => s.addItem);
+
+  const categoryLabels: Record<string, string> = {
+    all: t('shop.all'),
+    base: t('shop.base'),
+    lip: t('shop.lip'),
+    eye: t('shop.eye'),
+    skincare: t('shop.skincare'),
+  };
 
   useEffect(() => {
     fetchProducts().then((p) => {
@@ -30,10 +40,10 @@ const ShopView = () => {
     <m.div initial="hidden" animate="visible" variants={containerVariants} className="space-y-16 pb-20">
       <m.div variants={itemVariants} className="text-center space-y-4">
         <h2 className="text-[50px] lg:text-[80px] heading-font leading-[0.85] tracking-[-0.05em] uppercase">
-          K-BEAUTY <span className="italic text-[#FF4D8D]">SHOP</span>
+          {t('shop.title')}
         </h2>
         <p className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-400">
-          Curated Products for Every Melanin Level
+          {t('shop.subtitle')}
         </p>
       </m.div>
 
@@ -51,7 +61,7 @@ const ShopView = () => {
                   : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
               }`}
             >
-              {cat}
+              {categoryLabels[cat] ?? cat}
             </button>
           ))}
         </div>
@@ -75,7 +85,7 @@ const ShopView = () => {
               <Link to={`/shop/${product.id}`} className="block">
                 <div className="aspect-square bg-gray-50 flex items-center justify-center p-8 relative overflow-hidden">
                   <div className="absolute top-4 right-4 bg-black text-white px-3 py-1 rounded-full text-[8px] font-black z-10 shadow-lg uppercase">
-                    {product.matchScore}% Match
+                    {product.matchScore}% {t('common.match')}
                   </div>
                   <div className="absolute top-4 left-4 bg-white/80 backdrop-blur-sm text-[8px] font-black uppercase px-3 py-1 rounded-full border border-gray-100">
                     {product.category}

@@ -24,13 +24,13 @@ describe('CelebGalleryView', () => {
 
   it('renders the gallery header', () => {
     renderView();
-    expect(screen.getByText(/K-CELEB/i)).toBeInTheDocument();
-    expect(screen.getByText(/Style Muse Gallery/i)).toBeInTheDocument();
+    expect(screen.getByText('celebs.title')).toBeInTheDocument();
+    expect(screen.getByText('celebs.styleMuse')).toBeInTheDocument();
   });
 
   it('shows all celebs by default', () => {
     renderView();
-    const countText = screen.getByText(`${CELEB_GALLERY.length} celebs found`);
+    const countText = screen.getByText(`${CELEB_GALLERY.length} celebs.celebsCount celebs.found`);
     expect(countText).toBeInTheDocument();
   });
 
@@ -46,7 +46,7 @@ describe('CelebGalleryView', () => {
     fireEvent.click(kDramaBtn);
 
     const kDramaCelebs = CELEB_GALLERY.filter(c => c.genre === 'K-Drama');
-    const countText = screen.getByText(`${kDramaCelebs.length} celebs found`);
+    const countText = screen.getByText(`${kDramaCelebs.length} celebs.celebsCount celebs.found`);
     expect(countText).toBeInTheDocument();
   });
 
@@ -56,7 +56,7 @@ describe('CelebGalleryView', () => {
     fireEvent.click(cuteBtn);
 
     const cuteCelebs = CELEB_GALLERY.filter(c => c.mood === 'Cute');
-    const countText = screen.getByText(`${cuteCelebs.length} ${cuteCelebs.length === 1 ? 'celeb' : 'celebs'} found`);
+    const countText = screen.getByText(`${cuteCelebs.length} ${cuteCelebs.length === 1 ? 'celebs.celeb' : 'celebs.celebsCount'} celebs.found`);
     expect(countText).toBeInTheDocument();
   });
 
@@ -76,7 +76,7 @@ describe('CelebGalleryView', () => {
     fireEvent.click(kFilmBtn);
 
     if (CELEB_GALLERY.filter(c => c.genre === 'K-Film').length === 0) {
-      expect(screen.getByText(/No celebs match your filters/i)).toBeInTheDocument();
+      expect(screen.getByText('celebs.noResults')).toBeInTheDocument();
     }
   });
 

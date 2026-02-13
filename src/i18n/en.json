@@ -4,8 +4,14 @@
     "museBoard": "Muse Board",
     "match": "Match",
     "sherlock": "Sherlock",
+    "celebs": "Celebs",
     "shop": "Shop",
-    "settings": "Settings"
+    "settings": "Settings",
+    "scanLab": "Scan Laboratory",
+    "expertMatch": "Expert Match",
+    "sherlockMethod": "Sherlock Methodology",
+    "celebGallery": "K-Celeb Gallery",
+    "beautyShop": "K-Beauty Shop"
   },
   "scan": {
     "tagline": "Biometric Style Lab",
@@ -39,7 +45,17 @@
     "shopCollection": "Shop the collection",
     "curatedEducation": "Curated Education",
     "aiCoachingProtocol": "AI Coaching Protocol",
-    "swatchPreview": "Swatch"
+    "swatchPreview": "Swatch",
+    "curatedTutorials": "Curated Tutorials",
+    "curatedTutorialsDesc": "K-Beauty YouTube content handpicked for your look",
+    "focusPoints": "Focus Points — Tips to Watch For",
+    "recommendedChannels": "Recommended Channels",
+    "searchOnYoutube": "Search on YouTube",
+    "aiMatch": "AI Match",
+    "aiAutoTags": "AI Auto Tags",
+    "aiSuggests": "AI Suggests",
+    "saveToMuseBoard": "Save to Muse Board",
+    "views": "views"
   },
   "muse": {
     "title": "MUSE BOARD",
@@ -56,7 +72,23 @@
     "createBoard": "Create Board",
     "saveToMuseBoard": "Save to Muse Board",
     "noBoard": "No board (general)",
-    "saveMuse": "Save Muse"
+    "saveMuse": "Save Muse",
+    "editBoard": "Edit Board",
+    "updateBoardDetails": "Update board details",
+    "saveChanges": "Save Changes",
+    "moveToBoard": "Move to Board",
+    "selectDestination": "Select a destination board",
+    "noBoardAllMuses": "No Board (All Muses)",
+    "you": "You",
+    "autoTags": "Auto Tags",
+    "aiStylePoints": "AI Style Points",
+    "notes": "Notes",
+    "addNote": "Add a note about this look...",
+    "saveNote": "Save Note",
+    "extraImages": "Extra Images",
+    "addImage": "Add Image",
+    "tryAgainLook": "Try this look again",
+    "delete": "Delete"
   },
   "shop": {
     "title": "K-BEAUTY SHOP",
@@ -65,7 +97,12 @@
     "addedToCart": "Added to Cart",
     "melaninRange": "Melanin Range",
     "keyIngredients": "Key Ingredients",
-    "back": "Back"
+    "back": "Back",
+    "all": "All",
+    "base": "Base",
+    "lip": "Lip",
+    "eye": "Eye",
+    "skincare": "Skincare"
   },
   "checkout": {
     "title": "SECURE YOUR ARCHIVE.",
@@ -83,12 +120,15 @@
     "completePayment": "Complete Payment",
     "secureCheckout": "Secure Checkout by Stripe",
     "orderPlaced": "Order Placed",
-    "orderPlacedDesc": "Your K-Beauty collection is on its way.",
+    "orderPlacedDesc": "Your K-Beauty collection is on its way. Check your order history for tracking updates.",
     "cartEmpty": "Cart is Empty",
-    "cartEmptyDesc": "Run a scan to get AI-matched product recommendations.",
+    "cartEmptyDesc": "Run a scan to get AI-matched product recommendations, or browse the catalog.",
     "startScan": "Start Scan",
     "browseShop": "Browse Shop",
-    "viewOrders": "View Orders"
+    "viewOrders": "View Orders",
+    "items": "items",
+    "businessDays3_5": "3-5 Business Days",
+    "businessDays7_14": "7-14 Business Days"
   },
   "orders": {
     "title": "ORDER HISTORY",
@@ -101,7 +141,13 @@
   "settings": {
     "title": "Settings",
     "language": "Language",
-    "resetData": "Reset All Data"
+    "resetData": "Reset All Data",
+    "system": "System",
+    "inclusionGuard": "Inclusion Guard™",
+    "inclusionGuardDesc": "Ethical melanin rebalancing protocol",
+    "neuralSafetyFilter": "Neural Safety Filter",
+    "neuralSafetyDesc": "Ingredient safety scan active",
+    "resetNeural": "Reset Neural Stylist Data"
   },
   "auth": {
     "signIn": "Sign In",
@@ -110,7 +156,17 @@
     "password": "Password",
     "continueWithGoogle": "Continue with Google",
     "switchToSignUp": "Don't have an account? Sign up",
-    "switchToSignIn": "Already have an account? Sign in"
+    "switchToSignIn": "Already have an account? Sign in",
+    "welcomeBack": "Welcome Back",
+    "join": "Join",
+    "signInDesc": "Sign in to save your analysis",
+    "joinDesc": "Create your beauty profile",
+    "or": "or",
+    "passwordPlaceholder": "Min 6 characters",
+    "processing": "Processing...",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "supabaseNotConfigured": "Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env.local to enable auth."
   },
   "errors": {
     "networkError": "Network error. Please check your connection.",
@@ -126,7 +182,9 @@
     "required": "This field is required",
     "nameMinLength": "Name must be at least 2 characters",
     "addressMinLength": "Address must be at least 5 characters",
-    "fillFormToContinue": "Please fill in your name and address to continue"
+    "fillFormToContinue": "Please fill in your name and address to continue",
+    "fileFormat": "Use JPEG, PNG, or WebP",
+    "fileSize": "Image must be under 10 MB"
   },
   "celebs": {
     "title": "K-CELEB GALLERY",
@@ -135,7 +193,11 @@
     "filterByMood": "Filter by Mood",
     "noResults": "No celebs match your filters. Try a different combination.",
     "selectAsMuse": "Select as Muse",
-    "all": "All"
+    "all": "All",
+    "styleMuse": "Style Muse Gallery",
+    "found": "found",
+    "celeb": "celeb",
+    "celebsCount": "celebs"
   },
   "onboarding": {
     "title": "Calibrate Your Stylist.",
@@ -143,12 +205,48 @@
     "environment": "Target Environment",
     "skill": "Makeup Skill Level",
     "mood": "Preferred Vibe",
-    "start": "Initialize Engine"
+    "start": "Initialize Engine",
+    "office": "Office",
+    "outdoor": "Outdoor",
+    "studio": "Studio",
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "pro": "Pro",
+    "natural": "Natural",
+    "elegant": "Elegant",
+    "powerful": "Powerful"
   },
   "methodology": {
     "title": "SHERLOCK METHODOLOGY",
     "subtitle": "The science behind your style analysis",
-    "bookSession": "Book Expert Session"
+    "bookSession": "Book Expert Session",
+    "techPhilosophy": "Technical Philosophy — Sherlock v4.2",
+    "forensicBeauty": "FORENSIC BEAUTY.",
+    "quote": "We don't apply trends; we decode biology through the lens of Seoul's aesthetic elite.",
+    "description": "The Sherlock Methodology is K-MIRROR's proprietary facial analysis framework. It digitizes the intuition of world-class celebrity directors into a millimetric precision engine.",
+    "exploreMethodology": "Explore Full Methodology",
+    "universalBridge": "Universal Aesthetic Bridge",
+    "identityQuote": "Your identity is the constant. Seoul is the variable.",
+    "bridgeDesc": "K-MIRROR removes the barrier of entry to the world's most sophisticated beauty standards. Our AI translates professional artistry into a personalized protocol for every face, every tone, and every identity on Earth.",
+    "humanIntervention": "Human Artistry Intervention",
+    "masterDirector": "Ready for a Master Director?",
+    "bookMasterSession": "Book Master Session",
+    "adaptiveMetrics": "Adaptive Metrics",
+    "scanPrecision": "Scan Precision",
+    "inclusiveScore": "Inclusive Score",
+    "realTimeScan": "Real-time Scan Data",
+    "pillar1Title": "Facial Proportion Mapping",
+    "pillar1Subtitle": "The 1:1.2:0.9 Golden Ratio",
+    "pillar1Desc": "Our neural engine moves beyond archaic 'face shape' classifications. By segmenting the face into three distinct horizontal sectors—Upper, Middle, and Lower—Sherlock identifies the specific millimetric deviations from the iconic K-Idol balance. This allows for a precision-engineered approach to volume and contour placement, creating harmony where there was once disparity.",
+    "pillar1Accent": "Digital Symmetry",
+    "pillar2Title": "Optical Vector Analysis",
+    "pillar2Subtitle": "Eye Angle & Orbital Intensity",
+    "pillar2Desc": "We analyze the 'Canthal Tilt'—the critical angle between the inner and outer corners of the eye. Whether your anatomy dictates a 'Doe-eye' (neutral), 'Cat-eye' (positive), or 'Puppy-eye' (negative) vector, Sherlock adapts high-fashion K-eyeliner techniques to enhance your natural gaze. We don't hide your ethnicity; we accentuate its most powerful visual vectors.",
+    "pillar2Accent": "Orbital Energy",
+    "pillar3Title": "Osteo-Structural Mapping",
+    "pillar3Subtitle": "Skeletal Architecture vs. Skin Tension",
+    "pillar3Desc": "True K-Beauty elegance is built on the bone. Sherlock identifies the prominence of the zygomatic arch and the mandible to determine your 'Structural Signature.' This dictates whether a 'Soft-Focus' dewy look or a 'Sculpted-Matte' editorial finish will better serve your unique skeletal architecture, ensuring your transformation looks flawless in high-intensity lighting.",
+    "pillar3Accent": "Bone Blueprint"
   },
   "a11y": {
     "skipToContent": "Skip to content",
@@ -166,7 +264,10 @@
     "deleteMuse": "Delete muse",
     "removeItem": "Remove item",
     "increaseQuantity": "Increase quantity",
-    "decreaseQuantity": "Decrease quantity"
+    "decreaseQuantity": "Decrease quantity",
+    "aboutKmirror": "About K-MIRROR",
+    "browseShop": "Browse shop",
+    "museBoard": "Muse board"
   },
   "common": {
     "loading": "Loading...",
@@ -180,6 +281,12 @@
     "browseShop": "Browse Shop",
     "browseCelebs": "Browse Celebs",
     "startScan": "Start a Scan",
-    "saved": "saved"
+    "saved": "saved",
+    "or": "or",
+    "views": "views",
+    "error": "Error"
+  },
+  "footer": {
+    "tagline": "K-MIRROR Neural Beauty Intelligence"
   }
 }

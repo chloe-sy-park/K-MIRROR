@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import * as m from 'framer-motion/m';
 import { Star, Sparkles, Filter, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { containerVariants, itemVariants } from '@/constants/animations';
 import { CELEB_GALLERY, type CelebProfile } from '@/data/celebGallery';
 
@@ -26,9 +27,26 @@ const GENRE_COLORS: Record<CelebProfile['genre'], string> = {
 };
 
 const CelebGalleryView = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [genre, setGenre] = useState<GenreFilter>('All');
   const [mood, setMood] = useState<MoodFilter>('All');
+
+  const genreLabels: Record<string, string> = {
+    All: t('celebs.all'),
+    'K-Pop': 'K-Pop',
+    'K-Drama': 'K-Drama',
+    'K-Beauty': 'K-Beauty',
+    'K-Film': 'K-Film',
+  };
+
+  const moodLabels: Record<string, string> = {
+    All: t('celebs.all'),
+    Natural: t('onboarding.natural'),
+    Elegant: t('onboarding.elegant'),
+    Powerful: t('onboarding.powerful'),
+    Cute: 'Cute',
+  };
 
   const filtered = useMemo(() => {
     return CELEB_GALLERY
@@ -38,7 +56,6 @@ const CelebGalleryView = () => {
   }, [genre, mood]);
 
   const handleSelectCeleb = (celeb: CelebProfile) => {
-    // Navigate to scan view — user can then upload celeb's image
     navigate('/', { state: { selectedCeleb: celeb } });
   };
 
@@ -46,12 +63,12 @@ const CelebGalleryView = () => {
     <m.div initial="hidden" animate="visible" variants={containerVariants} className="max-w-6xl mx-auto space-y-16 pb-20">
       {/* Header */}
       <m.div variants={itemVariants} className="text-center space-y-4">
-        <p className="text-[10px] font-black text-[#FF4D8D] uppercase tracking-[0.5em]">Style Muse Gallery</p>
+        <p className="text-[10px] font-black text-[#FF4D8D] uppercase tracking-[0.5em]">{t('celebs.styleMuse')}</p>
         <h2 className="text-[50px] lg:text-[70px] heading-font leading-[0.85] tracking-[-0.05em] uppercase">
-          K-CELEB <span className="italic text-[#FF4D8D]">GALLERY</span>
+          {t('celebs.title')}
         </h2>
         <p className="text-sm text-gray-400 max-w-md mx-auto">
-          Browse trending K-Beauty icons. Select your style muse to start a personalized analysis.
+          {t('celebs.subtitle')}
         </p>
       </m.div>
 
@@ -59,9 +76,9 @@ const CelebGalleryView = () => {
       <m.div variants={itemVariants} className="space-y-6">
         <div className="flex items-center gap-3 text-gray-400">
           <Filter size={14} />
-          <span className="text-[9px] font-black uppercase tracking-widest">Filter by Genre</span>
+          <span className="text-[9px] font-black uppercase tracking-widest">{t('celebs.filterByGenre')}</span>
         </div>
-        <div className="flex flex-wrap gap-3" role="radiogroup" aria-label="Filter by genre">
+        <div className="flex flex-wrap gap-3" role="radiogroup" aria-label={t('celebs.filterByGenre')}>
           {GENRES.map((g) => (
             <button
               key={g}
@@ -74,29 +91,29 @@ const CelebGalleryView = () => {
                   : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
               }`}
             >
-              {g}
+              {genreLabels[g] ?? g}
             </button>
           ))}
         </div>
 
         <div className="flex items-center gap-3 text-gray-400 mt-4">
           <Sparkles size={14} aria-hidden="true" />
-          <span className="text-[9px] font-black uppercase tracking-widest">Filter by Mood</span>
+          <span className="text-[9px] font-black uppercase tracking-widest">{t('celebs.filterByMood')}</span>
         </div>
-        <div className="flex flex-wrap gap-3" role="radiogroup" aria-label="Filter by mood">
-          {MOODS.map((m) => (
+        <div className="flex flex-wrap gap-3" role="radiogroup" aria-label={t('celebs.filterByMood')}>
+          {MOODS.map((moodOption) => (
             <button
-              key={m}
+              key={moodOption}
               role="radio"
-              aria-checked={mood === m}
-              onClick={() => setMood(m)}
+              aria-checked={mood === moodOption}
+              onClick={() => setMood(moodOption)}
               className={`px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
-                mood === m
+                mood === moodOption
                   ? 'bg-black text-white shadow-lg'
                   : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
               }`}
             >
-              {m}
+              {moodLabels[moodOption] ?? moodOption}
             </button>
           ))}
         </div>
@@ -104,14 +121,14 @@ const CelebGalleryView = () => {
 
       {/* Results count */}
       <m.p variants={itemVariants} className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-300">
-        {filtered.length} {filtered.length === 1 ? 'celeb' : 'celebs'} found
+        {filtered.length} {filtered.length === 1 ? t('celebs.celeb') : t('celebs.celebsCount')} {t('celebs.found')}
       </m.p>
 
       {/* Grid */}
       {filtered.length === 0 ? (
         <m.div variants={itemVariants} className="py-20 text-center space-y-4">
           <Star size={48} className="mx-auto text-gray-200" />
-          <p className="text-gray-400 text-sm">No celebs match your filters. Try a different combination.</p>
+          <p className="text-gray-400 text-sm">{t('celebs.noResults')}</p>
         </m.div>
       ) : (
         <m.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -120,7 +137,7 @@ const CelebGalleryView = () => {
               key={celeb.id}
               role="button"
               tabIndex={0}
-              aria-label={`Select ${celeb.name} as style muse`}
+              aria-label={`${t('celebs.selectAsMuse')} — ${celeb.name}`}
               whileHover={{ y: -4, scale: 1.01 }}
               className="bg-white border border-gray-100 rounded-[2.5rem] p-8 shadow-sm hover:shadow-xl transition-all group cursor-pointer focus-visible:ring-2 focus-visible:ring-[#FF4D8D] focus-visible:ring-offset-2 outline-none"
               onClick={() => handleSelectCeleb(celeb)}
@@ -179,7 +196,7 @@ const CelebGalleryView = () => {
                 {/* CTA */}
                 <div className="pt-2">
                   <span className="text-[10px] font-black uppercase tracking-widest text-[#FF4D8D] opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
-                    <Sparkles size={12} /> Select as Muse
+                    <Sparkles size={12} /> {t('celebs.selectAsMuse')}
                   </span>
                 </div>
               </div>

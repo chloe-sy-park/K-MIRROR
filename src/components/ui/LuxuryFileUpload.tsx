@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import * as m from 'framer-motion/m';
 import { Camera, AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { pulseVariants } from '@/constants/animations';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
@@ -15,6 +16,7 @@ interface LuxuryFileUploadProps {
 }
 
 const LuxuryFileUpload = ({ label, secondaryLabel, preview, onImageSelect, capture }: LuxuryFileUploadProps) => {
+  const { t } = useTranslation();
   const [fileError, setFileError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,11 +25,11 @@ const LuxuryFileUpload = ({ label, secondaryLabel, preview, onImageSelect, captu
     if (!file) return;
 
     if (!ALLOWED_TYPES.includes(file.type)) {
-      setFileError('Use JPEG, PNG, or WebP');
+      setFileError(t('validation.fileFormat'));
       return;
     }
     if (file.size > MAX_FILE_SIZE) {
-      setFileError('Image must be under 10 MB');
+      setFileError(t('validation.fileSize'));
       return;
     }
 

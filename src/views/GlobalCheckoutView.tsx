@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import * as m from 'framer-motion/m';
 import {
   Globe, Truck, ShieldCheck, Sparkles, Minus, Plus, Trash2,
@@ -9,6 +10,7 @@ import { containerVariants, itemVariants } from '@/constants/animations';
 import { useCartStore } from '@/store/cartStore';
 
 const GlobalCheckoutView = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const {
     items, shippingMethod, setShippingMethod,
@@ -35,14 +37,14 @@ const GlobalCheckoutView = () => {
         <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto">
           <Check size={32} className="text-green-500" />
         </div>
-        <h2 className="text-4xl heading-font italic uppercase">Order Placed</h2>
-        <p className="text-gray-400 text-sm">Your K-Beauty collection is on its way. Check your order history for tracking updates.</p>
+        <h2 className="text-4xl heading-font italic uppercase">{t('checkout.orderPlaced')}</h2>
+        <p className="text-gray-400 text-sm">{t('checkout.orderPlacedDesc')}</p>
         <div className="flex gap-4 justify-center">
           <button onClick={() => navigate('/')} className="px-8 py-4 bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#FF4D8D] transition-all">
-            New Scan
+            {t('common.newScan')}
           </button>
           <button onClick={() => navigate('/orders')} className="px-8 py-4 bg-gray-50 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-100 transition-all">
-            View Orders
+            {t('checkout.viewOrders')}
           </button>
         </div>
       </m.div>
@@ -53,14 +55,14 @@ const GlobalCheckoutView = () => {
     return (
       <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-32 text-center space-y-8">
         <ShoppingBag size={64} className="mx-auto text-gray-200" />
-        <h2 className="text-3xl heading-font italic uppercase text-gray-300">Cart is Empty</h2>
-        <p className="text-gray-400 text-sm max-w-sm mx-auto">Run a scan to get AI-matched product recommendations, or browse the catalog.</p>
+        <h2 className="text-3xl heading-font italic uppercase text-gray-300">{t('checkout.cartEmpty')}</h2>
+        <p className="text-gray-400 text-sm max-w-sm mx-auto">{t('checkout.cartEmptyDesc')}</p>
         <div className="flex gap-4 justify-center">
           <button onClick={() => navigate('/')} className="px-8 py-4 bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#FF4D8D] transition-all">
-            Start Scan
+            {t('checkout.startScan')}
           </button>
           <button onClick={() => navigate('/shop')} className="px-8 py-4 bg-gray-50 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-100 transition-all">
-            Browse Shop
+            {t('checkout.browseShop')}
           </button>
         </div>
       </m.div>
@@ -71,11 +73,11 @@ const GlobalCheckoutView = () => {
     <m.div initial="hidden" animate="visible" variants={containerVariants} className="max-w-6xl mx-auto py-10 lg:py-20">
       <m.div variants={itemVariants} className="mb-12">
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-black transition-colors mb-8">
-          <ArrowLeft size={14} /> Continue Shopping
+          <ArrowLeft size={14} /> {t('checkout.continueShopping')}
         </button>
-        <p className="text-[10px] font-black tracking-[0.6em] text-[#FF4D8D] mb-3 uppercase italic">Checkout — {itemCount()} items</p>
+        <p className="text-[10px] font-black tracking-[0.6em] text-[#FF4D8D] mb-3 uppercase italic">Checkout — {itemCount()} {t('checkout.items')}</p>
         <h2 className="text-[50px] lg:text-[70px] heading-font leading-[0.9] tracking-[-0.04em] uppercase">
-          SECURE YOUR <span className="italic">ARCHIVE.</span>
+          {t('checkout.title')}
         </h2>
       </m.div>
 
@@ -84,7 +86,7 @@ const GlobalCheckoutView = () => {
           {/* Cart Items */}
           <section className="space-y-4">
             <h3 className="text-xs font-black uppercase tracking-widest mb-6 flex items-center gap-3">
-              <ShoppingBag size={14} /> Your Collection
+              <ShoppingBag size={14} /> {t('checkout.yourCollection')}
             </h3>
             {items.map(({ product, quantity }) => (
               <div key={product.id} className="flex items-center gap-6 p-6 bg-white rounded-3xl border border-gray-100 group">
@@ -122,15 +124,15 @@ const GlobalCheckoutView = () => {
           {/* Shipping */}
           <section>
             <h3 className="text-xs font-black uppercase tracking-widest mb-6 flex items-center gap-3">
-              <Globe size={14} /> Shipping Destination
+              <Globe size={14} /> {t('checkout.shippingDestination')}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
               <div className="space-y-2">
-                <label htmlFor="checkout-name" className="text-[9px] font-black uppercase text-gray-400 ml-2">Full Name</label>
+                <label htmlFor="checkout-name" className="text-[9px] font-black uppercase text-gray-400 ml-2">{t('checkout.fullName')}</label>
                 <input id="checkout-name" type="text" placeholder="Sarah Jenkins" value={fullName} onChange={(e) => setFullName(e.target.value)} className="w-full bg-[#F9F9F9] border-none rounded-2xl px-6 py-4 text-sm focus:ring-1 ring-black transition-all" />
               </div>
               <div className="space-y-2">
-                <label htmlFor="checkout-country" className="text-[9px] font-black uppercase text-gray-400 ml-2">Country</label>
+                <label htmlFor="checkout-country" className="text-[9px] font-black uppercase text-gray-400 ml-2">{t('checkout.country')}</label>
                 <select id="checkout-country" value={country} onChange={(e) => setCountry(e.target.value)} className="w-full bg-[#F9F9F9] border-none rounded-2xl px-6 py-4 text-sm focus:ring-1 ring-black">
                   <option>United States</option>
                   <option>United Kingdom</option>
@@ -141,20 +143,20 @@ const GlobalCheckoutView = () => {
                 </select>
               </div>
               <div className="md:col-span-2 space-y-2">
-                <label htmlFor="checkout-address" className="text-[9px] font-black uppercase text-gray-400 ml-2">Address</label>
+                <label htmlFor="checkout-address" className="text-[9px] font-black uppercase text-gray-400 ml-2">{t('checkout.address')}</label>
                 <input id="checkout-address" type="text" placeholder="123 Beauty Lane, Manhattan, NY" value={address} onChange={(e) => setAddress(e.target.value)} className="w-full bg-[#F9F9F9] border-none rounded-2xl px-6 py-4 text-sm focus:ring-1 ring-black" />
               </div>
             </div>
 
             <h3 className="text-xs font-black uppercase tracking-widest mb-6 flex items-center gap-3">
-              <Truck size={14} /> Logistics
+              <Truck size={14} /> {t('checkout.logistics')}
             </h3>
             <div className="space-y-4">
               <label className={`flex justify-between items-center p-6 rounded-3xl border-2 cursor-pointer transition-all ${shippingMethod === 'dhl' ? 'border-black bg-white' : 'border-gray-50 bg-[#F9F9F9]'}`}>
                 <input type="radio" name="shipping" className="hidden" checked={shippingMethod === 'dhl'} onChange={() => setShippingMethod('dhl')} />
                 <div className="flex items-center gap-4">
                   <div className="font-bold text-sm text-yellow-500">DHL Express</div>
-                  <span className="text-[10px] text-gray-400 font-medium">3-5 Business Days</span>
+                  <span className="text-[10px] text-gray-400 font-medium">{t('checkout.businessDays3_5')}</span>
                 </div>
                 <span className="font-black text-sm">$18.00</span>
               </label>
@@ -162,7 +164,7 @@ const GlobalCheckoutView = () => {
                 <input type="radio" name="shipping" className="hidden" checked={shippingMethod === 'ems'} onChange={() => setShippingMethod('ems')} />
                 <div className="flex items-center gap-4">
                   <div className="font-bold text-sm text-blue-500">EMS Global</div>
-                  <span className="text-[10px] text-gray-400 font-medium">7-14 Business Days</span>
+                  <span className="text-[10px] text-gray-400 font-medium">{t('checkout.businessDays7_14')}</span>
                 </div>
                 <span className="font-black text-sm">$12.00</span>
               </label>
@@ -173,7 +175,7 @@ const GlobalCheckoutView = () => {
         {/* Order Summary */}
         <m.div variants={itemVariants} className="lg:col-span-5">
           <div className="bg-white border border-gray-100 rounded-[3rem] p-10 sticky top-32 shadow-2xl">
-            <h4 className="text-[10px] font-black uppercase tracking-[0.4em] mb-10 text-gray-300 text-center">Order Summary</h4>
+            <h4 className="text-[10px] font-black uppercase tracking-[0.4em] mb-10 text-gray-300 text-center">{t('checkout.orderSummary')}</h4>
 
             <div className="space-y-4 mb-10">
               {items.map(({ product, quantity }) => (
@@ -189,15 +191,15 @@ const GlobalCheckoutView = () => {
 
             <div className="space-y-4 pt-6 border-t border-gray-50 mb-10">
               <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-400">
-                <span>Subtotal</span>
+                <span>{t('checkout.subtotal')}</span>
                 <span>${(subtotal() / 100).toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-400">
-                <span>Shipping ({shippingMethod.toUpperCase()})</span>
+                <span>{t('checkout.shipping')} ({shippingMethod.toUpperCase()})</span>
                 <span>${(shippingCost() / 100).toFixed(2)}</span>
               </div>
               <div className="flex justify-between items-center pt-4">
-                <span className="text-sm font-black uppercase">Total</span>
+                <span className="text-sm font-black uppercase">{t('checkout.total')}</span>
                 <span className="text-2xl heading-font italic">${(total() / 100).toFixed(2)}</span>
               </div>
             </div>
@@ -207,13 +209,13 @@ const GlobalCheckoutView = () => {
               disabled={!isFormValid}
               className={`w-full py-6 rounded-2xl font-black text-xs tracking-[0.3em] uppercase transition-all mb-4 shadow-xl ${isFormValid ? 'bg-black text-white hover:bg-[#FF4D8D]' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
             >
-              Complete Payment
+              {t('checkout.completePayment')}
             </button>
             {!isFormValid && (
-              <p className="text-[9px] text-center text-gray-400 mb-2">Please fill in your name and address to continue</p>
+              <p className="text-[9px] text-center text-gray-400 mb-2">{t('validation.fillFormToContinue')}</p>
             )}
             <div className="flex items-center justify-center gap-2 text-[10px] text-gray-300 font-bold uppercase tracking-widest">
-              <ShieldCheck size={14} className="text-green-500" /> Secure Checkout by Stripe
+              <ShieldCheck size={14} className="text-green-500" /> {t('checkout.secureCheckout')}
             </div>
           </div>
         </m.div>

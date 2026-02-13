@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { AnimatePresence } from 'framer-motion';
 import * as m from 'framer-motion/m';
 import {
@@ -24,7 +25,9 @@ const BoardFormModal = ({
   onIconChange: (v: string) => void;
   onSubmit: () => void;
   onClose: () => void;
-}) => (
+}) => {
+  const { t } = useTranslation();
+  return (
   <m.div
     initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
     className="fixed inset-0 z-[250] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
@@ -44,16 +47,16 @@ const BoardFormModal = ({
 
       <div className="text-center mb-10">
         <h2 className="text-3xl heading-font uppercase tracking-tight">
-          {mode === 'create' ? 'New' : 'Edit'} <span className="italic text-[#FF4D8D]">Board</span>
+          {mode === 'create' ? t('muse.newBoard') : t('muse.editBoard')}
         </h2>
         <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-3">
-          {mode === 'create' ? 'Organize your muse collection' : 'Update board details'}
+          {mode === 'create' ? t('muse.organizeCollection') : t('muse.updateBoardDetails')}
         </p>
       </div>
 
       <div className="space-y-6">
         <div className="space-y-1">
-          <span className="text-[9px] font-black uppercase text-gray-400 ml-2" id="icon-label">Icon</span>
+          <span className="text-[9px] font-black uppercase text-gray-400 ml-2" id="icon-label">{t('muse.icon')}</span>
           <div className="flex gap-2 flex-wrap" role="group" aria-labelledby="icon-label">
             {BOARD_ICONS.map((icon) => (
               <button
@@ -72,13 +75,13 @@ const BoardFormModal = ({
         </div>
 
         <div className="space-y-1">
-          <label htmlFor="board-name-input" className="text-[9px] font-black uppercase text-gray-400 ml-2">Board Name</label>
+          <label htmlFor="board-name-input" className="text-[9px] font-black uppercase text-gray-400 ml-2">{t('muse.boardName')}</label>
           <input
             id="board-name-input"
             type="text"
             value={boardName}
             onChange={(e) => onNameChange(e.target.value)}
-            placeholder="e.g., Summer Looks, Daily Glam"
+            placeholder={t('muse.boardPlaceholder')}
             maxLength={40}
             className="w-full bg-[#F9F9F9] rounded-2xl px-4 py-4 text-sm focus:ring-1 ring-black transition-all border-none"
             onKeyDown={(e) => e.key === 'Enter' && onSubmit()}
@@ -90,14 +93,16 @@ const BoardFormModal = ({
           disabled={!boardName.trim()}
           className="w-full py-5 bg-black text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] hover:bg-[#FF4D8D] transition-all disabled:opacity-40"
         >
-          {mode === 'create' ? 'Create Board' : 'Save Changes'}
+          {mode === 'create' ? t('muse.createBoard') : t('muse.saveChanges')}
         </button>
       </div>
     </m.div>
   </m.div>
-);
+  );
+};
 
 const MuseBoardView = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const {
     boards, muses, activeBoardId, loading,
@@ -215,10 +220,10 @@ const MuseBoardView = () => {
       {/* Header */}
       <m.div variants={itemVariants} className="text-center space-y-4">
         <h2 className="text-[50px] lg:text-[80px] heading-font leading-[0.85] tracking-[-0.05em] uppercase">
-          MUSE <span className="italic text-[#FF4D8D]">BOARD</span>
+          {t('muse.title')}
         </h2>
         <p className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-400">
-          Your Saved Neural Analyses
+          {t('muse.subtitle')}
         </p>
       </m.div>
 
@@ -241,7 +246,7 @@ const MuseBoardView = () => {
                 : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
             }`}
           >
-            All Muses
+            {t('muse.allMuses')}
           </button>
           {boards.map((board) => (
             <button
@@ -284,7 +289,7 @@ const MuseBoardView = () => {
             <div>
               <h3 className="text-lg font-black uppercase tracking-tight">{activeBoard.name}</h3>
               <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                {activeBoard.count} {activeBoard.count === 1 ? 'muse' : 'muses'} saved
+                {activeBoard.count} {activeBoard.count === 1 ? t('common.muse') : t('common.muses')} {t('common.saved')}
               </p>
             </div>
           </div>
@@ -325,23 +330,23 @@ const MuseBoardView = () => {
         <m.div variants={itemVariants} className="py-32 text-center border-2 border-dashed border-gray-100 rounded-[4rem] bg-gray-50/20 space-y-6">
           <LayoutGrid size={64} className="mx-auto text-gray-200" />
           <p className="text-gray-300 font-black uppercase tracking-[0.4em] text-sm">
-            {activeBoardId ? 'This board is empty' : 'No saved muses yet'}
+            {activeBoardId ? t('muse.emptyBoard') : t('muse.noMusesYet')}
           </p>
           <p className="text-[10px] text-gray-300 max-w-xs mx-auto">
-            Run a scan and save your analysis to start building your muse collection.
+            {t('muse.emptyHint')}
           </p>
           <div className="flex items-center justify-center gap-4 flex-wrap">
             <button
               onClick={() => navigate('/')}
               className="inline-flex items-center gap-2 px-8 py-4 bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#FF4D8D] transition-all"
             >
-              <Camera size={14} /> Start a Scan
+              <Camera size={14} /> {t('common.startScan')}
             </button>
             <button
               onClick={() => navigate('/celebs')}
               className="inline-flex items-center gap-2 px-8 py-4 bg-gray-50 text-gray-500 border border-gray-200 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:border-[#FF4D8D] hover:text-[#FF4D8D] transition-all"
             >
-              <Star size={14} /> Browse Celebs
+              <Star size={14} /> {t('common.browseCelebs')}
             </button>
           </div>
         </m.div>
@@ -484,10 +489,10 @@ const MuseBoardView = () => {
 
               <div className="text-center mb-8">
                 <h2 className="text-2xl heading-font uppercase tracking-tight">
-                  Move <span className="italic text-[#FF4D8D]">Muse</span>
+                  {t('muse.moveToBoard')}
                 </h2>
                 <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-2">
-                  Select a destination board
+                  {t('muse.selectDestination')}
                 </p>
               </div>
 
@@ -501,7 +506,7 @@ const MuseBoardView = () => {
                   }`}
                 >
                   <LayoutGrid size={16} />
-                  <span className="text-[10px] font-black uppercase tracking-widest">No Board (All Muses)</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest">{t('muse.noBoardAllMuses')}</span>
                 </button>
                 {boards.map((board) => (
                   <button
@@ -551,7 +556,7 @@ const MuseBoardView = () => {
                   ) : (
                     <div className="w-full h-full flex items-center justify-center"><User size={40} className="text-gray-300" /></div>
                   )}
-                  <span className="absolute bottom-3 left-3 text-[8px] font-black uppercase tracking-widest bg-black/60 text-white px-3 py-1 rounded-lg">You</span>
+                  <span className="absolute bottom-3 left-3 text-[8px] font-black uppercase tracking-widest bg-black/60 text-white px-3 py-1 rounded-lg">{t('muse.you')}</span>
                 </div>
                 <div className="relative bg-gray-100">
                   {selectedMuse.celebImage ? (
@@ -584,7 +589,7 @@ const MuseBoardView = () => {
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <Tag size={12} className="text-gray-400" />
-                      <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">Auto Tags</span>
+                      <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">{t('muse.autoTags')}</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {selectedMuse.tags.map((tag) => (
@@ -599,7 +604,7 @@ const MuseBoardView = () => {
                 {/* AI Style Points */}
                 {selectedMuse.aiStylePoints.length > 0 && (
                   <div className="space-y-2">
-                    <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">Style Points</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">{t('muse.aiStylePoints')}</span>
                     <div className="flex flex-wrap gap-2">
                       {selectedMuse.aiStylePoints.map((point) => (
                         <span key={point} className="text-[8px] font-black uppercase tracking-widest bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
@@ -615,14 +620,14 @@ const MuseBoardView = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <StickyNote size={12} className="text-gray-400" />
-                      <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">Notes</span>
+                      <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">{t('muse.notes')}</span>
                     </div>
                     {!isEditingNotes && (
                       <button
                         onClick={() => { setEditNotes(selectedMuse.notes || ''); setIsEditingNotes(true); }}
                         className="text-[9px] font-black uppercase tracking-widest text-[#FF4D8D] hover:underline"
                       >
-                        {selectedMuse.notes ? 'Edit' : 'Add Note'}
+                        {t('muse.addNote')}
                       </button>
                     )}
                   </div>
@@ -631,7 +636,7 @@ const MuseBoardView = () => {
                       <textarea
                         value={editNotes}
                         onChange={(e) => setEditNotes(e.target.value)}
-                        placeholder="Add your thoughts, tips, reminders..."
+                        placeholder={t('muse.addNote')}
                         rows={3}
                         className="w-full bg-[#F9F9F9] rounded-2xl px-4 py-3 text-sm focus:ring-1 ring-black transition-all border-none resize-none"
                       />
@@ -646,7 +651,7 @@ const MuseBoardView = () => {
                           onClick={handleSaveNotes}
                           className="px-6 py-2 bg-black text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-[#FF4D8D] transition-all"
                         >
-                          Save
+                          {t('muse.saveNote')}
                         </button>
                       </div>
                     </div>
@@ -662,13 +667,13 @@ const MuseBoardView = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <ImagePlus size={12} className="text-gray-400" />
-                      <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">Extra Images</span>
+                      <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">{t('muse.extraImages')}</span>
                     </div>
                     <button
                       onClick={() => fileInputRef.current?.click()}
                       className="text-[9px] font-black uppercase tracking-widest text-[#FF4D8D] hover:underline"
                     >
-                      Add Image
+                      {t('muse.addImage')}
                     </button>
                   </div>
                   {selectedMuse.extraImages && selectedMuse.extraImages.length > 0 ? (
@@ -696,13 +701,13 @@ const MuseBoardView = () => {
                     onClick={() => { setModal(null); openMoveModal(selectedMuse); }}
                     className="flex-1 flex items-center justify-center gap-2 py-4 bg-gray-50 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-500 hover:bg-gray-100 transition-all"
                   >
-                    <FolderInput size={14} /> Move to Board
+                    <FolderInput size={14} /> {t('muse.moveToBoard')}
                   </button>
                   <button
                     onClick={() => navigate('/')}
                     className="flex-1 flex items-center justify-center gap-2 py-4 bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#FF4D8D] transition-all"
                   >
-                    <Camera size={14} /> Try This Look Again
+                    <Camera size={14} /> {t('muse.tryAgainLook')}
                   </button>
                 </div>
               </div>

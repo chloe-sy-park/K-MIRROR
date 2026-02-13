@@ -46,18 +46,18 @@ describe('GlobalCheckoutView', () => {
   describe('empty cart', () => {
     it('shows empty cart message', () => {
       renderCheckout();
-      expect(screen.getByText(/Cart is Empty/i)).toBeInTheDocument();
+      expect(screen.getByText('checkout.cartEmpty')).toBeInTheDocument();
     });
 
     it('has Start Scan button that navigates to /', () => {
       renderCheckout();
-      fireEvent.click(screen.getByText(/Start Scan/i));
+      fireEvent.click(screen.getByText('checkout.startScan'));
       expect(mockNavigate).toHaveBeenCalledWith('/');
     });
 
     it('has Browse Shop button that navigates to /shop', () => {
       renderCheckout();
-      fireEvent.click(screen.getByText(/Browse Shop/i));
+      fireEvent.click(screen.getByText('checkout.browseShop'));
       expect(mockNavigate).toHaveBeenCalledWith('/shop');
     });
   });
@@ -80,13 +80,13 @@ describe('GlobalCheckoutView', () => {
 
     it('disables payment button when form is invalid', () => {
       renderCheckout();
-      const payButton = screen.getByText(/Complete Payment/i);
+      const payButton = screen.getByText('checkout.completePayment');
       expect(payButton).toBeDisabled();
     });
 
     it('shows validation message when form is incomplete', () => {
       renderCheckout();
-      expect(screen.getByText(/Please fill in your name and address/i)).toBeInTheDocument();
+      expect(screen.getByText('validation.fillFormToContinue')).toBeInTheDocument();
     });
 
     it('enables payment button when form is valid', () => {
@@ -94,7 +94,7 @@ describe('GlobalCheckoutView', () => {
       fireEvent.change(screen.getByPlaceholderText(/Sarah Jenkins/i), { target: { value: 'Test User' } });
       fireEvent.change(screen.getByPlaceholderText(/123 Beauty Lane/i), { target: { value: '456 Test Street, City' } });
 
-      const payButton = screen.getByText(/Complete Payment/i);
+      const payButton = screen.getByText('checkout.completePayment');
       expect(payButton).not.toBeDisabled();
     });
 
@@ -102,9 +102,9 @@ describe('GlobalCheckoutView', () => {
       renderCheckout();
       fireEvent.change(screen.getByPlaceholderText(/Sarah Jenkins/i), { target: { value: 'Test User' } });
       fireEvent.change(screen.getByPlaceholderText(/123 Beauty Lane/i), { target: { value: '456 Test Street, City' } });
-      fireEvent.click(screen.getByText(/Complete Payment/i));
+      fireEvent.click(screen.getByText('checkout.completePayment'));
 
-      expect(screen.getByText(/Order Placed/i)).toBeInTheDocument();
+      expect(screen.getByText('checkout.orderPlaced')).toBeInTheDocument();
       expect(useCartStore.getState().items).toHaveLength(0);
       expect(useCartStore.getState().orders).toHaveLength(1);
     });
@@ -114,7 +114,7 @@ describe('GlobalCheckoutView', () => {
       fireEvent.change(screen.getByPlaceholderText(/Sarah Jenkins/i), { target: { value: 'A' } });
       fireEvent.change(screen.getByPlaceholderText(/123 Beauty Lane/i), { target: { value: '456 Test Street, City' } });
 
-      expect(screen.getByText(/Complete Payment/i)).toBeDisabled();
+      expect(screen.getByText('checkout.completePayment')).toBeDisabled();
     });
 
     it('form requires minimum address length of 5', () => {
@@ -122,7 +122,7 @@ describe('GlobalCheckoutView', () => {
       fireEvent.change(screen.getByPlaceholderText(/Sarah Jenkins/i), { target: { value: 'Test User' } });
       fireEvent.change(screen.getByPlaceholderText(/123 Beauty Lane/i), { target: { value: '123' } });
 
-      expect(screen.getByText(/Complete Payment/i)).toBeDisabled();
+      expect(screen.getByText('checkout.completePayment')).toBeDisabled();
     });
   });
 
@@ -133,9 +133,9 @@ describe('GlobalCheckoutView', () => {
 
       fireEvent.change(screen.getByPlaceholderText(/Sarah Jenkins/i), { target: { value: 'Test User' } });
       fireEvent.change(screen.getByPlaceholderText(/123 Beauty Lane/i), { target: { value: '456 Test Street, City' } });
-      fireEvent.click(screen.getByText(/Complete Payment/i));
+      fireEvent.click(screen.getByText('checkout.completePayment'));
 
-      fireEvent.click(screen.getByText(/New Scan/i));
+      fireEvent.click(screen.getByText('common.newScan'));
       expect(mockNavigate).toHaveBeenCalledWith('/');
     });
 
@@ -145,9 +145,9 @@ describe('GlobalCheckoutView', () => {
 
       fireEvent.change(screen.getByPlaceholderText(/Sarah Jenkins/i), { target: { value: 'Test User' } });
       fireEvent.change(screen.getByPlaceholderText(/123 Beauty Lane/i), { target: { value: '456 Test Street, City' } });
-      fireEvent.click(screen.getByText(/Complete Payment/i));
+      fireEvent.click(screen.getByText('checkout.completePayment'));
 
-      fireEvent.click(screen.getByText(/View Orders/i));
+      fireEvent.click(screen.getByText('checkout.viewOrders'));
       expect(mockNavigate).toHaveBeenCalledWith('/orders');
     });
   });

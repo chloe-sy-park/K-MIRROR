@@ -4,8 +4,14 @@
     "museBoard": "뮤즈 보드",
     "match": "매칭",
     "sherlock": "셜록",
+    "celebs": "셀럽",
     "shop": "쇼핑",
-    "settings": "설정"
+    "settings": "설정",
+    "scanLab": "스캔 연구소",
+    "expertMatch": "전문가 매칭",
+    "sherlockMethod": "셜록 방법론",
+    "celebGallery": "K-셀럽 갤러리",
+    "beautyShop": "K-뷰티 쇼핑"
   },
   "scan": {
     "tagline": "바이오메트릭 스타일 랩",
@@ -39,7 +45,17 @@
     "shopCollection": "컬렉션 쇼핑",
     "curatedEducation": "큐레이티드 교육",
     "aiCoachingProtocol": "AI 코칭 프로토콜",
-    "swatchPreview": "발색"
+    "swatchPreview": "발색",
+    "curatedTutorials": "큐레이티드 튜토리얼",
+    "curatedTutorialsDesc": "당신의 룩에 맞춘 K-뷰티 YouTube 콘텐츠",
+    "focusPoints": "포커스 포인트 — 주목할 팁",
+    "recommendedChannels": "추천 채널",
+    "searchOnYoutube": "YouTube에서 검색",
+    "aiMatch": "AI 매치",
+    "aiAutoTags": "AI 자동 태그",
+    "aiSuggests": "AI 추천",
+    "saveToMuseBoard": "뮤즈 보드에 저장",
+    "views": "조회"
   },
   "muse": {
     "title": "뮤즈 보드",
@@ -56,7 +72,23 @@
     "createBoard": "보드 만들기",
     "saveToMuseBoard": "뮤즈 보드에 저장",
     "noBoard": "보드 없음 (일반)",
-    "saveMuse": "뮤즈 저장"
+    "saveMuse": "뮤즈 저장",
+    "editBoard": "보드 수정",
+    "updateBoardDetails": "보드 세부 정보 수정",
+    "saveChanges": "변경 저장",
+    "moveToBoard": "보드로 이동",
+    "selectDestination": "이동할 보드를 선택하세요",
+    "noBoardAllMuses": "보드 없음 (전체 뮤즈)",
+    "you": "나",
+    "autoTags": "자동 태그",
+    "aiStylePoints": "AI 스타일 포인트",
+    "notes": "메모",
+    "addNote": "이 룩에 대한 메모를 추가하세요...",
+    "saveNote": "메모 저장",
+    "extraImages": "추가 이미지",
+    "addImage": "이미지 추가",
+    "tryAgainLook": "이 룩 다시 시도하기",
+    "delete": "삭제"
   },
   "shop": {
     "title": "K-뷰티 쇼핑",
@@ -65,7 +97,12 @@
     "addedToCart": "담기 완료",
     "melaninRange": "멜라닌 범위",
     "keyIngredients": "주요 성분",
-    "back": "뒤로"
+    "back": "뒤로",
+    "all": "전체",
+    "base": "베이스",
+    "lip": "립",
+    "eye": "아이",
+    "skincare": "스킨케어"
   },
   "checkout": {
     "title": "주문을 완성하세요.",
@@ -83,12 +120,15 @@
     "completePayment": "결제 완료",
     "secureCheckout": "Stripe 보안 결제",
     "orderPlaced": "주문 완료",
-    "orderPlacedDesc": "K-뷰티 컬렉션이 배송 준비 중입니다.",
+    "orderPlacedDesc": "K-뷰티 컬렉션이 배송 준비 중입니다. 주문 내역에서 배송 상태를 확인하세요.",
     "cartEmpty": "장바구니가 비어있습니다",
-    "cartEmptyDesc": "스캔을 통해 AI 맞춤 제품 추천을 받으세요.",
+    "cartEmptyDesc": "스캔을 통해 AI 맞춤 제품 추천을 받거나, 카탈로그를 둘러보세요.",
     "startScan": "스캔 시작",
     "browseShop": "쇼핑하기",
-    "viewOrders": "주문 내역"
+    "viewOrders": "주문 내역",
+    "items": "개",
+    "businessDays3_5": "영업일 3-5일",
+    "businessDays7_14": "영업일 7-14일"
   },
   "orders": {
     "title": "주문 내역",
@@ -101,7 +141,13 @@
   "settings": {
     "title": "설정",
     "language": "언어",
-    "resetData": "데이터 초기화"
+    "resetData": "데이터 초기화",
+    "system": "시스템",
+    "inclusionGuard": "포용성 가드™",
+    "inclusionGuardDesc": "윤리적 멜라닌 밸런싱 프로토콜",
+    "neuralSafetyFilter": "뉴럴 안전 필터",
+    "neuralSafetyDesc": "성분 안전성 스캔 활성화",
+    "resetNeural": "뉴럴 스타일리스트 데이터 초기화"
   },
   "auth": {
     "signIn": "로그인",
@@ -110,7 +156,17 @@
     "password": "비밀번호",
     "continueWithGoogle": "Google로 계속하기",
     "switchToSignUp": "계정이 없으신가요? 회원가입",
-    "switchToSignIn": "이미 계정이 있으신가요? 로그인"
+    "switchToSignIn": "이미 계정이 있으신가요? 로그인",
+    "welcomeBack": "돌아오셨군요",
+    "join": "가입",
+    "signInDesc": "분석 결과를 저장하려면 로그인하세요",
+    "joinDesc": "뷰티 프로필을 만드세요",
+    "or": "또는",
+    "passwordPlaceholder": "최소 6자",
+    "processing": "처리 중...",
+    "noAccount": "계정이 없으신가요?",
+    "hasAccount": "이미 계정이 있으신가요?",
+    "supabaseNotConfigured": "Supabase가 설정되지 않았습니다. .env.local에 VITE_SUPABASE_URL과 VITE_SUPABASE_ANON_KEY를 설정하세요."
   },
   "errors": {
     "networkError": "네트워크 오류입니다. 인터넷 연결을 확인하세요.",
@@ -126,7 +182,9 @@
     "required": "필수 입력 항목입니다",
     "nameMinLength": "이름은 2자 이상이어야 합니다",
     "addressMinLength": "주소는 5자 이상이어야 합니다",
-    "fillFormToContinue": "이름과 주소를 입력해주세요"
+    "fillFormToContinue": "이름과 주소를 입력해주세요",
+    "fileFormat": "JPEG, PNG, 또는 WebP를 사용하세요",
+    "fileSize": "이미지는 10MB 이하여야 합니다"
   },
   "celebs": {
     "title": "K-셀럽 갤러리",
@@ -135,7 +193,11 @@
     "filterByMood": "무드별 필터",
     "noResults": "필터에 맞는 셀럽이 없습니다. 다른 조합을 시도해보세요.",
     "selectAsMuse": "뮤즈로 선택",
-    "all": "전체"
+    "all": "전체",
+    "styleMuse": "스타일 뮤즈 갤러리",
+    "found": "발견",
+    "celeb": "명",
+    "celebsCount": "명"
   },
   "onboarding": {
     "title": "스타일리스트를 설정하세요.",
@@ -143,12 +205,48 @@
     "environment": "대상 환경",
     "skill": "메이크업 스킬 레벨",
     "mood": "선호 무드",
-    "start": "엔진 초기화"
+    "start": "엔진 초기화",
+    "office": "오피스",
+    "outdoor": "아웃도어",
+    "studio": "스튜디오",
+    "beginner": "초보",
+    "intermediate": "중급",
+    "pro": "프로",
+    "natural": "내추럴",
+    "elegant": "엘레건트",
+    "powerful": "파워풀"
   },
   "methodology": {
     "title": "셜록 방법론",
     "subtitle": "스타일 분석의 과학적 원리",
-    "bookSession": "전문가 세션 예약"
+    "bookSession": "전문가 세션 예약",
+    "techPhilosophy": "기술 철학 — 셜록 v4.2",
+    "forensicBeauty": "포렌식 뷰티.",
+    "quote": "트렌드를 적용하지 않습니다; 서울 미학 엘리트의 시선으로 생물학을 해독합니다.",
+    "description": "셜록 방법론은 K-MIRROR의 독점 얼굴 분석 프레임워크입니다. 세계 최고의 셀러브리티 디렉터의 직관을 밀리미터 정밀 엔진으로 디지털화합니다.",
+    "exploreMethodology": "전체 방법론 탐색",
+    "universalBridge": "유니버설 미학 브릿지",
+    "identityQuote": "당신의 정체성은 상수입니다. 서울은 변수입니다.",
+    "bridgeDesc": "K-MIRROR는 세계에서 가장 정교한 뷰티 표준의 진입 장벽을 제거합니다. AI가 전문 아티스트의 기술을 모든 얼굴, 모든 톤, 모든 정체성을 위한 맞춤 프로토콜로 변환합니다.",
+    "humanIntervention": "휴먼 아티스트리 개입",
+    "masterDirector": "마스터 디렉터를 만날 준비가 되셨나요?",
+    "bookMasterSession": "마스터 세션 예약",
+    "adaptiveMetrics": "적응형 매트릭스",
+    "scanPrecision": "스캔 정밀도",
+    "inclusiveScore": "포용성 스코어",
+    "realTimeScan": "실시간 스캔 데이터",
+    "pillar1Title": "안면 비율 매핑",
+    "pillar1Subtitle": "1:1.2:0.9 황금 비율",
+    "pillar1Desc": "우리의 뉴럴 엔진은 구식 '얼굴형' 분류를 넘어섭니다. 얼굴을 상부, 중부, 하부 세 개의 수평 섹터로 분할하여 K-아이돌 밸런스와의 정밀한 밀리미터 편차를 식별합니다. 이를 통해 볼륨과 컨투어 배치에 대한 정밀 접근이 가능해져, 불균형한 부분에 조화를 만들어냅니다.",
+    "pillar1Accent": "디지털 시메트리",
+    "pillar2Title": "광학 벡터 분석",
+    "pillar2Subtitle": "눈 각도 & 안와 인텐시티",
+    "pillar2Desc": "눈꼬리 각도(Canthal Tilt)를 분석합니다. 해부학적 구조가 '사슴눈'(중립), '고양이눈'(양성), '강아지눈'(음성) 벡터를 지시하든, 셜록은 하이패션 K-아이라이너 기법을 적용하여 자연스러운 시선을 강화합니다. 민족적 특성을 숨기지 않고, 가장 강력한 시각적 벡터를 강조합니다.",
+    "pillar2Accent": "안와 에너지",
+    "pillar3Title": "골격 구조 매핑",
+    "pillar3Subtitle": "골격 구조 vs. 피부 장력",
+    "pillar3Desc": "진정한 K-뷰티 엘레건스는 뼈 위에 구축됩니다. 셜록은 광대뼈 아치와 턱뼈의 돌출도를 식별하여 '구조적 시그니처'를 결정합니다. 이를 통해 '소프트 포커스' 촉촉한 룩과 '스컬프트 매트' 에디토리얼 피니시 중 어떤 것이 골격 구조에 더 적합한지 판단하여, 고강도 조명에서도 완벽한 변신을 보장합니다.",
+    "pillar3Accent": "본 블루프린트"
   },
   "a11y": {
     "skipToContent": "본문으로 건너뛰기",
@@ -166,7 +264,10 @@
     "deleteMuse": "뮤즈 삭제",
     "removeItem": "항목 삭제",
     "increaseQuantity": "수량 증가",
-    "decreaseQuantity": "수량 감소"
+    "decreaseQuantity": "수량 감소",
+    "aboutKmirror": "K-MIRROR 소개",
+    "browseShop": "쇼핑하기",
+    "museBoard": "뮤즈 보드"
   },
   "common": {
     "loading": "로딩 중...",
@@ -180,6 +281,12 @@
     "browseShop": "쇼핑하기",
     "browseCelebs": "셀럽 둘러보기",
     "startScan": "스캔 시작",
-    "saved": "저장됨"
+    "saved": "저장됨",
+    "or": "또는",
+    "views": "조회",
+    "error": "에러"
+  },
+  "footer": {
+    "tagline": "K-MIRROR 뉴럴 뷰티 인텔리전스"
   }
 }

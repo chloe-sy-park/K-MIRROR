@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import * as m from 'framer-motion/m';
 import { Sparkles, Beaker, X } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
@@ -10,6 +11,7 @@ import Toggle from '@/components/ui/Toggle';
 import type { CelebProfile } from '@/data/celebGallery';
 
 const ScanView = () => {
+  const { t } = useTranslation();
   const { userImage, celebImage, selectedCelebName, setUserImage, setCelebImage, setCelebFromGallery, analyze, demoMode } = useScanStore();
   const { isSensitive, toggleSensitive, prefs } = useSettingsStore();
   const location = useLocation();
@@ -40,7 +42,7 @@ const ScanView = () => {
     >
       <m.div variants={itemVariants} className="flex-1 text-center lg:text-left space-y-10">
         <div className="relative inline-block">
-          <p className="text-[10px] font-black text-[#FF4D8D] uppercase tracking-[0.5em] mb-6 uppercase">Biometric Style Lab</p>
+          <p className="text-[10px] font-black text-[#FF4D8D] uppercase tracking-[0.5em] mb-6 uppercase">{t('scan.tagline')}</p>
           <button onClick={demoMode} className="absolute -top-12 -right-12 group">
             <m.div
               animate={{ scale: [1, 1.2, 1], rotate: [0, 5, -5, 0] }}
@@ -49,15 +51,15 @@ const ScanView = () => {
             >
               <Beaker size={20} />
             </m.div>
-            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap text-[8px] font-black text-pink-500 opacity-0 group-hover:opacity-100 transition-opacity uppercase uppercase">Preview Demo</div>
+            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap text-[8px] font-black text-pink-500 opacity-0 group-hover:opacity-100 transition-opacity uppercase uppercase">{t('scan.previewDemo')}</div>
           </button>
-          <h2 className="text-6xl lg:text-8xl font-black heading-font leading-[0.9] tracking-tighter uppercase mb-10 text-balance">Reflect Your<br/><span className="text-gray-300 text-balance">Inner Idol.</span></h2>
-          <p className="text-base lg:text-lg text-gray-500 mb-12 max-w-md leading-relaxed mx-auto lg:mx-0 font-medium italic uppercase tracking-tighter text-balance">당신의 인종적 특성과 골격을 AI가 학습합니다.<br/>보정 없는 본연의 아름다움을 위해.</p>
+          <h2 className="text-6xl lg:text-8xl font-black heading-font leading-[0.9] tracking-tighter uppercase mb-10 text-balance">{t('scan.title')}<br/><span className="text-gray-300 text-balance">{t('scan.titleAccent')}</span></h2>
+          <p className="text-base lg:text-lg text-gray-500 mb-12 max-w-md leading-relaxed mx-auto lg:mx-0 font-medium italic uppercase tracking-tighter text-balance whitespace-pre-line">{t('scan.subtitle')}</p>
         </div>
         <div className="grid grid-cols-2 gap-6 md:gap-10 mb-12">
-          <LuxuryFileUpload label="Base Portrait" preview={userImage} onImageSelect={setUserImage} secondaryLabel="Bare-Face / No Makeup" capture="user" />
+          <LuxuryFileUpload label={t('scan.basePortrait')} preview={userImage} onImageSelect={setUserImage} secondaryLabel={t('scan.bareFace')} capture="user" />
           <div className="relative">
-            <LuxuryFileUpload label="Style Muse" preview={celebImage} onImageSelect={setCelebImage} secondaryLabel={selectedCelebName ?? 'Pinterest Inspiration'} />
+            <LuxuryFileUpload label={t('scan.styleMuse')} preview={celebImage} onImageSelect={setCelebImage} secondaryLabel={selectedCelebName ?? t('scan.pinterestInspiration')} />
             {selectedCelebName && (
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-[#FF4D8D] text-white px-3 py-1 rounded-full z-10 shadow-lg">
                 <span className="text-[9px] font-black uppercase tracking-wider">{selectedCelebName}</span>
@@ -74,8 +76,8 @@ const ScanView = () => {
             className="flex items-center gap-6 bg-gray-50/50 px-8 py-5 rounded-[2.5rem] border border-gray-100 backdrop-blur-sm shadow-sm"
           >
             <div className="flex flex-col">
-              <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 leading-none mb-1 uppercase">Sensitivity</span>
-              <span className="text-[10px] font-bold text-gray-900 uppercase uppercase">Ingredient Filter</span>
+              <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 leading-none mb-1 uppercase">{t('scan.sensitivity')}</span>
+              <span className="text-[10px] font-bold text-gray-900 uppercase uppercase">{t('scan.ingredientFilter')}</span>
             </div>
             <Toggle checked={isSensitive} onChange={toggleSensitive} />
           </m.div>
@@ -87,7 +89,7 @@ const ScanView = () => {
             disabled={!userImage || !celebImage}
             className="px-14 py-7 bg-black text-white rounded-[2.5rem] font-black text-xs uppercase tracking-[0.4em] hover:bg-[#FF4D8D] transition-all duration-500 disabled:opacity-20 shadow-2xl flex items-center gap-4 uppercase"
           >
-            Neural Scan {userImage && celebImage && <Sparkles size={16} />}
+            {t('scan.neuralScan')} {userImage && celebImage && <Sparkles size={16} />}
           </m.button>
         </div>
       </m.div>

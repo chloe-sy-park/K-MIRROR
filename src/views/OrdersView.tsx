@@ -1,6 +1,7 @@
 import * as m from 'framer-motion/m';
 import { Package, Clock, Truck, CheckCircle, ShoppingBag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { containerVariants, itemVariants } from '@/constants/animations';
 import { useCartStore } from '@/store/cartStore';
 
@@ -12,6 +13,7 @@ const STATUS_CONFIG = {
 };
 
 const OrdersView = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const orders = useCartStore((s) => s.orders);
 
@@ -19,10 +21,10 @@ const OrdersView = () => {
     return (
       <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-32 text-center space-y-8">
         <Package size={64} className="mx-auto text-gray-200" />
-        <h2 className="text-3xl heading-font italic uppercase text-gray-300">No Orders Yet</h2>
-        <p className="text-gray-400 text-sm">Start shopping to see your order history here.</p>
+        <h2 className="text-3xl heading-font italic uppercase text-gray-300">{t('orders.noOrders')}</h2>
+        <p className="text-gray-400 text-sm">{t('orders.noOrdersDesc')}</p>
         <button onClick={() => navigate('/shop')} className="px-8 py-4 bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#FF4D8D] transition-all">
-          <ShoppingBag size={14} className="inline mr-2" /> Browse Shop
+          <ShoppingBag size={14} className="inline mr-2" /> {t('orders.browseShop')}
         </button>
       </m.div>
     );
@@ -32,10 +34,10 @@ const OrdersView = () => {
     <m.div initial="hidden" animate="visible" variants={containerVariants} className="max-w-4xl mx-auto space-y-16 pb-20">
       <m.div variants={itemVariants} className="text-center space-y-4">
         <h2 className="text-[50px] lg:text-[70px] heading-font leading-[0.85] tracking-[-0.05em] uppercase">
-          ORDER <span className="italic text-[#FF4D8D]">HISTORY</span>
+          {t('orders.title')}
         </h2>
         <p className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-400">
-          {orders.length} {orders.length === 1 ? 'order' : 'orders'} placed
+          {orders.length} {orders.length === 1 ? t('orders.orderPlaced') : t('orders.ordersPlaced')}
         </p>
       </m.div>
 
@@ -70,7 +72,7 @@ const OrdersView = () => {
 
               <div className="flex justify-between items-center pt-4 border-t border-gray-50">
                 <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-                  {order.shippingMethod.toUpperCase()} Shipping
+                  {order.shippingMethod.toUpperCase()} {t('checkout.shipping')}
                 </span>
                 <span className="text-lg font-black">${(order.total / 100).toFixed(2)}</span>
               </div>
