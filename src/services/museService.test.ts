@@ -13,6 +13,8 @@ import {
 } from './museService';
 
 const makeMuse = (overrides = {}) => ({
+  type: 'analysis' as const,
+  image: 'img.jpg',
   userImage: 'img.jpg',
   celebImage: 'celeb.jpg',
   celebName: 'Test Celeb',

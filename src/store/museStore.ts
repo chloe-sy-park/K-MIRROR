@@ -15,7 +15,7 @@ interface MuseState {
   updateBoard: (id: string, updates: { name?: string; icon?: string }) => Promise<void>;
   deleteBoard: (id: string) => Promise<void>;
   saveMuse: (muse: Omit<SavedMuse, 'id'>) => Promise<void>;
-  updateMuse: (id: string, updates: { notes?: string; extraImages?: string[]; tags?: string[] }) => Promise<void>;
+  updateMuse: (id: string, updates: { title?: string; notes?: string; extraImages?: string[]; tags?: string[] }) => Promise<void>;
   moveMuse: (id: string, newBoardId: string | null) => Promise<void>;
   deleteMuse: (id: string) => Promise<void>;
   setActiveBoard: (id: string | null) => void;

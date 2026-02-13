@@ -95,7 +95,21 @@
     "extraImages": "추가 이미지",
     "addImage": "이미지 추가",
     "tryAgainLook": "이 룩 다시 시도하기",
-    "delete": "삭제"
+    "delete": "삭제",
+    "addInspiration": "영감 추가",
+    "uploadPhoto": "사진 업로드",
+    "pasteUrl": "URL 붙여넣기",
+    "newAiScan": "새 AI 스캔",
+    "dropOrClick": "이미지를 드래그하거나 클릭하세요",
+    "imageTitle": "제목 (선택)",
+    "titlePlaceholder": "이 뮤즈에 이름을 붙여보세요...",
+    "urlPlaceholder": "https://example.com/image.jpg",
+    "save": "저장",
+    "invalidUrl": "유효한 이미지 URL을 입력하세요",
+    "uploading": "처리 중...",
+    "analysis": "AI 분석",
+    "imageType": "사진",
+    "urlType": "URL"
   },
   "shop": {
     "title": "K-뷰티 쇼핑",

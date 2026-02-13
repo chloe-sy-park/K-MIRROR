@@ -148,6 +148,8 @@ const AnalysisResultView = () => {
 
   const handleSaveMuse = async () => {
     await saveMuse({
+      type: 'analysis',
+      image: userImage || celebImage || '',
       userImage: userImage || '',
       celebImage: celebImage || '',
       celebName: result.kMatch.celebName,

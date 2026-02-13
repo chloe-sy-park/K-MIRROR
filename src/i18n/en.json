@@ -95,7 +95,21 @@
     "extraImages": "Extra Images",
     "addImage": "Add Image",
     "tryAgainLook": "Try this look again",
-    "delete": "Delete"
+    "delete": "Delete",
+    "addInspiration": "Add Inspiration",
+    "uploadPhoto": "Upload Photo",
+    "pasteUrl": "Paste URL",
+    "newAiScan": "New AI Scan",
+    "dropOrClick": "Drop image here or click to browse",
+    "imageTitle": "Title (optional)",
+    "titlePlaceholder": "Give this muse a name...",
+    "urlPlaceholder": "https://example.com/image.jpg",
+    "save": "Save",
+    "invalidUrl": "Please enter a valid image URL",
+    "uploading": "Processing...",
+    "analysis": "AI Analysis",
+    "imageType": "Photo",
+    "urlType": "URL"
   },
   "shop": {
     "title": "K-BEAUTY SHOP",

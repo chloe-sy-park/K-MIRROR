@@ -28,13 +28,13 @@ const testBoard: MuseBoard = { id: 'b1', name: 'Board 1', icon: '🎨', count: 0
 const testBoard2: MuseBoard = { id: 'b2', name: 'Board 2', icon: '✨', count: 2, aiSummary: '' };
 
 const testMuse: SavedMuse = {
-  id: 'm1', userImage: 'img1', celebImage: 'img2', celebName: 'Jennie',
+  id: 'm1', type: 'analysis', image: 'img1', userImage: 'img1', celebImage: 'img2', celebName: 'Jennie',
   date: '2025-01-01', vibe: 'cool', boardId: 'b1',
   aiStylePoints: ['point1'], tags: ['tag1'], notes: '', extraImages: [],
 };
 
 const testMuse2: SavedMuse = {
-  id: 'm2', userImage: 'img3', celebImage: 'img4', celebName: 'Jisoo',
+  id: 'm2', type: 'analysis', image: 'img3', userImage: 'img3', celebImage: 'img4', celebName: 'Jisoo',
   date: '2025-01-02', vibe: 'elegant', boardId: 'b2',
   aiStylePoints: ['point2'], tags: ['tag2'], notes: '', extraImages: [],
 };

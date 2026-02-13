@@ -137,15 +137,21 @@ export interface MuseBoard {
   aiSummary: string;
 }
 
+export type MuseType = 'analysis' | 'image' | 'url';
+
 export interface SavedMuse {
   id: string;
-  userImage: string;
-  celebImage: string;
-  celebName: string;
+  type: MuseType;
+  image: string;          // primary display image (base64 or URL)
+  title?: string;         // user-editable title
+  sourceUrl?: string;     // original URL for 'url' type muses
+  userImage?: string;     // selfie — only for 'analysis' type
+  celebImage?: string;    // celeb reference — only for 'analysis' type
+  celebName?: string;     // celeb name — only for 'analysis' type
   date: string;
-  vibe: string;
+  vibe?: string;          // facial vibe — only for 'analysis' type
   boardId?: string;
-  aiStylePoints: string[];
+  aiStylePoints?: string[];  // AI style points — only for 'analysis' type
   tags: string[];
   notes: string;
   extraImages: string[];

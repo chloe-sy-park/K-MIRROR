@@ -1,5 +1,5 @@
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
-import type { MuseBoard, SavedMuse } from '@/types';
+import type { MuseBoard, SavedMuse, MuseType } from '@/types';
 
 /*
   Expected Supabase tables (create via Dashboard → SQL Editor):
@@ -131,6 +131,8 @@ export async function fetchMuses(boardId?: string): Promise<SavedMuse[]> {
   if (!isSupabaseConfigured) {
     const muses = lsGet<SavedMuse>(LS_MUSES_KEY).map((m) => ({
       ...m,
+      type: (m.type || 'analysis') as MuseType,
+      image: m.image || m.userImage || '',
       tags: m.tags || [],
       notes: m.notes || '',
       extraImages: m.extraImages || [],
@@ -146,11 +148,15 @@ export async function fetchMuses(boardId?: string): Promise<SavedMuse[]> {
 
   return (data || []).map((r) => ({
     id: r.id,
-    userImage: r.user_image,
-    celebImage: r.celeb_image,
-    celebName: r.celeb_name,
+    type: (r.type || 'analysis') as MuseType,
+    image: r.image || r.user_image || '',
+    title: r.title || undefined,
+    sourceUrl: r.source_url || undefined,
+    userImage: r.user_image || undefined,
+    celebImage: r.celeb_image || undefined,
+    celebName: r.celeb_name || undefined,
     date: new Date(r.created_at).toLocaleDateString(),
-    vibe: r.vibe,
+    vibe: r.vibe || undefined,
     boardId: r.board_id ?? undefined,
     aiStylePoints: r.ai_style_points || [],
     tags: r.tags || [],
@@ -176,11 +182,15 @@ export async function saveMuse(muse: Omit<SavedMuse, 'id'>): Promise<SavedMuse> 
     .insert({
       user_id: user.id,
       board_id: muse.boardId || null,
-      user_image: muse.userImage,
-      celeb_image: muse.celebImage,
-      celeb_name: muse.celebName,
-      vibe: muse.vibe,
-      ai_style_points: muse.aiStylePoints,
+      type: muse.type || 'analysis',
+      image: muse.image,
+      title: muse.title || null,
+      source_url: muse.sourceUrl || null,
+      user_image: muse.userImage || '',
+      celeb_image: muse.celebImage || '',
+      celeb_name: muse.celebName || '',
+      vibe: muse.vibe || '',
+      ai_style_points: muse.aiStylePoints || [],
       tags: muse.tags || [],
       notes: muse.notes || '',
       extra_images: muse.extraImages || [],
@@ -191,11 +201,15 @@ export async function saveMuse(muse: Omit<SavedMuse, 'id'>): Promise<SavedMuse> 
   if (error) throw new Error(error.message);
   return {
     id: data.id,
-    userImage: data.user_image,
-    celebImage: data.celeb_image,
-    celebName: data.celeb_name,
+    type: (data.type || 'analysis') as MuseType,
+    image: data.image || data.user_image || '',
+    title: data.title || undefined,
+    sourceUrl: data.source_url || undefined,
+    userImage: data.user_image || undefined,
+    celebImage: data.celeb_image || undefined,
+    celebName: data.celeb_name || undefined,
     date: new Date(data.created_at).toLocaleDateString(),
-    vibe: data.vibe,
+    vibe: data.vibe || undefined,
     boardId: data.board_id ?? undefined,
     aiStylePoints: data.ai_style_points || [],
     tags: data.tags || [],
@@ -242,7 +256,7 @@ export async function updateBoard(id: string, updates: { name?: string; icon?: s
 
 export async function updateMuse(
   id: string,
-  updates: { notes?: string; extraImages?: string[]; tags?: string[] }
+  updates: { title?: string; notes?: string; extraImages?: string[]; tags?: string[] }
 ): Promise<SavedMuse> {
   if (!isSupabaseConfigured) {
     const muses = lsGet<SavedMuse>(LS_MUSES_KEY);
@@ -254,6 +268,7 @@ export async function updateMuse(
   }
 
   const dbUpdates: Record<string, unknown> = {};
+  if (updates.title !== undefined) dbUpdates.title = updates.title;
   if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
   if (updates.extraImages !== undefined) dbUpdates.extra_images = updates.extraImages;
   if (updates.tags !== undefined) dbUpdates.tags = updates.tags;
@@ -268,11 +283,15 @@ export async function updateMuse(
   if (error) throw new Error(error.message);
   return {
     id: data.id,
-    userImage: data.user_image,
-    celebImage: data.celeb_image,
-    celebName: data.celeb_name,
+    type: (data.type || 'analysis') as MuseType,
+    image: data.image || data.user_image || '',
+    title: data.title || undefined,
+    sourceUrl: data.source_url || undefined,
+    userImage: data.user_image || undefined,
+    celebImage: data.celeb_image || undefined,
+    celebName: data.celeb_name || undefined,
     date: new Date(data.created_at).toLocaleDateString(),
-    vibe: data.vibe,
+    vibe: data.vibe || undefined,
     boardId: data.board_id ?? undefined,
     aiStylePoints: data.ai_style_points || [],
     tags: data.tags || [],
