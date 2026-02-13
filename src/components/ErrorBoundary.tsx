@@ -73,8 +73,12 @@ class ErrorBoundary extends Component<Props, State> {
           <h1 style={{ color: '#FF4D8D', fontSize: 24 }}>K-MIRROR — Runtime Error</h1>
           <pre style={{ background: '#f5f5f5', padding: 20, borderRadius: 12, overflow: 'auto', fontSize: 13, lineHeight: 1.6 }}>
             {this.state.error?.message}
-            {'\n\n'}
-            {this.state.error?.stack}
+            {import.meta.env.DEV && (
+              <>
+                {'\n\n'}
+                {this.state.error?.stack}
+              </>
+            )}
           </pre>
           <button
             onClick={() => { this.setState({ hasError: false, error: null }); window.location.reload(); }}
