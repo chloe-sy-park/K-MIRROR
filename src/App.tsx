@@ -25,6 +25,7 @@ const ShopView = lazy(() => import('@/views/ShopView'));
 const ProductDetailView = lazy(() => import('@/views/ProductDetailView'));
 const OrdersView = lazy(() => import('@/views/OrdersView'));
 const CelebGalleryView = lazy(() => import('@/views/CelebGalleryView'));
+const CheckoutSuccessView = lazy(() => import('@/views/CheckoutSuccessView'));
 
 const LazyFallback = () => (
   <div className="flex items-center justify-center py-32">
@@ -44,6 +45,7 @@ const ROUTE_TITLES: Record<string, string> = {
   '/': 'Scan',
   '/onboarding': 'Onboarding',
   '/checkout': 'Checkout',
+  '/checkout/success': 'Order Confirmed',
   '/match': 'Expert Match',
   '/methodology': 'Sherlock Methodology',
   '/settings': 'Settings',
@@ -100,6 +102,7 @@ const App = () => {
               isOnboarded ? <Navigate to="/" replace /> : <OnboardingView />
             } />
             <Route path="/checkout" element={<GlobalCheckoutView />} />
+            <Route path="/checkout/success" element={<CheckoutSuccessView />} />
             <Route path="/match" element={<ExpertMatchingView />} />
             <Route path="/methodology" element={<MethodologyView onBookSession={() => navigate('/match')} />} />
             <Route path="/settings" element={<SettingsView />} />
