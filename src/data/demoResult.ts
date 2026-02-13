@@ -6,7 +6,13 @@ export const DEMO_RESULT: AnalysisResult = {
     undertone: 'Cool',
     skinHexCode: '#6B4226',
     skinConcerns: ['Hyper-pigmentation', 'Inner Dryness', 'Structural Shadowing'],
-    description: "Your complexion exhibits a rich, cool-ebony depth (Melanin L5) with subtle sapphire undertones. K-Beauty standards for this tone shift from 'whitening' to 'luminosity optimization,' focusing on high-chroma berry pigments and moisture-locked glass finishes."
+    description: "Your complexion exhibits a rich, cool-ebony depth (Melanin L5) with subtle sapphire undertones. K-Beauty standards for this tone shift from 'whitening' to 'luminosity optimization,' focusing on high-chroma berry pigments and moisture-locked glass finishes.",
+    skinType: 'combination' as const,
+    sensitivityLevel: 2,
+    moistureLevel: 'low' as const,
+    sebumLevel: 'medium' as const,
+    poreSize: 'medium' as const,
+    skinThickness: 'medium' as const
   },
   sherlock: {
     proportions: { upper: '1', middle: '1.25', lower: '0.85' },

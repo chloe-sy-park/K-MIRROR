@@ -17,17 +17,17 @@ export async function fetchProducts(): Promise<Product[]> {
 
   return data.map((r) => ({
     id: r.id,
-    name: r.name,
+    name: r.name_en ?? r.name ?? '',
     brand: r.brand,
-    price: r.price,
-    priceDisplay: `$${(r.price / 100).toFixed(2)}`,
-    desc: r.desc,
+    price: r.price_usd ? Math.round(Number(r.price_usd) * 100) : (r.price ?? 0),
+    priceDisplay: r.price_usd ? `$${Number(r.price_usd).toFixed(2)}` : `$${((r.price ?? 0) / 100).toFixed(2)}`,
+    desc: r.desc ?? '',
     matchScore: r.match_score ?? 0,
     ingredients: r.ingredients ?? [],
     safetyRating: r.safety_rating ?? '',
     category: r.category,
     imageUrl: r.image_url ?? undefined,
-    melaninRange: [r.melanin_min ?? 1, r.melanin_max ?? 6],
+    melaninRange: [r.melanin_min ?? 1, r.melanin_max ?? 6] as [number, number],
   }));
 }
 
@@ -49,17 +49,17 @@ export async function fetchProductById(id: string): Promise<Product | null> {
 
   return {
     id: data.id,
-    name: data.name,
+    name: data.name_en ?? data.name ?? '',
     brand: data.brand,
-    price: data.price,
-    priceDisplay: `$${(data.price / 100).toFixed(2)}`,
-    desc: data.desc,
+    price: data.price_usd ? Math.round(Number(data.price_usd) * 100) : (data.price ?? 0),
+    priceDisplay: data.price_usd ? `$${Number(data.price_usd).toFixed(2)}` : `$${((data.price ?? 0) / 100).toFixed(2)}`,
+    desc: data.desc ?? '',
     matchScore: data.match_score ?? 0,
     ingredients: data.ingredients ?? [],
     safetyRating: data.safety_rating ?? '',
     category: data.category,
     imageUrl: data.image_url ?? undefined,
-    melaninRange: [data.melanin_min ?? 1, data.melanin_max ?? 6],
+    melaninRange: [data.melanin_min ?? 1, data.melanin_max ?? 6] as [number, number],
   };
 }
 
