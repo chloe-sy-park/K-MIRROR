@@ -14,6 +14,91 @@ const BOARD_ICONS = ['🎨', '💄', '✨', '🌸', '🔥', '💎', '🦋', '�
 
 type ModalType = 'create-board' | 'edit-board' | 'muse-detail' | 'move-muse' | null;
 
+// ── Extracted as top-level component to satisfy react-hooks/static-components ──
+
+interface BoardFormModalProps {
+  mode: 'create' | 'edit';
+  boardName: string;
+  boardIcon: string;
+  onNameChange: (v: string) => void;
+  onIconChange: (v: string) => void;
+  onSubmit: () => void;
+  onClose: () => void;
+}
+
+const BoardFormModal = ({ mode, boardName, boardIcon, onNameChange, onIconChange, onSubmit, onClose }: BoardFormModalProps) => (
+  <m.div
+    initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+    className="fixed inset-0 z-[250] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+    onClick={onClose}
+  >
+    <m.div
+      initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+      onClick={(e) => e.stopPropagation()}
+      className="bg-white rounded-[3rem] p-10 max-w-md w-full shadow-2xl relative"
+    >
+      <button
+        onClick={onClose}
+        className="absolute top-6 right-6 p-2 text-gray-300 hover:text-black transition-colors"
+      >
+        <X size={20} />
+      </button>
+
+      <div className="text-center mb-10">
+        <h2 className="text-3xl heading-font uppercase tracking-tight">
+          {mode === 'create' ? 'New' : 'Edit'} <span className="italic text-[#FF4D8D]">Board</span>
+        </h2>
+        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-3">
+          {mode === 'create' ? 'Organize your muse collection' : 'Update board details'}
+        </p>
+      </div>
+
+      <div className="space-y-6">
+        <div className="space-y-1">
+          <span className="text-[9px] font-black uppercase text-gray-400 ml-2" id="icon-label">Icon</span>
+          <div className="flex gap-2 flex-wrap" role="group" aria-labelledby="icon-label">
+            {BOARD_ICONS.map((icon) => (
+              <button
+                key={icon}
+                onClick={() => onIconChange(icon)}
+                className={`w-12 h-12 rounded-2xl text-xl flex items-center justify-center transition-all ${
+                  boardIcon === icon
+                    ? 'bg-black text-white scale-110 shadow-lg'
+                    : 'bg-gray-50 hover:bg-gray-100'
+                }`}
+              >
+                {icon}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-1">
+          <label htmlFor="board-name-input" className="text-[9px] font-black uppercase text-gray-400 ml-2">Board Name</label>
+          <input
+            id="board-name-input"
+            type="text"
+            value={boardName}
+            onChange={(e) => onNameChange(e.target.value)}
+            placeholder="e.g., Summer Looks, Daily Glam"
+            maxLength={40}
+            className="w-full bg-[#F9F9F9] rounded-2xl px-4 py-4 text-sm focus:ring-1 ring-black transition-all border-none"
+            onKeyDown={(e) => e.key === 'Enter' && onSubmit()}
+          />
+        </div>
+
+        <button
+          onClick={onSubmit}
+          disabled={!boardName.trim()}
+          className="w-full py-5 bg-black text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] hover:bg-[#FF4D8D] transition-all disabled:opacity-40"
+        >
+          {mode === 'create' ? 'Create Board' : 'Save Changes'}
+        </button>
+      </div>
+    </m.div>
+  </m.div>
+);
+
 const MuseBoardView = () => {
   const navigate = useNavigate();
   const {
@@ -123,81 +208,6 @@ const MuseBoardView = () => {
     img.startsWith('data:') || img.startsWith('http')
       ? img
       : `data:image/jpeg;base64,${img}`;
-
-  // ── Board/Icon picker shared UI ─────────────────────
-
-  const BoardFormModal = ({ mode }: { mode: 'create' | 'edit' }) => (
-    <m.div
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[250] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
-      onClick={() => setModal(null)}
-    >
-      <m.div
-        initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
-        onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-[3rem] p-10 max-w-md w-full shadow-2xl relative"
-      >
-        <button
-          onClick={() => setModal(null)}
-          className="absolute top-6 right-6 p-2 text-gray-300 hover:text-black transition-colors"
-        >
-          <X size={20} />
-        </button>
-
-        <div className="text-center mb-10">
-          <h2 className="text-3xl heading-font uppercase tracking-tight">
-            {mode === 'create' ? 'New' : 'Edit'} <span className="italic text-[#FF4D8D]">Board</span>
-          </h2>
-          <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-3">
-            {mode === 'create' ? 'Organize your muse collection' : 'Update board details'}
-          </p>
-        </div>
-
-        <div className="space-y-6">
-          <div className="space-y-1">
-            <span className="text-[9px] font-black uppercase text-gray-400 ml-2" id="icon-label">Icon</span>
-            <div className="flex gap-2 flex-wrap" role="group" aria-labelledby="icon-label">
-              {BOARD_ICONS.map((icon) => (
-                <button
-                  key={icon}
-                  onClick={() => setNewBoardIcon(icon)}
-                  className={`w-12 h-12 rounded-2xl text-xl flex items-center justify-center transition-all ${
-                    newBoardIcon === icon
-                      ? 'bg-black text-white scale-110 shadow-lg'
-                      : 'bg-gray-50 hover:bg-gray-100'
-                  }`}
-                >
-                  {icon}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <label htmlFor="board-name-input" className="text-[9px] font-black uppercase text-gray-400 ml-2">Board Name</label>
-            <input
-              id="board-name-input"
-              type="text"
-              value={newBoardName}
-              onChange={(e) => setNewBoardName(e.target.value)}
-              placeholder="e.g., Summer Looks, Daily Glam"
-              maxLength={40}
-              className="w-full bg-[#F9F9F9] rounded-2xl px-4 py-4 text-sm focus:ring-1 ring-black transition-all border-none"
-              onKeyDown={(e) => e.key === 'Enter' && (mode === 'create' ? handleCreateBoard() : handleEditBoard())}
-            />
-          </div>
-
-          <button
-            onClick={mode === 'create' ? handleCreateBoard : handleEditBoard}
-            disabled={!newBoardName.trim()}
-            className="w-full py-5 bg-black text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] hover:bg-[#FF4D8D] transition-all disabled:opacity-40"
-          >
-            {mode === 'create' ? 'Create Board' : 'Save Changes'}
-          </button>
-        </div>
-      </m.div>
-    </m.div>
-  );
 
   return (
     <m.div
@@ -351,7 +361,7 @@ const MuseBoardView = () => {
                 {muse.userImage ? (
                   <img
                     src={getImageSrc(muse.userImage)}
-                    alt="Uploaded selfie"
+                    alt="Your selfie"
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -444,7 +454,15 @@ const MuseBoardView = () => {
       {/* ── Modals ─────────────────────────────────────── */}
       <AnimatePresence>
         {(modal === 'create-board' || modal === 'edit-board') && (
-          <BoardFormModal mode={modal === 'create-board' ? 'create' : 'edit'} />
+          <BoardFormModal
+            mode={modal === 'create-board' ? 'create' : 'edit'}
+            boardName={newBoardName}
+            boardIcon={newBoardIcon}
+            onNameChange={setNewBoardName}
+            onIconChange={setNewBoardIcon}
+            onSubmit={modal === 'create-board' ? handleCreateBoard : handleEditBoard}
+            onClose={() => setModal(null)}
+          />
         )}
 
         {/* Move Muse Modal */}
@@ -531,7 +549,7 @@ const MuseBoardView = () => {
               <div className="grid grid-cols-2 h-64 rounded-t-[3rem] overflow-hidden">
                 <div className="relative bg-gray-100">
                   {selectedMuse.userImage ? (
-                    <img src={getImageSrc(selectedMuse.userImage)} alt="Your photo" className="w-full h-full object-cover" />
+                    <img src={getImageSrc(selectedMuse.userImage)} alt="Your look" className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center"><User size={40} className="text-gray-300" /></div>
                   )}
