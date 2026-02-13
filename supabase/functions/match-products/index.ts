@@ -256,7 +256,8 @@ serve(async (req) => {
   const supabase = createClient(supabaseUrl, supabaseKey);
   const { data: products, error: dbError } = await supabase
     .from('products')
-    .select('*');
+    .select('*')
+    .eq('is_active', true);
 
   if (dbError) {
     return jsonResponse({ error: `데이터베이스 조회 실패: ${dbError.message}` }, 500, req);

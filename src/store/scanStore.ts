@@ -3,6 +3,7 @@ import { AnalysisResult, UserPreferences, YouTubeVideo } from '@/types';
 import { analyzeKBeauty, analyzeSkin, matchProducts, AnalysisError } from '@/services/geminiService';
 import type { MatchedProduct } from '@/services/geminiService';
 import { searchYouTubeVideos, isYouTubeConfigured } from '@/services/youtubeService';
+import { saveAnalysis, extractProductIds } from '@/services/analysisService';
 import { DEMO_RESULT } from '@/data/demoResult';
 import type { CelebProfile } from '@/data/celebGallery';
 
@@ -14,6 +15,7 @@ interface ScanState {
   celebImage: string | null;
   selectedCelebName: string | null;
   result: AnalysisResult | null;
+  analysisId: string | null;
   matchedProducts: MatchedProduct[];
   youtubeVideos: YouTubeVideo[];
   error: string | null;
@@ -47,6 +49,7 @@ export const useScanStore = create<ScanState>((set, get) => ({
   celebImage: null,
   selectedCelebName: null,
   result: null,
+  analysisId: null,
   matchedProducts: [],
   youtubeVideos: [],
   error: null,
@@ -116,6 +119,11 @@ export const useScanStore = create<ScanState>((set, get) => ({
 
       if (!controller.signal.aborted) {
         set({ result: res, matchedProducts: products, phase: 'result' });
+
+        // Save to DB (non-blocking) — analysisId is used for feedback
+        saveAnalysis(res, extractProductIds(products)).then((id) => {
+          if (id && !controller.signal.aborted) set({ analysisId: id });
+        }).catch(() => {});
       }
     } catch (err) {
       if (controller.signal.aborted) return;
@@ -142,7 +150,7 @@ export const useScanStore = create<ScanState>((set, get) => ({
     if (demoTimer) { clearTimeout(demoTimer); demoTimer = null; }
     analyzeController?.abort();
     analyzeController = null;
-    set({ result: null, youtubeVideos: [], matchedProducts: [], phase: 'idle', error: null, selectedCelebName: null });
+    set({ result: null, analysisId: null, youtubeVideos: [], matchedProducts: [], phase: 'idle', error: null, selectedCelebName: null });
   },
   clearError: () => set({ error: null }),
 }));

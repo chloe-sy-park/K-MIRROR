@@ -27,7 +27,7 @@ const generateReportId = () => ++nextReportId;
 const AnalysisResultView = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { result, userImage, celebImage, youtubeVideos, matchedProducts: dbProducts, reset } = useScanStore();
+  const { result, userImage, celebImage, youtubeVideos, matchedProducts: dbProducts, analysisId, reset } = useScanStore();
   const { boards, saveMuse, fetchBoards } = useMuseStore();
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [selectedBoardId, setSelectedBoardId] = useState<string | undefined>();
@@ -128,12 +128,12 @@ const AnalysisResultView = () => {
 
   const handleAnalysisFeedback = async (helpful: boolean) => {
     setAnalysisFeedback(helpful);
-    await submitAnalysisFeedback('placeholder', helpful);
+    if (analysisId) await submitAnalysisFeedback(analysisId, helpful);
   };
 
   const handleProductFeedback = async (productId: string, relevant: boolean) => {
     setProductFeedbacks(prev => ({ ...prev, [productId]: relevant }));
-    await submitProductFeedback('placeholder', productId, relevant);
+    if (analysisId) await submitProductFeedback(analysisId, productId, relevant);
   };
 
   const handleCheckout = () => {

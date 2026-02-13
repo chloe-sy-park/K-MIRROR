@@ -173,8 +173,10 @@ export const matchProducts = async (
     if (!res.ok) return [];
 
     const data: unknown = await res.json();
-    if (!Array.isArray(data)) return [];
-    return data as MatchedProduct[];
+    // Edge Function returns { recommendations: [...] }
+    const list = (data as { recommendations?: unknown }).recommendations ?? data;
+    if (!Array.isArray(list)) return [];
+    return list as MatchedProduct[];
   } catch {
     return [];
   } finally {

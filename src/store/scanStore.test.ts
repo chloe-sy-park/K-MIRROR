@@ -19,6 +19,12 @@ vi.mock('@/services/geminiService', () => ({
   },
 }));
 
+// Mock analysisService (non-blocking DB save)
+vi.mock('@/services/analysisService', () => ({
+  saveAnalysis: vi.fn().mockResolvedValue(null),
+  extractProductIds: vi.fn().mockReturnValue([]),
+}));
+
 describe('scanStore', () => {
   beforeEach(() => {
     vi.useFakeTimers();
