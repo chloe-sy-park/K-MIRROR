@@ -27,6 +27,8 @@ const ProductDetailView = lazy(() => import('@/views/ProductDetailView'));
 const OrdersView = lazy(() => import('@/views/OrdersView'));
 const CelebGalleryView = lazy(() => import('@/views/CelebGalleryView'));
 const CheckoutSuccessView = lazy(() => import('@/views/CheckoutSuccessView'));
+const PrivacyPolicyView = lazy(() => import('@/views/PrivacyPolicyView'));
+const TermsView = lazy(() => import('@/views/TermsView'));
 
 const LazyFallback = () => (
   <div className="flex items-center justify-center py-32">
@@ -54,6 +56,8 @@ const ROUTE_TITLES: Record<string, string> = {
   '/shop': 'K-Beauty Shop',
   '/orders': 'Orders',
   '/celebs': 'K-Celeb Gallery',
+  '/privacy': 'Privacy Policy',
+  '/terms': 'Terms of Service',
 };
 
 const App = () => {
@@ -112,6 +116,8 @@ const App = () => {
             <Route path="/shop/:id" element={<ProductDetailView />} />
             <Route path="/orders" element={<OrdersView />} />
             <Route path="/celebs" element={<CelebGalleryView />} />
+            <Route path="/privacy" element={<PrivacyPolicyView />} />
+            <Route path="/terms" element={<TermsView />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
           </Suspense>

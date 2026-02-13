@@ -20,6 +20,15 @@ const Footer = () => {
           <Heart size={18} />
         </button>
       </div>
+      <div className="flex justify-center gap-6 mt-6">
+        <button onClick={() => navigate('/privacy')} className="text-[9px] font-bold text-gray-300 hover:text-black transition-colors uppercase tracking-widest">
+          {t('legal.privacyPolicy')}
+        </button>
+        <span className="text-gray-200">·</span>
+        <button onClick={() => navigate('/terms')} className="text-[9px] font-bold text-gray-300 hover:text-black transition-colors uppercase tracking-widest">
+          {t('legal.termsOfService')}
+        </button>
+      </div>
     </footer>
   );
 };
