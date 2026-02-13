@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AnimatePresence } from 'framer-motion';
 import * as m from 'framer-motion/m';
@@ -27,10 +27,12 @@ const generateReportId = () => ++nextReportId;
 const AnalysisResultView = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromBoard = (location.state as { fromBoard?: string } | null)?.fromBoard;
   const { result, userImage, celebImage, youtubeVideos, matchedProducts: dbProducts, analysisId, reset } = useScanStore();
   const { boards, saveMuse, fetchBoards } = useMuseStore();
   const [showSaveModal, setShowSaveModal] = useState(false);
-  const [selectedBoardId, setSelectedBoardId] = useState<string | undefined>();
+  const [selectedBoardId, setSelectedBoardId] = useState<string | undefined>(fromBoard ?? undefined);
   const [isSaved, setIsSaved] = useState(false);
 
   const { addItem } = useCartStore();
@@ -142,6 +144,7 @@ const AnalysisResultView = () => {
 
   const handleOpenSave = async () => {
     await fetchBoards();
+    if (fromBoard) setSelectedBoardId(fromBoard);
     setShowSaveModal(true);
   };
 

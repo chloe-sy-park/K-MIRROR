@@ -69,6 +69,8 @@
     "emptyBoard": "This board is empty",
     "noMusesYet": "No saved muses yet",
     "emptyHint": "Run a scan and save your analysis to start building your muse collection.",
+    "addMuse": "Add Muse",
+    "newScan": "Start a new scan",
     "newBoard": "New Board",
     "organizeCollection": "Organize your muse collection",
     "icon": "Icon",

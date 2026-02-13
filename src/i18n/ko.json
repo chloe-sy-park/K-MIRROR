@@ -69,6 +69,8 @@
     "emptyBoard": "이 보드는 비어있습니다",
     "noMusesYet": "아직 저장된 뮤즈가 없습니다",
     "emptyHint": "스캔 후 분석 결과를 저장하여 뮤즈 컬렉션을 시작하세요.",
+    "addMuse": "뮤즈 추가",
+    "newScan": "새 스캔 시작",
     "newBoard": "새 보드",
     "organizeCollection": "뮤즈 컬렉션을 정리하세요",
     "icon": "아이콘",

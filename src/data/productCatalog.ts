@@ -17,6 +17,7 @@ export const PRODUCT_CATALOG: Product[] = [
     ingredients: ['Niacinamide', 'Titanium Dioxide', 'Centella Asiatica'],
     safetyRating: 'EWG Green',
     category: 'base',
+    imageUrl: 'https://images.unsplash.com/photo-1631214524020-7e18db9a8f92?w=400&h=400&fit=crop',
     melaninRange: [3, 6],
   },
   {
@@ -30,6 +31,7 @@ export const PRODUCT_CATALOG: Product[] = [
     ingredients: ['Hyaluronic Acid', 'Ceramide NP', 'Rosemary Extract'],
     safetyRating: 'EWG Green',
     category: 'base',
+    imageUrl: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop',
     melaninRange: [1, 3],
   },
   {
@@ -43,6 +45,7 @@ export const PRODUCT_CATALOG: Product[] = [
     ingredients: ['Korean Ginseng', 'Plum Blossom Extract', 'Jaumdan Complex'],
     safetyRating: 'EWG Green',
     category: 'base',
+    imageUrl: 'https://images.unsplash.com/photo-1619451334792-150fd785ee74?w=400&h=400&fit=crop',
     melaninRange: [1, 4],
   },
 
@@ -58,6 +61,7 @@ export const PRODUCT_CATALOG: Product[] = [
     ingredients: ['Shea Butter', 'Jojoba Oil', 'Vitamin E'],
     safetyRating: 'Vegan',
     category: 'lip',
+    imageUrl: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400&h=400&fit=crop',
     melaninRange: [1, 6],
   },
   {
@@ -71,6 +75,7 @@ export const PRODUCT_CATALOG: Product[] = [
     ingredients: ['Macadamia Oil', 'Beeswax', 'Vitamin C'],
     safetyRating: 'EWG Green',
     category: 'lip',
+    imageUrl: 'https://images.unsplash.com/photo-1583241800698-e8ab01830a07?w=400&h=400&fit=crop',
     melaninRange: [1, 5],
   },
   {
@@ -84,6 +89,7 @@ export const PRODUCT_CATALOG: Product[] = [
     ingredients: ['Argan Oil', 'Candelilla Wax', 'Rose Hip Extract'],
     safetyRating: 'Vegan',
     category: 'lip',
+    imageUrl: 'https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=400&h=400&fit=crop',
     melaninRange: [2, 6],
   },
 
@@ -99,6 +105,7 @@ export const PRODUCT_CATALOG: Product[] = [
     ingredients: ['Carnauba Wax', 'Silica', 'Tocopherol'],
     safetyRating: 'EWG Green',
     category: 'eye',
+    imageUrl: 'https://images.unsplash.com/photo-1512207736890-6ffed8a84e8d?w=400&h=400&fit=crop',
     melaninRange: [1, 4],
   },
   {
@@ -112,6 +119,7 @@ export const PRODUCT_CATALOG: Product[] = [
     ingredients: ['Mica', 'Dimethicone', 'Talc'],
     safetyRating: 'EWG Green',
     category: 'eye',
+    imageUrl: 'https://images.unsplash.com/photo-1583241119928-90274f38e03a?w=400&h=400&fit=crop',
     melaninRange: [1, 6],
   },
 
@@ -127,6 +135,7 @@ export const PRODUCT_CATALOG: Product[] = [
     ingredients: ['Snail Secretion Filtrate (96%)', 'Betaine', 'Sodium Hyaluronate'],
     safetyRating: 'EWG Green',
     category: 'skincare',
+    imageUrl: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop',
     melaninRange: [1, 6],
   },
   {
@@ -140,6 +149,7 @@ export const PRODUCT_CATALOG: Product[] = [
     ingredients: ['Oryza Sativa Bran Extract', 'Lactobacillus', 'Niacinamide'],
     safetyRating: 'EWG Green',
     category: 'skincare',
+    imageUrl: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=400&h=400&fit=crop',
     melaninRange: [1, 6],
   },
   {
@@ -153,6 +163,7 @@ export const PRODUCT_CATALOG: Product[] = [
     ingredients: ['Camellia Sinensis Seed Oil', 'Betaine', 'Trehalose'],
     safetyRating: 'EWG Green',
     category: 'skincare',
+    imageUrl: 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=400&h=400&fit=crop',
     melaninRange: [1, 6],
   },
   {
@@ -166,6 +177,7 @@ export const PRODUCT_CATALOG: Product[] = [
     ingredients: ['Ascorbic Acid (5%)', 'Centella Asiatica', 'Portulaca Extract'],
     safetyRating: 'Vegan',
     category: 'skincare',
+    imageUrl: 'https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=400&h=400&fit=crop',
     melaninRange: [1, 6],
   },
 ];

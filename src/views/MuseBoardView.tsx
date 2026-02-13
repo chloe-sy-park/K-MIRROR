@@ -295,7 +295,7 @@ const MuseBoardView = () => {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/', { state: { fromBoard: activeBoardId } })}
               className="p-3 text-gray-300 hover:text-[#FF4D8D] transition-colors"
               title="New Scan for this board"
             >
@@ -337,7 +337,7 @@ const MuseBoardView = () => {
           </p>
           <div className="flex items-center justify-center gap-4 flex-wrap">
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/', { state: { fromBoard: activeBoardId } })}
               className="inline-flex items-center gap-2 px-8 py-4 bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#FF4D8D] transition-all"
             >
               <Camera size={14} /> {t('common.startScan')}
@@ -352,6 +352,22 @@ const MuseBoardView = () => {
         </m.div>
       ) : (
         <m.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Add Muse Card */}
+          <m.div
+            whileHover={{ y: -4 }}
+            onClick={() => navigate('/', { state: { fromBoard: activeBoardId } })}
+            className="flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-[3rem] cursor-pointer hover:border-[#FF4D8D] hover:bg-[#FF4D8D]/5 transition-all"
+            style={{ minHeight: '20rem' }}
+          >
+            <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+              <Camera size={24} className="text-gray-400" />
+            </div>
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">
+              {t('muse.addMuse')}
+            </p>
+            <p className="text-[9px] text-gray-300 mt-1">{t('muse.newScan')}</p>
+          </m.div>
+
           {muses.map((muse) => (
             <m.div
               key={muse.id}
