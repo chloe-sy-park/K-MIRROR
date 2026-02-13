@@ -1,7 +1,7 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import OrdersView from './OrdersView';
-import { useCartStore } from '@/store/cartStore';
 import type { Order } from '@/types';
 
 const mockNavigate = vi.fn();
@@ -9,6 +9,11 @@ vi.mock('react-router-dom', async (importOriginal) => {
   const mod = await importOriginal<typeof import('react-router-dom')>();
   return { ...mod, useNavigate: () => mockNavigate };
 });
+
+const mockFetchOrders = vi.fn();
+vi.mock('@/services/orderService', () => ({
+  fetchOrders: (...args: unknown[]) => mockFetchOrders(...args),
+}));
 
 const testOrder: Order = {
   id: 'order-abc12345-def6-7890',
@@ -54,29 +59,34 @@ const testOrder: Order = {
   createdAt: '2026-01-15T10:30:00.000Z',
 };
 
-function renderView() {
-  return render(
+async function renderView() {
+  render(
     <MemoryRouter>
       <OrdersView />
     </MemoryRouter>
   );
+  // Wait for fetchOrders to resolve and component to update
+  await waitFor(() => {
+    expect(mockFetchOrders).toHaveBeenCalled();
+  });
 }
 
 describe('OrdersView', () => {
   beforeEach(() => {
     mockNavigate.mockClear();
-    useCartStore.setState({ orders: [] });
+    mockFetchOrders.mockReset();
+    mockFetchOrders.mockResolvedValue([]);
   });
 
   describe('empty state', () => {
-    it('shows empty state message when no orders exist', () => {
-      renderView();
+    it('shows empty state message when no orders exist', async () => {
+      await renderView();
       expect(screen.getByText('orders.noOrders')).toBeInTheDocument();
       expect(screen.getByText('orders.noOrdersDesc')).toBeInTheDocument();
     });
 
-    it('shows Browse Shop button that navigates to /shop', () => {
-      renderView();
+    it('shows Browse Shop button that navigates to /shop', async () => {
+      await renderView();
       const browseBtn = screen.getByText('orders.browseShop');
       fireEvent.click(browseBtn);
       expect(mockNavigate).toHaveBeenCalledWith('/shop');
@@ -85,98 +95,92 @@ describe('OrdersView', () => {
 
   describe('with orders', () => {
     beforeEach(() => {
-      useCartStore.setState({ orders: [testOrder] });
+      mockFetchOrders.mockResolvedValue([testOrder]);
     });
 
-    it('renders the orders title', () => {
-      renderView();
+    it('renders the orders title', async () => {
+      await renderView();
       expect(screen.getByText('orders.title')).toBeInTheDocument();
     });
 
-    it('shows the order count for a single order', () => {
-      renderView();
+    it('shows the order count for a single order', async () => {
+      await renderView();
       expect(screen.getByText('1 orders.orderPlaced')).toBeInTheDocument();
     });
 
-    it('shows the order count for multiple orders', () => {
+    it('shows the order count for multiple orders', async () => {
       const secondOrder: Order = {
         ...testOrder,
         id: 'order-xyz98765-ghi4-3210',
         status: 'shipped',
       };
-      useCartStore.setState({ orders: [testOrder, secondOrder] });
-      renderView();
+      mockFetchOrders.mockResolvedValue([testOrder, secondOrder]);
+      await renderView();
       expect(screen.getByText('2 orders.ordersPlaced')).toBeInTheDocument();
     });
 
-    it('displays the truncated order ID', () => {
-      renderView();
+    it('displays the truncated order ID', async () => {
+      await renderView();
       expect(screen.getByText('Order #order-ab')).toBeInTheDocument();
     });
 
-    it('shows order date', () => {
-      renderView();
+    it('shows order date', async () => {
+      await renderView();
       const formatted = new Date(testOrder.createdAt).toLocaleDateString();
       expect(screen.getByText(formatted)).toBeInTheDocument();
     });
 
-    it('displays product names in the order', () => {
-      renderView();
+    it('displays product names in the order', async () => {
+      await renderView();
       expect(screen.getByText('Black Cushion SPF34')).toBeInTheDocument();
       expect(screen.getByText('Glasting Water Tint')).toBeInTheDocument();
     });
 
-    it('shows product brand and quantity', () => {
-      renderView();
+    it('shows product brand and quantity', async () => {
+      await renderView();
       expect(screen.getByText('HERA x 2')).toBeInTheDocument();
       expect(screen.getByText('ROM&ND x 1')).toBeInTheDocument();
     });
 
-    it('shows line item totals', () => {
-      renderView();
+    it('shows line item totals', async () => {
+      await renderView();
       // HERA cushion: $45.00 x 2 = $90.00
       expect(screen.getByText('$90.00')).toBeInTheDocument();
       // ROM&ND tint: $14.00 x 1 = $14.00
       expect(screen.getByText('$14.00')).toBeInTheDocument();
     });
 
-    it('shows the order total', () => {
-      renderView();
+    it('shows the order total', async () => {
+      await renderView();
       // Total: 12200 cents = $122.00
       expect(screen.getByText('$122.00')).toBeInTheDocument();
     });
 
-    it('shows the shipping method', () => {
-      renderView();
+    it('shows the shipping method', async () => {
+      await renderView();
       expect(screen.getByText(/DHL/)).toBeInTheDocument();
     });
 
-    it('shows Pending status for a pending order', () => {
-      renderView();
+    it('shows Pending status for a pending order', async () => {
+      await renderView();
       expect(screen.getByText('Pending')).toBeInTheDocument();
     });
 
-    it('shows Shipped status for a shipped order', () => {
-      useCartStore.setState({
-        orders: [{ ...testOrder, status: 'shipped' }],
-      });
-      renderView();
+    it('shows Shipped status for a shipped order', async () => {
+      mockFetchOrders.mockResolvedValue([{ ...testOrder, status: 'shipped' }]);
+      await renderView();
       expect(screen.getByText('Shipped')).toBeInTheDocument();
     });
 
-    it('shows Paid status for a paid order', () => {
-      useCartStore.setState({
-        orders: [{ ...testOrder, status: 'paid' }],
-      });
-      renderView();
+    it('shows Paid status for a paid order', async () => {
+      mockFetchOrders.mockResolvedValue([{ ...testOrder, status: 'paid' }]);
+      await renderView();
       expect(screen.getByText('Paid')).toBeInTheDocument();
     });
 
-    it('shows Delivered status for a delivered order', () => {
-      useCartStore.setState({
-        orders: [{ ...testOrder, status: 'delivered' }],
-      });
-      renderView();
+    it('shows Delivered status for a delivered order', async () => {
+      mockFetchOrders.mockResolvedValue([{ ...testOrder, status: 'delivered' }]);
+      await renderView();
       expect(screen.getByText('Delivered')).toBeInTheDocument();
     });
   });

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import GlobalCheckoutView from './GlobalCheckoutView';
 import { useCartStore } from '@/store/cartStore';
@@ -9,6 +9,15 @@ vi.mock('react-router-dom', async (importOriginal) => {
   const mod = await importOriginal<typeof import('react-router-dom')>();
   return { ...mod, useNavigate: () => mockNavigate };
 });
+
+vi.mock('@/services/paymentService', () => ({
+  isPaymentEnabled: false,
+  createCheckoutSession: vi.fn(),
+}));
+
+vi.mock('@/services/orderService', () => ({
+  createLocalOrder: vi.fn(),
+}));
 
 const testProduct: Product = {
   id: 'test-1',
@@ -38,9 +47,9 @@ function renderCheckout() {
 describe('GlobalCheckoutView', () => {
   beforeEach(() => {
     mockNavigate.mockClear();
-    // Reset cart using clearCart + reset orders via setState
+    // Reset cart using clearCart + reset shippingMethod via setState
     useCartStore.getState().clearCart();
-    useCartStore.setState({ orders: [], shippingMethod: 'dhl' });
+    useCartStore.setState({ shippingMethod: 'dhl' });
   });
 
   describe('empty cart', () => {
@@ -98,15 +107,16 @@ describe('GlobalCheckoutView', () => {
       expect(payButton).not.toBeDisabled();
     });
 
-    it('places order and shows confirmation', () => {
+    it('places order and shows confirmation', async () => {
       renderCheckout();
       fireEvent.change(screen.getByPlaceholderText(/Sarah Jenkins/i), { target: { value: 'Test User' } });
       fireEvent.change(screen.getByPlaceholderText(/123 Beauty Lane/i), { target: { value: '456 Test Street, City' } });
       fireEvent.click(screen.getByText('checkout.completePayment'));
 
-      expect(screen.getByText('checkout.orderPlaced')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('checkout.orderPlaced')).toBeInTheDocument();
+      });
       expect(useCartStore.getState().items).toHaveLength(0);
-      expect(useCartStore.getState().orders).toHaveLength(1);
     });
 
     it('form requires minimum name length of 2', () => {
@@ -127,25 +137,33 @@ describe('GlobalCheckoutView', () => {
   });
 
   describe('order confirmation', () => {
-    it('navigates to home after order with New Scan', () => {
+    it('navigates to home after order with New Scan', async () => {
       addTestItem(1);
       renderCheckout();
 
       fireEvent.change(screen.getByPlaceholderText(/Sarah Jenkins/i), { target: { value: 'Test User' } });
       fireEvent.change(screen.getByPlaceholderText(/123 Beauty Lane/i), { target: { value: '456 Test Street, City' } });
       fireEvent.click(screen.getByText('checkout.completePayment'));
+
+      await waitFor(() => {
+        expect(screen.getByText('checkout.orderPlaced')).toBeInTheDocument();
+      });
 
       fireEvent.click(screen.getByText('common.newScan'));
       expect(mockNavigate).toHaveBeenCalledWith('/');
     });
 
-    it('navigates to orders after order', () => {
+    it('navigates to orders after order', async () => {
       addTestItem(1);
       renderCheckout();
 
       fireEvent.change(screen.getByPlaceholderText(/Sarah Jenkins/i), { target: { value: 'Test User' } });
       fireEvent.change(screen.getByPlaceholderText(/123 Beauty Lane/i), { target: { value: '456 Test Street, City' } });
       fireEvent.click(screen.getByText('checkout.completePayment'));
+
+      await waitFor(() => {
+        expect(screen.getByText('checkout.orderPlaced')).toBeInTheDocument();
+      });
 
       fireEvent.click(screen.getByText('checkout.viewOrders'));
       expect(mockNavigate).toHaveBeenCalledWith('/orders');
