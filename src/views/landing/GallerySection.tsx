@@ -9,23 +9,33 @@ import {
 const galleryCards = [
   {
     labelKey: 'landing.gallery.eastAsian',
-    gradient: 'from-[#FF4D8D] via-[#FF6B9D] to-[#FFB3D1]',
+    image:
+      'https://images.unsplash.com/photo-1544376798-89aa6b82c6cd?w=400&h=500&fit=crop&crop=face&auto=format&q=80',
+    accent: '#FF4D8D',
   },
   {
     labelKey: 'landing.gallery.southAsian',
-    gradient: 'from-[#FF8E53] via-[#FFB347] to-[#FFD166]',
+    image:
+      'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=500&fit=crop&crop=face&auto=format&q=80',
+    accent: '#FF8E53',
   },
   {
     labelKey: 'landing.gallery.african',
-    gradient: 'from-[#6C5CE7] via-[#A29BFE] to-[#DFE6E9]',
+    image:
+      'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&h=500&fit=crop&crop=face&auto=format&q=80',
+    accent: '#6C5CE7',
   },
   {
     labelKey: 'landing.gallery.european',
-    gradient: 'from-[#00B894] via-[#55EFC4] to-[#81ECEC]',
+    image:
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=500&fit=crop&crop=face&auto=format&q=80',
+    accent: '#00B894',
   },
   {
     labelKey: 'landing.gallery.latinAmerican',
-    gradient: 'from-[#E17055] via-[#FAB1A0] to-[#FFEAA7]',
+    image:
+      'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=400&h=500&fit=crop&crop=face&auto=format&q=80',
+    accent: '#E17055',
   },
 ] as const;
 
@@ -72,18 +82,24 @@ const GallerySection = () => {
           style={{ scrollSnapType: 'x mandatory' }}
         >
           <div className="flex gap-6 w-max">
-            {galleryCards.map(({ labelKey, gradient }) => (
+            {galleryCards.map(({ labelKey, image, accent }) => (
               <div
                 key={labelKey}
-                className="min-w-[280px] h-[400px] rounded-[2rem] overflow-hidden relative flex-shrink-0"
+                className="group min-w-[280px] h-[400px] rounded-[2rem] overflow-hidden relative flex-shrink-0"
                 style={{ scrollSnapAlign: 'start' }}
               >
-                {/* Gradient placeholder background */}
-                <div
-                  className={`absolute inset-0 bg-gradient-to-br ${gradient}`}
+                <img
+                  src={image}
+                  alt={t(labelKey)}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
                 />
-
-                {/* Label overlay */}
+                <div
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                  style={{
+                    background: `linear-gradient(135deg, ${accent}30, transparent 60%)`,
+                  }}
+                />
                 <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/60 to-transparent">
                   <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/80">
                     {t(labelKey)}

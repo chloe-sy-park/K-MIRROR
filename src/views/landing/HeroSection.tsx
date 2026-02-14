@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import * as m from 'framer-motion/m';
 
+const HERO_IMAGE =
+  'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=800&h=1000&fit=crop&crop=face&auto=format&q=80';
+
 const HeroSection = () => {
   const { t } = useTranslation();
   const [position, setPosition] = useState(50);
@@ -118,14 +121,27 @@ const HeroSection = () => {
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            {/* "Before" side — full background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-gray-700 via-gray-800 to-gray-900" />
-
-            {/* "After" side — clipped on top */}
-            <div
-              className="absolute inset-0 bg-gradient-to-br from-[#FF4D8D] via-[#FF8E53] to-[#FFD166]"
-              style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}
+            {/* "Before" side — desaturated photo */}
+            <img
+              src={HERO_IMAGE}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover grayscale brightness-95"
+              draggable={false}
             />
+
+            {/* "After" side — full color photo, clipped */}
+            <div
+              className="absolute inset-0"
+              style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}
+            >
+              <img
+                src={HERO_IMAGE}
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover"
+                draggable={false}
+              />
+              <div className="absolute inset-0 bg-gradient-to-br from-[#FF4D8D]/10 via-transparent to-[#FFB5D6]/10 pointer-events-none" />
+            </div>
 
             {/* Scanline overlay */}
             <div className="animate-scanline absolute inset-0 w-full h-1/3 bg-gradient-to-b from-transparent via-white/10 to-transparent pointer-events-none" />
@@ -157,7 +173,7 @@ const HeroSection = () => {
 
             {/* Divider line */}
             <div
-              className="absolute top-0 bottom-0 w-0.5 bg-[#0F0F0F]/60 pointer-events-none"
+              className="absolute top-0 bottom-0 w-0.5 bg-white/80 pointer-events-none"
               style={{ left: `${position}%` }}
             />
 

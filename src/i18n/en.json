@@ -360,6 +360,11 @@
     "gallery": {
       "title": "Real People. Real Transformations.",
       "subtitle": "See how K-Beauty transforms across every skin tone and face shape",
+      "eastAsian": "East Asian",
+      "southAsian": "South Asian",
+      "african": "African",
+      "european": "European",
+      "latinAmerican": "Latin American",
       "statTransformations": "Transformations",
       "statCountries": "Countries",
       "statSatisfaction": "Satisfaction"

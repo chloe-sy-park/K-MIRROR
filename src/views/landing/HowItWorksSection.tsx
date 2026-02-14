@@ -37,13 +37,13 @@ const HowItWorksSection = () => {
       id="how-it-works"
       className="landing-section py-24 px-6 lg:px-12"
     >
-      <div ref={ref} className="max-w-7xl mx-auto">
+      <div ref={ref} className="max-w-5xl mx-auto">
         {/* Header */}
         <m.div
           variants={staggerContainerVariants}
           initial="hidden"
           animate={isInView ? 'visible' : 'hidden'}
-          className="text-center mb-16"
+          className="text-center mb-20"
         >
           <m.h2
             variants={fadeInUpVariants}
@@ -59,45 +59,93 @@ const HowItWorksSection = () => {
           </m.p>
         </m.div>
 
-        {/* Steps grid */}
         <m.div
           variants={staggerContainerVariants}
           initial="hidden"
           animate={isInView ? 'visible' : 'hidden'}
-          className="relative grid grid-cols-1 lg:grid-cols-3 gap-8"
         >
-          {/* Connection lines between cards (desktop only) */}
-          <div className="hidden lg:block absolute top-1/2 left-0 right-0 -translate-y-1/2 px-16 pointer-events-none">
-            <div className="border-t-2 border-dashed border-gray-200 w-full" />
+          {/* Desktop: horizontal timeline */}
+          <div className="hidden lg:block relative">
+            {/* Connection line */}
+            <div className="absolute top-8 left-[16.67%] right-[16.67%] h-0.5 bg-gray-200">
+              <m.div
+                className="h-full bg-[#FF4D8D]"
+                initial={{ scaleX: 0 }}
+                animate={isInView ? { scaleX: 1 } : { scaleX: 0 }}
+                transition={{ duration: 1.5, delay: 0.5, ease: 'easeOut' }}
+                style={{ transformOrigin: 'left' }}
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-8">
+              {steps.map(({ icon: Icon, number, titleKey, descKey }) => (
+                <m.div
+                  key={titleKey}
+                  variants={fadeInUpVariants}
+                  className="flex flex-col items-center text-center"
+                >
+                  {/* Circle node */}
+                  <div className="relative z-10 w-16 h-16 rounded-full bg-white border-2 border-[#FF4D8D] flex items-center justify-center mb-8 shadow-md">
+                    <Icon size={24} className="text-[#FF4D8D]" />
+                  </div>
+
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#FF4D8D] mb-3">
+                    {number}
+                  </span>
+                  <h3 className="text-xl font-black heading-font uppercase tracking-tight mb-3">
+                    {t(titleKey)}
+                  </h3>
+                  <p className="text-gray-500 text-sm leading-relaxed max-w-xs">
+                    {t(descKey)}
+                  </p>
+                </m.div>
+              ))}
+            </div>
           </div>
 
-          {steps.map(({ icon: Icon, number, titleKey, descKey }) => (
-            <m.div
-              key={titleKey}
-              variants={fadeInUpVariants}
-              className="relative bg-white border border-gray-100 rounded-[2rem] p-8 hover:border-[#FF4D8D]/30 transition-colors"
-            >
-              {/* Number badge */}
-              <div className="w-8 h-8 rounded-full bg-[#FF4D8D] flex items-center justify-center mb-6">
-                <span className="text-white text-xs font-black">
-                  {number}
-                </span>
-              </div>
+          {/* Mobile: vertical timeline */}
+          <div className="lg:hidden relative pl-12">
+            {/* Vertical line */}
+            <div className="absolute left-[15px] top-0 bottom-0 w-0.5 bg-gray-200">
+              <m.div
+                className="w-full bg-[#FF4D8D]"
+                initial={{ scaleY: 0 }}
+                animate={isInView ? { scaleY: 1 } : { scaleY: 0 }}
+                transition={{ duration: 1.5, delay: 0.5, ease: 'easeOut' }}
+                style={{ transformOrigin: 'top' }}
+              />
+            </div>
 
-              {/* Icon */}
-              <div className="w-14 h-14 rounded-2xl bg-[#FF4D8D]/10 flex items-center justify-center mb-6">
-                <Icon size={24} className="text-[#FF4D8D]" />
-              </div>
+            {steps.map(({ icon: Icon, number, titleKey, descKey }) => (
+              <m.div
+                key={titleKey}
+                variants={fadeInUpVariants}
+                className="relative mb-12 last:mb-0"
+              >
+                {/* Circle node */}
+                <div className="absolute -left-12 top-0 z-10 w-8 h-8 rounded-full bg-white border-2 border-[#FF4D8D] flex items-center justify-center shadow-sm">
+                  <span className="text-[#FF4D8D] text-[10px] font-black">
+                    {number}
+                  </span>
+                </div>
 
-              {/* Text */}
-              <h3 className="text-xl font-black heading-font uppercase tracking-tight mb-3">
-                {t(titleKey)}
-              </h3>
-              <p className="text-gray-500 text-sm leading-relaxed">
-                {t(descKey)}
-              </p>
-            </m.div>
-          ))}
+                {/* Card */}
+                <div className="bg-white border border-gray-100 rounded-2xl p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-xl bg-[#FF4D8D]/10 flex items-center justify-center">
+                      <Icon size={20} className="text-[#FF4D8D]" />
+                    </div>
+                    <h3 className="text-lg font-black heading-font uppercase tracking-tight">
+                      {t(titleKey)}
+                    </h3>
+                  </div>
+                  <p className="text-gray-500 text-sm leading-relaxed">
+                    {t(descKey)}
+                  </p>
+                </div>
+              </m.div>
+            ))}
+          </div>
         </m.div>
       </div>
     </section>

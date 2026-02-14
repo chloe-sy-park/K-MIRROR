@@ -360,6 +360,11 @@
     "gallery": {
       "title": "진짜 사람들. 진짜 변화.",
       "subtitle": "모든 피부 톤과 얼굴형에서 K-뷰티가 어떻게 변화를 만드는지 보세요",
+      "eastAsian": "동아시아",
+      "southAsian": "남아시아",
+      "african": "아프리카",
+      "european": "유럽",
+      "latinAmerican": "라틴 아메리카",
       "statTransformations": "변환",
       "statCountries": "국가",
       "statSatisfaction": "만족도"

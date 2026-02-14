@@ -49,19 +49,22 @@ const reviews = [
     nameKey: 'landing.reviews.review1Name',
     locationKey: 'landing.reviews.review1Location',
     textKey: 'landing.reviews.review1Text',
-    color: '#FF4D8D',
+    image:
+      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face&auto=format&q=80',
   },
   {
     nameKey: 'landing.reviews.review2Name',
     locationKey: 'landing.reviews.review2Location',
     textKey: 'landing.reviews.review2Text',
-    color: '#6C5CE7',
+    image:
+      'https://images.unsplash.com/photo-1507152927220-18c1d9fd852c?w=100&h=100&fit=crop&crop=face&auto=format&q=80',
   },
   {
     nameKey: 'landing.reviews.review3Name',
     locationKey: 'landing.reviews.review3Location',
     textKey: 'landing.reviews.review3Text',
-    color: '#00B894',
+    image:
+      'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=100&h=100&fit=crop&crop=face&auto=format&q=80',
   },
 ] as const;
 
@@ -119,6 +122,12 @@ const ReviewsSection = () => {
           >
             {t('landing.reviews.title')}
           </m.h2>
+          <m.p
+            variants={fadeInUpVariants}
+            className="mt-4 text-gray-500 text-lg max-w-2xl mx-auto"
+          >
+            {t('landing.reviews.subtitle')}
+          </m.p>
         </m.div>
 
         {/* Stats row */}
@@ -147,9 +156,8 @@ const ReviewsSection = () => {
           animate={isInView ? 'visible' : 'hidden'}
           className="grid grid-cols-1 md:grid-cols-3 gap-6"
         >
-          {reviews.map(({ nameKey, locationKey, textKey, color }) => {
+          {reviews.map(({ nameKey, locationKey, textKey, image }) => {
             const name = t(nameKey);
-            const initial = name.charAt(0).toUpperCase();
 
             return (
               <m.div
@@ -159,12 +167,12 @@ const ReviewsSection = () => {
               >
                 {/* Avatar + name */}
                 <div className="flex items-center gap-4 mb-5">
-                  <div
-                    className="w-12 h-12 rounded-full flex items-center justify-center text-white font-black text-lg"
-                    style={{ backgroundColor: color }}
-                  >
-                    {initial}
-                  </div>
+                  <img
+                    src={image}
+                    alt={name}
+                    className="w-12 h-12 rounded-full object-cover"
+                    loading="lazy"
+                  />
                   <div>
                     <p className="font-black heading-font text-sm uppercase tracking-tight">
                       {name}
