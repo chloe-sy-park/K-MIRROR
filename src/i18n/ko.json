@@ -326,5 +326,145 @@
     "privacyPolicy": "개인정보 처리방침",
     "termsOfService": "이용약관",
     "lastUpdated": "최종 수정일: 2026년 2월"
+  },
+  "landing": {
+    "nav": {
+      "tryNow": "지금 시작",
+      "features": "기능",
+      "howItWorks": "사용 방법",
+      "pricing": "요금제"
+    },
+    "hero": {
+      "title": "당신의 얼굴.",
+      "titleAccent": "서울의 기준.",
+      "subtitle": "AI 기반 안면 분석이 당신의 골격 구조를 K-뷰티 최고의 테크닉에 매핑합니다. 맞춤형. 정밀. 포용적.",
+      "cta": "무료 분석 시작",
+      "ctaSecondary": "사용 방법 보기",
+      "beforeLabel": "비포",
+      "afterLabel": "애프터"
+    },
+    "sherlock": {
+      "title": "셜록 엔진™",
+      "subtitle": "바이오메트릭 분석의 세 가지 핵심 기술",
+      "neuralTitle": "뉴럴 매핑",
+      "neuralDesc": "AI가 K-아이돌 황금 비율에 대해 밀리미터 정밀도로 안면 비율을 분석합니다",
+      "biometricTitle": "바이오메트릭 스캔",
+      "biometricDesc": "첨단 눈꼬리 각도 및 안와 벡터 분석으로 엘리트 K-아이라이너 기법을 적용합니다",
+      "spectralTitle": "스펙트럼 분석",
+      "spectralDesc": "골격 구조 매핑으로 촉촉한 또는 조각적인 피니시를 위한 시그니처를 결정합니다",
+      "statAccuracy": "분석 정확도",
+      "statScans": "완료된 스캔",
+      "statCelebs": "K-셀럽 데이터베이스",
+      "statProducts": "제품 매칭"
+    },
+    "gallery": {
+      "title": "유니버설 뷰티, 해독됨",
+      "subtitle": "모든 피부 톤과 민족에 걸친 실제 변환을 확인하세요",
+      "statTransformations": "변환",
+      "statCountries": "국가",
+      "statSatisfaction": "만족도"
+    },
+    "valueProps": {
+      "card1Title": "포용적 설계",
+      "card1Desc": "모든 민족에 대해 학습된 알고리즘. 멜라닌 레벨은 필터가 아닌 기반입니다.",
+      "card2Title": "서울급 정밀도",
+      "card2Desc": "K-뷰티 최고의 셀럽 디렉터가 사용하는 밀리미터 분석을 당신의 손안에.",
+      "card3Title": "성분 인텔리전스",
+      "card3Desc": "모든 제품 추천은 피부 타입에 맞춘 뉴럴 안전 프로토콜로 필터링됩니다."
+    },
+    "howItWorks": {
+      "title": "K-뷰티 프로토콜까지 3단계",
+      "subtitle": "셀카에서 맞춤 뷰티 루틴까지 60초 이내",
+      "step1Title": "셀카 업로드",
+      "step1Desc": "민낯 사진을 촬영하거나 업로드하세요. AI 분석에는 메이크업이 필요 없습니다.",
+      "step2Title": "AI 분석",
+      "step2Desc": "셜록 엔진이 68개 얼굴 랜드마크를 K-뷰티 황금 비율과 피부 스펙트럼 데이터로 매핑합니다.",
+      "step3Title": "프로토콜 받기",
+      "step3Desc": "제품 매칭, 튜토리얼, 셀럽 스타일 룩이 포함된 맞춤 뷰티 프로토콜을 받으세요."
+    },
+    "celebs": {
+      "title": "K-셀럽 트윈 매칭",
+      "subtitle": "AI가 당신의 얼굴 구조와 유사한 K-뷰티 아이콘을 식별합니다",
+      "matchLabel": "매치"
+    },
+    "reviews": {
+      "title": "50,000명 이상의 사용자가 사랑합니다",
+      "statUsers": "활성 사용자",
+      "statRating": "평균 평점",
+      "statCountries": "국가",
+      "review1Name": "Sarah J.",
+      "review1Location": "뉴욕, 미국",
+      "review1Text": "드디어 제 피부 톤에 맞는 K-뷰티 조언을 찾았어요. AI 분석이 놀라울 정도로 정확했습니다.",
+      "review2Name": "Aisha K.",
+      "review2Location": "런던, 영국",
+      "review2Text": "몇 년간 K-뷰티를 팔로우했지만 어두운 피부용 제품을 찾지 못했어요. K-MIRROR가 완전히 바꿔줬습니다.",
+      "review3Name": "Yuki T.",
+      "review3Location": "도쿄, 일본",
+      "review3Text": "셀럽 매칭 기능이 중독적이에요. 제니 매칭을 통해 완벽한 메이크업 루틴을 찾았습니다."
+    },
+    "transparency": {
+      "title": "투명한 뷰티 인텔리전스",
+      "subtitle": "모든 추천은 마케팅이 아닌 과학에 기반합니다",
+      "safetyScore": "안전 점수",
+      "ingredientAnalysis": "성분 분석",
+      "radarHydration": "보습",
+      "radarBrightening": "미백",
+      "radarAntiAging": "안티에이징",
+      "radarSoothing": "진정",
+      "radarProtection": "보호"
+    },
+    "pricing": {
+      "title": "미러를 선택하세요",
+      "subtitle": "무료로 시작. 준비되면 업그레이드.",
+      "free": "무료",
+      "freePrice": "₩0",
+      "freeFeature1": "월 3회 스캔",
+      "freeFeature2": "기본 셀럽 매칭",
+      "freeFeature3": "제품 추천",
+      "freeCta": "무료 시작",
+      "pro": "프로",
+      "proPrice": "₩12,900",
+      "proPeriod": "/월",
+      "proFeature1": "무제한 스캔",
+      "proFeature2": "고급 셀럽 매칭",
+      "proFeature3": "뮤즈 보드 컬렉션",
+      "proFeature4": "우선 AI 처리",
+      "proCta": "프로 시작",
+      "proPopular": "가장 인기",
+      "premium": "프리미엄",
+      "premiumPrice": "₩25,900",
+      "premiumPeriod": "/월",
+      "premiumFeature1": "프로의 모든 기능",
+      "premiumFeature2": "전문가 세션 크레딧",
+      "premiumFeature3": "독점 제품 드롭",
+      "premiumFeature4": "얼리 액세스 기능",
+      "premiumCta": "프리미엄 시작"
+    },
+    "faq": {
+      "title": "자주 묻는 질문",
+      "q1": "AI 분석은 얼마나 정확한가요?",
+      "a1": "셜록 엔진은 68개 얼굴 랜드마크를 97.3% 정확도로 분석하며, 전문 뷰티 디렉터 기준으로 검증되었습니다. 밝고 선명한 사진으로 결과가 향상됩니다.",
+      "q2": "모든 피부 톤에서 작동하나요?",
+      "a2": "물론입니다. K-MIRROR의 포용성 가드™가 모든 멜라닌 레벨과 민족에 대해 알고리즘이 학습되도록 보장합니다. 피부 톤은 제한이 아닌 기반입니다.",
+      "q3": "사진 데이터가 저장되나요?",
+      "a3": "아니요. 모든 안면 분석은 실시간으로 처리되고 즉시 삭제됩니다. 생체 데이터를 서버에 저장하지 않습니다. 자세한 내용은 개인정보 처리방침을 참조하세요.",
+      "q4": "다른 뷰티 앱과 어떻게 다른가요?",
+      "a4": "K-MIRROR는 밀리미터 안면 매핑과 서울의 전문 뷰티 표준을 결합한 유일한 플랫폼입니다. 필터가 아닌 진단 도구입니다."
+    },
+    "cta": {
+      "title": "당신의 반영을 만날 준비가 됐나요?",
+      "subtitle": "K-뷰티 아이덴티티를 발견하는 50,000명 이상의 사용자와 함께하세요",
+      "button": "무료 분석 시작"
+    },
+    "footer": {
+      "tagline": "뉴럴 뷰티 인텔리전스",
+      "copyright": "© 2026 K-MIRROR AI. All rights reserved.",
+      "privacy": "개인정보",
+      "terms": "이용약관"
+    },
+    "floatingCta": {
+      "tryFree": "무료 분석 체험",
+      "startNow": "지금 시작"
+    }
   }
 }

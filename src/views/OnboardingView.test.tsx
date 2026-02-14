@@ -119,7 +119,7 @@ describe('OnboardingView', () => {
       skill: 'Pro',
       mood: 'Powerful',
     });
-    expect(mockNavigate).toHaveBeenCalledWith('/');
+    expect(mockNavigate).toHaveBeenCalledWith('/scan');
   });
 
   it('calls completeOnboarding with default prefs when no changes are made', () => {

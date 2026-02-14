@@ -35,7 +35,7 @@ describe('CheckoutSuccessView', () => {
   it('navigates to home when new scan button is clicked', () => {
     render(<CheckoutSuccessView />);
     screen.getByText('common.newScan').click();
-    expect(mockNavigate).toHaveBeenCalledWith('/');
+    expect(mockNavigate).toHaveBeenCalledWith('/scan');
   });
 
   it('navigates to orders when view orders button is clicked', () => {

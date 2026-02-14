@@ -18,7 +18,7 @@ const Navbar = () => {
   const cartCount = useCartStore((s) => s.itemCount);
 
   const navItems = [
-    { to: '/', label: t('nav.scan') },
+    { to: '/scan', label: t('nav.scan') },
     { to: '/muse', label: t('nav.museBoard') },
     { to: '/match', label: t('nav.match') },
     { to: '/methodology', label: t('nav.sherlock') },
@@ -28,7 +28,7 @@ const Navbar = () => {
   ];
 
   const mobileNavItems = [
-    { to: '/', label: t('nav.scanLab'), icon: <Camera size={20}/> },
+    { to: '/scan', label: t('nav.scanLab'), icon: <Camera size={20}/> },
     { to: '/muse', label: t('nav.museBoard'), icon: <LayoutGrid size={20}/> },
     { to: '/match', label: t('nav.expertMatch'), icon: <MessageCircle size={20}/> },
     { to: '/methodology', label: t('nav.sherlockMethod'), icon: <Scan size={20}/> },
@@ -38,8 +38,8 @@ const Navbar = () => {
   ];
 
   const isActive = (to: string) => {
-    if (to === '/') {
-      return location.pathname === '/' || location.pathname === '/checkout';
+    if (to === '/scan') {
+      return location.pathname === '/scan' || location.pathname === '/checkout';
     }
     return location.pathname === to;
   };

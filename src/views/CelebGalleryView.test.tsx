@@ -65,7 +65,7 @@ describe('CelebGalleryView', () => {
     const jennieCard = screen.getByText('Jennie').closest('[class*="cursor-pointer"]');
     if (jennieCard) fireEvent.click(jennieCard);
 
-    expect(mockNavigate).toHaveBeenCalledWith('/', {
+    expect(mockNavigate).toHaveBeenCalledWith('/scan', {
       state: { selectedCeleb: expect.objectContaining({ name: 'Jennie' }) },
     });
   });

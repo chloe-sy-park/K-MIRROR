@@ -56,7 +56,7 @@ const CelebGalleryView = () => {
   }, [genre, mood]);
 
   const handleSelectCeleb = (celeb: CelebProfile) => {
-    navigate('/', { state: { selectedCeleb: celeb } });
+    navigate('/scan', { state: { selectedCeleb: celeb } });
   };
 
   return (

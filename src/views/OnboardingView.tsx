@@ -37,7 +37,7 @@ const OnboardingView = () => {
 
   const handleComplete = () => {
     completeOnboarding(prefs);
-    navigate('/');
+    navigate('/scan');
   };
 
   return (

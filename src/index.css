@@ -44,6 +44,30 @@ body {
   background: linear-gradient(90deg, #FF4D8D, #FF8E53);
 }
 
+/* === Landing Page Utilities === */
+.landing-section {
+  scroll-margin-top: 80px;
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); opacity: 0; }
+  50% { opacity: 0.6; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+
+.animate-scanline {
+  animation: scanline 3s infinite ease-in-out;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 3s infinite ease-in-out;
+}
+
 /* === Scan Animation === */
 @keyframes scan {
   0% { top: 0%; opacity: 0; }

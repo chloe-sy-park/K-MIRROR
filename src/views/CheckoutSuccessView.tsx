@@ -65,7 +65,7 @@ const CheckoutSuccessView = () => {
 
       <div className="flex gap-4 justify-center">
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/scan')}
           className="px-8 py-4 bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#FF4D8D] transition-all"
         >
           {t('common.newScan')}

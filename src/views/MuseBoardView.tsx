@@ -350,7 +350,7 @@ const MuseBoardView = () => {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => navigate('/', { state: { fromBoard: activeBoardId } })}
+              onClick={() => navigate('/scan', { state: { fromBoard: activeBoardId } })}
               className="p-3 text-gray-300 hover:text-[#FF4D8D] transition-colors"
               title="New Scan for this board"
             >
@@ -398,7 +398,7 @@ const MuseBoardView = () => {
               <Plus size={14} /> {t('muse.addInspiration')}
             </button>
             <button
-              onClick={() => navigate('/', { state: { fromBoard: activeBoardId } })}
+              onClick={() => navigate('/scan', { state: { fromBoard: activeBoardId } })}
               className="inline-flex items-center gap-2 px-8 py-4 bg-gray-50 text-gray-500 border border-gray-200 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:border-[#FF4D8D] hover:text-[#FF4D8D] transition-all"
             >
               <Camera size={14} /> {t('common.startScan')}
@@ -777,7 +777,7 @@ const MuseBoardView = () => {
                   <button
                     onClick={() => {
                       setModal(null);
-                      navigate('/', { state: { fromBoard: activeBoardId } });
+                      navigate('/scan', { state: { fromBoard: activeBoardId } });
                     }}
                     className="w-full py-5 bg-black text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] hover:bg-[#FF4D8D] transition-all"
                   >
@@ -967,7 +967,7 @@ const MuseBoardView = () => {
                     <FolderInput size={14} /> {t('muse.moveToBoard')}
                   </button>
                   <button
-                    onClick={() => navigate('/')}
+                    onClick={() => navigate('/scan')}
                     className="flex-1 flex items-center justify-center gap-2 py-4 bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#FF4D8D] transition-all"
                   >
                     <Camera size={14} /> {t('muse.tryAgainLook')}

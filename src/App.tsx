@@ -13,6 +13,7 @@ import AuthModal from '@/components/ui/AuthModal';
 import CookieConsentBanner from '@/components/ui/CookieConsentBanner';
 
 // Lazy-loaded views for code splitting
+const LandingView = lazy(() => import('@/views/LandingView'));
 const OnboardingView = lazy(() => import('@/views/OnboardingView'));
 const ScanView = lazy(() => import('@/views/ScanView'));
 const AnalyzingView = lazy(() => import('@/views/AnalyzingView'));
@@ -45,7 +46,8 @@ const ScanRoute = () => {
 };
 
 const ROUTE_TITLES: Record<string, string> = {
-  '/': 'Scan',
+  '/': 'K-MIRROR AI',
+  '/scan': 'Scan',
   '/onboarding': 'Onboarding',
   '/checkout': 'Checkout',
   '/checkout/success': 'Order Confirmed',
@@ -96,15 +98,16 @@ const App = () => {
         )}
       </AnimatePresence>
 
-      <Navbar />
+      {location.pathname !== '/' && <Navbar />}
 
-      <main id="main-content" tabIndex={-1} className="flex-1 pt-32 pb-24 px-6 lg:px-12 max-w-7xl mx-auto w-full min-h-screen outline-none">
+      <main id="main-content" tabIndex={-1} className={location.pathname === '/' ? 'outline-none' : 'flex-1 pt-32 pb-24 px-6 lg:px-12 max-w-7xl mx-auto w-full min-h-screen outline-none'}>
         <ErrorBoundary inline>
           <Suspense fallback={<LazyFallback />}>
           <Routes location={location}>
-            <Route path="/" element={<ScanRoute />} />
+            <Route path="/" element={<LandingView />} />
+            <Route path="/scan" element={<ScanRoute />} />
             <Route path="/onboarding" element={
-              isOnboarded ? <Navigate to="/" replace /> : <OnboardingView />
+              isOnboarded ? <Navigate to="/scan" replace /> : <OnboardingView />
             } />
             <Route path="/checkout" element={<GlobalCheckoutView />} />
             <Route path="/checkout/success" element={<CheckoutSuccessView />} />
@@ -124,7 +127,7 @@ const App = () => {
         </ErrorBoundary>
       </main>
 
-      <Footer />
+      {location.pathname !== '/' && <Footer />}
       <ErrorToast message={error} onDismiss={clearError} />
       <AuthModal />
       <CookieConsentBanner />

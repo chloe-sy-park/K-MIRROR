@@ -61,10 +61,10 @@ describe('GlobalCheckoutView', () => {
       expect(screen.getByText('checkout.cartEmpty')).toBeInTheDocument();
     });
 
-    it('has Start Scan button that navigates to /', () => {
+    it('has Start Scan button that navigates to /scan', () => {
       renderCheckout();
       fireEvent.click(screen.getByText('checkout.startScan'));
-      expect(mockNavigate).toHaveBeenCalledWith('/');
+      expect(mockNavigate).toHaveBeenCalledWith('/scan');
     });
 
     it('has Browse Shop button that navigates to /shop', () => {
@@ -153,7 +153,7 @@ describe('GlobalCheckoutView', () => {
       });
 
       fireEvent.click(screen.getByText('common.newScan'));
-      expect(mockNavigate).toHaveBeenCalledWith('/');
+      expect(mockNavigate).toHaveBeenCalledWith('/scan');
     });
 
     it('navigates to orders after order', async () => {

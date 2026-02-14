@@ -5,7 +5,7 @@ import { useScanStore } from '@/store/scanStore';
 
 function renderWithRouter(state?: Record<string, unknown>) {
   return render(
-    <MemoryRouter initialEntries={[{ pathname: '/', state }]}>
+    <MemoryRouter initialEntries={[{ pathname: '/scan', state }]}>
       <ScanView />
     </MemoryRouter>
   );

@@ -76,7 +76,7 @@ const GlobalCheckoutView = () => {
         <h2 className="text-4xl heading-font italic uppercase">{t('checkout.orderPlaced')}</h2>
         <p className="text-gray-400 text-sm">{t('checkout.orderPlacedDesc')}</p>
         <div className="flex gap-4 justify-center">
-          <button onClick={() => navigate('/')} className="px-8 py-4 bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#FF4D8D] transition-all">
+          <button onClick={() => navigate('/scan')} className="px-8 py-4 bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#FF4D8D] transition-all">
             {t('common.newScan')}
           </button>
           <button onClick={() => navigate('/orders')} className="px-8 py-4 bg-gray-50 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-100 transition-all">
@@ -94,7 +94,7 @@ const GlobalCheckoutView = () => {
         <h2 className="text-3xl heading-font italic uppercase text-gray-300">{t('checkout.cartEmpty')}</h2>
         <p className="text-gray-400 text-sm max-w-sm mx-auto">{t('checkout.cartEmptyDesc')}</p>
         <div className="flex gap-4 justify-center">
-          <button onClick={() => navigate('/')} className="px-8 py-4 bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#FF4D8D] transition-all">
+          <button onClick={() => navigate('/scan')} className="px-8 py-4 bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#FF4D8D] transition-all">
             {t('checkout.startScan')}
           </button>
           <button onClick={() => navigate('/shop')} className="px-8 py-4 bg-gray-50 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-100 transition-all">
