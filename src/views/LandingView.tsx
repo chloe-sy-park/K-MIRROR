@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import LandingNav from './landing/LandingNav';
 import HeroSection from './landing/HeroSection';
 import SherlockSection from './landing/SherlockSection';
 import GallerySection from './landing/GallerySection';
@@ -11,7 +10,6 @@ import TransparencySection from './landing/TransparencySection';
 import PricingSection from './landing/PricingSection';
 import FAQSection from './landing/FAQSection';
 import CTASection from './landing/CTASection';
-import LandingFooter from './landing/LandingFooter';
 import FloatingCTA from './landing/FloatingCTA';
 import CelebModal from './landing/CelebModal';
 
@@ -27,8 +25,7 @@ const LandingView = () => {
   });
 
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden">
-      <LandingNav />
+    <div className="min-h-screen bg-white overflow-x-hidden pt-20">
       <HeroSection />
       <SherlockSection />
       <GallerySection />
@@ -42,7 +39,6 @@ const LandingView = () => {
       <PricingSection />
       <FAQSection />
       <CTASection />
-      <LandingFooter />
       <FloatingCTA />
       <CelebModal
         isOpen={celebModal.isOpen}

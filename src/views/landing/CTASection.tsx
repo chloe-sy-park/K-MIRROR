@@ -9,7 +9,7 @@ const CTASection = () => {
   const { ref, isInView } = useScrollAnimation();
 
   return (
-    <section className="landing-section relative overflow-hidden bg-[#0F0F0F] text-white py-32 px-6 lg:px-12">
+    <section className="landing-section relative overflow-hidden bg-gradient-to-br from-[#FF4D8D]/5 via-white to-[#FFB5D6]/5 py-32 px-6 lg:px-12">
       {/* Decorative gradient circles */}
       <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-[#FF4D8D]/10 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 translate-x-1/2 w-[400px] h-[400px] rounded-full bg-[#FF4D8D]/5 blur-[100px] pointer-events-none" />
@@ -22,14 +22,14 @@ const CTASection = () => {
         >
           <m.h2
             variants={fadeInUpVariants}
-            className="text-4xl md:text-6xl font-black heading-font tracking-tighter uppercase leading-tight"
+            className="text-4xl md:text-6xl font-black heading-font tracking-tighter uppercase leading-tight text-[#0F0F0F]"
           >
             {t('landing.cta.title')}
           </m.h2>
 
           <m.p
             variants={fadeInUpVariants}
-            className="mt-6 text-gray-400 text-lg max-w-2xl mx-auto"
+            className="mt-6 text-gray-600 text-lg max-w-2xl mx-auto"
           >
             {t('landing.cta.subtitle')}
           </m.p>

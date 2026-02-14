@@ -6,8 +6,9 @@ import * as m from 'framer-motion/m';
 import { Menu, X } from 'lucide-react';
 
 const navLinks = [
-  { href: '#features', key: 'landing.nav.features' },
-  { href: '#how-it-works', key: 'landing.nav.howItWorks' },
+  { href: '/scan', key: 'landing.nav.scan' },
+  { href: '/celebs', key: 'landing.nav.celebs' },
+  { href: '/shop', key: 'landing.nav.shop' },
   { href: '#pricing', key: 'landing.nav.pricing' },
 ] as const;
 

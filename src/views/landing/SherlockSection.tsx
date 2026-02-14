@@ -27,7 +27,7 @@ const SherlockSection = () => {
   return (
     <section
       id="features"
-      className="landing-section py-24 px-6 lg:px-12 bg-[#0F0F0F] text-white"
+      className="landing-section py-24 px-6 lg:px-12 bg-white"
     >
       <div ref={ref} className="max-w-7xl mx-auto">
         {/* Header */}
@@ -39,13 +39,13 @@ const SherlockSection = () => {
         >
           <m.h2
             variants={fadeInUpVariants}
-            className="text-4xl md:text-5xl font-black heading-font tracking-tighter uppercase"
+            className="text-4xl md:text-5xl font-black heading-font tracking-tighter uppercase text-[#0F0F0F]"
           >
             {t('landing.sherlock.title')}
           </m.h2>
           <m.p
             variants={fadeInUpVariants}
-            className="mt-4 text-gray-400 text-lg max-w-2xl mx-auto"
+            className="mt-4 text-gray-600 text-lg max-w-2xl mx-auto"
           >
             {t('landing.sherlock.subtitle')}
           </m.p>
@@ -62,15 +62,15 @@ const SherlockSection = () => {
             <m.div
               key={titleKey}
               variants={fadeInUpVariants}
-              className="bg-white/5 border border-white/10 rounded-[2rem] p-8 hover:border-[#FF4D8D]/40 transition-colors"
+              className="bg-gray-50 border border-gray-100 rounded-[2rem] p-8 hover:border-[#FF4D8D]/40 hover:bg-white transition-all"
             >
               <div className="w-14 h-14 rounded-2xl bg-[#FF4D8D]/10 flex items-center justify-center mb-6">
                 <Icon size={24} className="text-[#FF4D8D]" />
               </div>
-              <h3 className="text-xl font-black heading-font uppercase tracking-tight mb-3">
+              <h3 className="text-xl font-black heading-font uppercase tracking-tight mb-3 text-[#0F0F0F]">
                 {t(titleKey)}
               </h3>
-              <p className="text-gray-400 text-sm leading-relaxed">
+              <p className="text-gray-600 text-sm leading-relaxed">
                 {t(descKey)}
               </p>
             </m.div>
@@ -82,7 +82,7 @@ const SherlockSection = () => {
           variants={staggerContainerVariants}
           initial="hidden"
           animate={isInView ? 'visible' : 'hidden'}
-          className="grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-white/10 pt-12"
+          className="grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-gray-100 pt-12"
         >
           {stats.map(({ value, labelKey }) => (
             <m.div
@@ -93,7 +93,7 @@ const SherlockSection = () => {
               <p className="text-3xl md:text-4xl font-black heading-font text-[#FF4D8D]">
                 {value}
               </p>
-              <p className="mt-2 text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">
+              <p className="mt-2 text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">
                 {t(labelKey)}
               </p>
             </m.div>

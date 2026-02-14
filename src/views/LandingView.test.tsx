@@ -11,9 +11,9 @@ function renderLanding() {
 }
 
 describe('LandingView', () => {
-  it('renders the landing nav with brand name', () => {
+  it('renders hero section title', () => {
     renderLanding();
-    expect(screen.getByText('landing.nav.tryNow')).toBeInTheDocument();
+    expect(screen.getByText('landing.hero.title')).toBeInTheDocument();
   });
 
   it('renders hero section with CTA', () => {
@@ -72,9 +72,9 @@ describe('LandingView', () => {
     expect(screen.getByText('landing.cta.title')).toBeInTheDocument();
   });
 
-  it('renders footer', () => {
+  it('renders CTA section title', () => {
     renderLanding();
-    expect(screen.getByText('landing.footer.copyright')).toBeInTheDocument();
+    expect(screen.getByText('landing.cta.button')).toBeInTheDocument();
   });
 
   it('has CTA links pointing to /scan', () => {

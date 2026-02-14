@@ -98,7 +98,7 @@ const App = () => {
         )}
       </AnimatePresence>
 
-      {location.pathname !== '/' && <Navbar />}
+      <Navbar />
 
       <main id="main-content" tabIndex={-1} className={location.pathname === '/' ? 'outline-none' : 'flex-1 pt-32 pb-24 px-6 lg:px-12 max-w-7xl mx-auto w-full min-h-screen outline-none'}>
         <ErrorBoundary inline>
@@ -127,7 +127,7 @@ const App = () => {
         </ErrorBoundary>
       </main>
 
-      {location.pathname !== '/' && <Footer />}
+      <Footer />
       <ErrorToast message={error} onDismiss={clearError} />
       <AuthModal />
       <CookieConsentBanner />

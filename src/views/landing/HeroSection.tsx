@@ -53,12 +53,9 @@ const HeroSection = () => {
   ];
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#0F0F0F]">
-      {/* Background gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0F0F0F] via-[#0F0F0F]/90 to-[#0F0F0F]" />
-
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-white via-gray-50 to-white">
       {/* Ambient glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#FF4D8D]/10 blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#FF4D8D]/5 blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-12 py-32 flex flex-col lg:flex-row items-center gap-16">
         {/* ── Text column ── */}
@@ -67,7 +64,7 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="text-5xl md:text-7xl font-black heading-font tracking-tighter uppercase leading-[0.95] text-white"
+            className="text-5xl md:text-7xl font-black heading-font tracking-tighter uppercase leading-[0.95] text-[#0F0F0F]"
           >
             {t('landing.hero.title')}{' '}
             <span className="text-[#FF4D8D]">
@@ -79,7 +76,7 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            className="mt-6 text-lg md:text-xl text-gray-400 max-w-lg mx-auto lg:mx-0"
+            className="mt-6 text-lg md:text-xl text-gray-600 max-w-lg mx-auto lg:mx-0"
           >
             {t('landing.hero.subtitle')}
           </m.p>
@@ -98,7 +95,7 @@ const HeroSection = () => {
             </Link>
             <a
               href="#how-it-works"
-              className="px-8 py-4 border border-white/20 text-white text-[10px] font-black uppercase tracking-[0.3em] rounded-full hover:border-[#FF4D8D] hover:text-[#FF4D8D] transition-colors text-center"
+              className="px-8 py-4 border border-gray-200 text-[#0F0F0F] text-[10px] font-black uppercase tracking-[0.3em] rounded-full hover:border-[#FF4D8D] hover:text-[#FF4D8D] transition-colors text-center"
             >
               {t('landing.hero.ctaSecondary')}
             </a>
@@ -151,22 +148,22 @@ const HeroSection = () => {
             ))}
 
             {/* Labels */}
-            <span className="absolute top-4 left-4 text-[9px] font-black uppercase tracking-[0.25em] text-white/70 bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full pointer-events-none">
+            <span className="absolute top-4 left-4 text-[9px] font-black uppercase tracking-[0.25em] text-white bg-[#0F0F0F]/70 backdrop-blur-sm px-3 py-1.5 rounded-full pointer-events-none">
               {t('landing.hero.beforeLabel')}
             </span>
-            <span className="absolute top-4 right-4 text-[9px] font-black uppercase tracking-[0.25em] text-white/70 bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full pointer-events-none">
+            <span className="absolute top-4 right-4 text-[9px] font-black uppercase tracking-[0.25em] text-white bg-[#0F0F0F]/70 backdrop-blur-sm px-3 py-1.5 rounded-full pointer-events-none">
               {t('landing.hero.afterLabel')}
             </span>
 
             {/* Divider line */}
             <div
-              className="absolute top-0 bottom-0 w-0.5 bg-white/80 pointer-events-none"
+              className="absolute top-0 bottom-0 w-0.5 bg-[#0F0F0F]/60 pointer-events-none"
               style={{ left: `${position}%` }}
             />
 
             {/* Draggable handle */}
             <div
-              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center cursor-col-resize z-10"
+              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-white border-2 border-[#FF4D8D] shadow-lg flex items-center justify-center cursor-col-resize z-10"
               style={{ left: `${position}%` }}
               onMouseDown={handleMouseDown}
               onTouchStart={handleTouchStart}
@@ -182,7 +179,7 @@ const HeroSection = () => {
                 height="16"
                 viewBox="0 0 16 16"
                 fill="none"
-                className="text-gray-600"
+                className="text-[#FF4D8D]"
               >
                 <path
                   d="M5 3L2 8L5 13M11 3L14 8L11 13"
