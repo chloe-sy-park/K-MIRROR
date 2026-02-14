@@ -344,8 +344,8 @@
       "afterLabel": "After"
     },
     "sherlock": {
-      "title": "Sherlock Engine™",
-      "subtitle": "Three pillars of biometric analysis power every scan",
+      "title": "The Science Behind Your Match",
+      "subtitle": "How AI creates your personalized beauty profile",
       "neuralTitle": "Neural Mapping",
       "neuralDesc": "AI decodes your facial proportions against the K-Idol golden ratio with millimetric precision",
       "biometricTitle": "Biometric Scan",
@@ -358,8 +358,8 @@
       "statProducts": "Product Matches"
     },
     "gallery": {
-      "title": "Universal Beauty, Decoded",
-      "subtitle": "See real transformations across every skin tone and ethnicity",
+      "title": "Real People. Real Transformations.",
+      "subtitle": "See how K-Beauty transforms across every skin tone and face shape",
       "statTransformations": "Transformations",
       "statCountries": "Countries",
       "statSatisfaction": "Satisfaction"
@@ -383,12 +383,13 @@
       "step3Desc": "Receive a personalized beauty protocol with product matches, tutorials, and celeb-inspired looks."
     },
     "celebs": {
-      "title": "Match Your K-Celeb Twin",
-      "subtitle": "Our AI identifies which K-Beauty icons share your facial architecture",
+      "title": "Meet Your Celebrity Twin",
+      "subtitle": "Join 50,000+ users who discovered their K-Beauty doppelgänger",
       "matchLabel": "Match"
     },
     "reviews": {
-      "title": "Loved by 50,000+ Users",
+      "title": "Join Our Beauty Community",
+      "subtitle": "50,000+ members have found their perfect K-Beauty match",
       "statUsers": "Active Users",
       "statRating": "Average Rating",
       "statCountries": "Countries",

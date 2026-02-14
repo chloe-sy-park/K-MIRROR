@@ -26,18 +26,29 @@ const LandingView = () => {
 
   return (
     <div className="min-h-screen bg-white overflow-x-hidden pt-20">
+      {/* 감성 훅 — 즉각적 관심 유도 */}
       <HeroSection />
-      <SherlockSection />
-      <GallerySection />
-      <ValuePropSection />
-      <HowItWorksSection />
+      {/* 소셜 프루프 — 셀럽 매칭으로 신뢰 구축 */}
       <CelebritySection
         onCelebClick={(celeb) => setCelebModal({ isOpen: true, celeb })}
       />
+      {/* 시각적 증거 — 실제 변환 사례 */}
+      <GallerySection />
+      {/* 커뮤니티 — 사용자 리뷰로 신뢰 강화 */}
       <ReviewsSection />
+      {/* 가치 제안 — 핵심 차별점 */}
+      <ValuePropSection />
+      {/* 사용 방법 — 실행 단계 안내 */}
+      <HowItWorksSection />
+      {/* 기술 신뢰 — AI 분석의 과학적 근거 */}
+      <SherlockSection />
+      {/* 투명성 — 성분 분석 */}
       <TransparencySection />
+      {/* 가격 — 전환 유도 */}
       <PricingSection />
+      {/* FAQ — 이탈 방지 */}
       <FAQSection />
+      {/* 최종 CTA — 행동 촉구 */}
       <CTASection />
       <FloatingCTA />
       <CelebModal
