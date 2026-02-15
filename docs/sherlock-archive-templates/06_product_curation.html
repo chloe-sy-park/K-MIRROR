@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SHERLOCK ARCHIVE — Product Curation</title>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  .page { width:794px;height:1123px;background:#0A0A1A;color:#F0F0F0;font-family:'Inter',sans-serif;position:relative;overflow:hidden;padding:48px 56px;display:flex;flex-direction:column; }
+  .bg-glow { position:absolute;border-radius:50%;filter:blur(160px);pointer-events:none;z-index:0; }
+  .bg-glow--1 { width:350px;height:350px;background:#FFD700;bottom:200px;left:-100px;opacity:0.04; }
+  .page-header { position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;padding-bottom:16px;border-bottom:1px solid rgba(139,139,163,0.1);margin-bottom:32px; }
+  .page-header__section { font-family:'Fira Code',monospace;font-size:11px;color:#FF2D9B;letter-spacing:3px;text-transform:uppercase; }
+  .page-header__case { font-family:'Fira Code',monospace;font-size:11px;color:#8B8BA3;letter-spacing:2px; }
+  .section-title { position:relative;z-index:1;margin-bottom:24px; }
+  .section-title__number { font-family:'Fira Code',monospace;font-size:12px;color:#FF2D9B;letter-spacing:4px;margin-bottom:8px; }
+  .section-title__text { font-size:28px;font-weight:700;letter-spacing:2px;text-transform:uppercase; }
+  .section-title__desc { font-size:14px;color:#8B8BA3;margin-top:8px;line-height:1.5; }
+
+  /* 제품 그리드 */
+  .products-grid {
+    position: relative; z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    flex: 1;
+  }
+
+  .product-card {
+    background: rgba(26, 26, 46, 0.5);
+    border: 1px solid rgba(139, 139, 163, 0.06);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .product-card__top {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+  .product-card__image {
+    width: 72px; height: 72px;
+    background: #1A1A2E;
+    border-radius: 8px;
+    border: 1px solid rgba(139,139,163,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fira Code', monospace;
+    font-size: 9px;
+    color: #8B8BA3;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .product-card__info { flex: 1; }
+  .product-card__category {
+    font-family: 'Fira Code', monospace;
+    font-size: 10px; color: #FF2D9B;
+    letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .product-card__name {
+    font-size: 15px; font-weight: 600;
+    color: #F0F0F0;
+    margin-bottom: 2px;
+    line-height: 1.3;
+  }
+  .product-card__brand {
+    font-size: 12px; color: #8B8BA3;
+  }
+
+  /* Match Score 바 */
+  .match-score {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .match-score__label {
+    font-family: 'Fira Code', monospace;
+    font-size: 10px; color: #8B8BA3;
+    letter-spacing: 1px;
+  }
+  .match-score__bar {
+    flex: 1; height: 4px;
+    background: #1A1A2E;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .match-score__fill {
+    height: 100%;
+    background: linear-gradient(90deg, #FF2D9B, #FFD700);
+    border-radius: 2px;
+  }
+  .match-score__value {
+    font-family: 'Fira Code', monospace;
+    font-size: 14px; font-weight: 700;
+    color: #FFD700;
+  }
+
+  .product-card__reason {
+    font-size: 12px;
+    color: #D0D0E0;
+    line-height: 1.5;
+    margin-bottom: 12px;
+    flex: 1;
+  }
+
+  .product-card__links {
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+  }
+  .buy-link {
+    font-family: 'Fira Code', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 6px 14px;
+    border-radius: 6px;
+    text-decoration: none;
+    text-align: center;
+    flex: 1;
+  }
+  .buy-link--amazon {
+    color: #FFD700;
+    background: rgba(255, 215, 0, 0.08);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+  }
+  .buy-link--oliveyoung {
+    color: #4ADE80;
+    background: rgba(74, 222, 128, 0.08);
+    border: 1px solid rgba(74, 222, 128, 0.2);
+  }
+
+  .product-card__price {
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    color: #8B8BA3;
+    margin-top: 8px;
+    text-align: right;
+  }
+
+  /* 하단 총 견적 */
+  .total-section {
+    position: relative; z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 45, 155, 0.04);
+    border: 1px solid rgba(255, 45, 155, 0.1);
+    border-radius: 10px;
+    padding: 18px 24px;
+    margin-top: 20px;
+  }
+  .total-section__label {
+    font-family: 'Fira Code', monospace;
+    font-size: 12px; color: #8B8BA3;
+    letter-spacing: 2px; text-transform: uppercase;
+  }
+  .total-section__value {
+    font-family: 'Fira Code', monospace;
+    font-size: 20px; font-weight: 700;
+    color: #FF2D9B;
+  }
+  .total-section__note {
+    font-size: 11px; color: #8B8BA3;
+  }
+
+  .page-number { position:absolute;bottom:28px;right:56px;font-family:'Fira Code',monospace;font-size:11px;color:#8B8BA3;z-index:1; }
+</style>
+</head>
+<body style="background:#000;display:flex;justify-content:center;padding:40px;">
+
+<div class="page">
+  <div class="bg-glow bg-glow--1"></div>
+
+  <div class="page-header">
+    <span class="page-header__section">06 — Product Curation</span>
+    <span class="page-header__case">Case #{{analysis_id}}</span>
+  </div>
+
+  <div class="section-title">
+    <div class="section-title__number">SECTION 06</div>
+    <div class="section-title__text">Product Curation</div>
+    <div class="section-title__desc">AI-matched products for your skin profile and target vibe, scored by ingredient compatibility and style fit.</div>
+  </div>
+
+  <div class="products-grid">
+
+    <!-- Product 1 -->
+    <div class="product-card">
+      <div class="product-card__top">
+        <div class="product-card__image">PRODUCT<br>IMAGE</div>
+        <div class="product-card__info">
+          <div class="product-card__category">Base</div>
+          <div class="product-card__name">{{product1_name}}</div>
+          <div class="product-card__brand">{{product1_brand}}</div>
+        </div>
+      </div>
+      <div class="match-score">
+        <span class="match-score__label">Match</span>
+        <div class="match-score__bar"><div class="match-score__fill" style="width:{{product1_score}}%"></div></div>
+        <span class="match-score__value">{{product1_score}}</span>
+      </div>
+      <div class="product-card__reason">{{product1_reason}}</div>
+      <div class="product-card__links">
+        <a href="#" class="buy-link buy-link--amazon">Amazon</a>
+        <a href="#" class="buy-link buy-link--oliveyoung">Olive Young</a>
+      </div>
+      <div class="product-card__price">{{product1_price}}</div>
+    </div>
+
+    <!-- Product 2 -->
+    <div class="product-card">
+      <div class="product-card__top">
+        <div class="product-card__image">PRODUCT<br>IMAGE</div>
+        <div class="product-card__info">
+          <div class="product-card__category">Eye</div>
+          <div class="product-card__name">{{product2_name}}</div>
+          <div class="product-card__brand">{{product2_brand}}</div>
+        </div>
+      </div>
+      <div class="match-score">
+        <span class="match-score__label">Match</span>
+        <div class="match-score__bar"><div class="match-score__fill" style="width:{{product2_score}}%"></div></div>
+        <span class="match-score__value">{{product2_score}}</span>
+      </div>
+      <div class="product-card__reason">{{product2_reason}}</div>
+      <div class="product-card__links">
+        <a href="#" class="buy-link buy-link--amazon">Amazon</a>
+        <a href="#" class="buy-link buy-link--oliveyoung">Olive Young</a>
+      </div>
+      <div class="product-card__price">{{product2_price}}</div>
+    </div>
+
+    <!-- Product 3 -->
+    <div class="product-card">
+      <div class="product-card__top">
+        <div class="product-card__image">PRODUCT<br>IMAGE</div>
+        <div class="product-card__info">
+          <div class="product-card__category">Lip</div>
+          <div class="product-card__name">{{product3_name}}</div>
+          <div class="product-card__brand">{{product3_brand}}</div>
+        </div>
+      </div>
+      <div class="match-score">
+        <span class="match-score__label">Match</span>
+        <div class="match-score__bar"><div class="match-score__fill" style="width:{{product3_score}}%"></div></div>
+        <span class="match-score__value">{{product3_score}}</span>
+      </div>
+      <div class="product-card__reason">{{product3_reason}}</div>
+      <div class="product-card__links">
+        <a href="#" class="buy-link buy-link--amazon">Amazon</a>
+        <a href="#" class="buy-link buy-link--oliveyoung">Olive Young</a>
+      </div>
+      <div class="product-card__price">{{product3_price}}</div>
+    </div>
+
+    <!-- Product 4 -->
+    <div class="product-card">
+      <div class="product-card__top">
+        <div class="product-card__image">PRODUCT<br>IMAGE</div>
+        <div class="product-card__info">
+          <div class="product-card__category">Skincare</div>
+          <div class="product-card__name">{{product4_name}}</div>
+          <div class="product-card__brand">{{product4_brand}}</div>
+        </div>
+      </div>
+      <div class="match-score">
+        <span class="match-score__label">Match</span>
+        <div class="match-score__bar"><div class="match-score__fill" style="width:{{product4_score}}%"></div></div>
+        <span class="match-score__value">{{product4_score}}</span>
+      </div>
+      <div class="product-card__reason">{{product4_reason}}</div>
+      <div class="product-card__links">
+        <a href="#" class="buy-link buy-link--amazon">Amazon</a>
+        <a href="#" class="buy-link buy-link--oliveyoung">Olive Young</a>
+      </div>
+      <div class="product-card__price">{{product4_price}}</div>
+    </div>
+
+  </div>
+
+  <div class="total-section">
+    <div>
+      <div class="total-section__label">Full Kit Estimate</div>
+      <div class="total-section__note">Based on lowest available prices</div>
+    </div>
+    <div class="total-section__value">{{total_price}}</div>
+  </div>
+
+  <div class="page-number">06</div>
+</div>
+
+</body>
+</html>

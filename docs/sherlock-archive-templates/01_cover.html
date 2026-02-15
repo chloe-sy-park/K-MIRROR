@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SHERLOCK ARCHIVE — Cover</title>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  .page {
+    width: 794px; /* A4 at 96dpi */
+    height: 1123px;
+    background: #0A0A1A;
+    color: #F0F0F0;
+    font-family: 'Inter', sans-serif;
+    position: relative;
+    overflow: hidden;
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 배경 글로우 */
+  .bg-glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(160px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .bg-glow--1 {
+    width: 500px; height: 500px;
+    background: #FF2D9B;
+    top: -150px; right: -100px;
+    opacity: 0.12;
+  }
+  .bg-glow--2 {
+    width: 400px; height: 400px;
+    background: #00D4FF;
+    bottom: 100px; left: -150px;
+    opacity: 0.06;
+  }
+
+  /* 상단 바 */
+  .top-bar {
+    position: relative; z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 45, 155, 0.2);
+    margin-bottom: 48px;
+  }
+  .top-bar__brand {
+    font-family: 'Fira Code', monospace;
+    font-size: 13px;
+    color: #8B8BA3;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+  .top-bar__classified {
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    color: #FF2D9B;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border: 1px solid rgba(255, 45, 155, 0.3);
+    border-radius: 4px;
+  }
+
+  /* 메인 타이틀 */
+  .title-section {
+    position: relative; z-index: 1;
+    margin-bottom: 40px;
+  }
+  .title-section__the {
+    font-family: 'Fira Code', monospace;
+    font-size: 14px;
+    color: #8B8BA3;
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .title-section__main {
+    font-size: 56px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+  .title-section__main span {
+    background: linear-gradient(135deg, #F0F0F0 30%, #FF2D9B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .title-section__sub {
+    font-family: 'Fira Code', monospace;
+    font-size: 16px;
+    color: #FF2D9B;
+    letter-spacing: 2px;
+  }
+
+  /* Before/After 이미지 영역 */
+  .image-area {
+    position: relative; z-index: 1;
+    display: flex;
+    gap: 20px;
+    margin-bottom: 36px;
+    flex: 1;
+    max-height: 380px;
+  }
+  .image-frame {
+    flex: 1;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    background: #1A1A2E;
+    border: 1px solid rgba(255, 45, 155, 0.1);
+  }
+  .image-frame img { width: 100%; height: 100%; object-fit: cover; }
+  .image-frame__label {
+    position: absolute;
+    top: 12px; left: 16px;
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #8B8BA3;
+  }
+  .image-frame--after .image-frame__label { color: #FF2D9B; }
+  .image-frame--after { border-color: rgba(255, 45, 155, 0.25); }
+
+  /* 레이더 차트 영역 (중앙) */
+  .radar-area {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 160px;
+    height: 160px;
+    background: rgba(10, 10, 26, 0.85);
+    border: 1px solid rgba(255, 45, 155, 0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    backdrop-filter: blur(8px);
+  }
+  .radar-area__placeholder {
+    font-family: 'Fira Code', monospace;
+    font-size: 10px;
+    color: #8B8BA3;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  /* 정보 그리드 */
+  .info-grid {
+    position: relative; z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 32px;
+    margin-bottom: 36px;
+    padding: 28px 32px;
+    background: rgba(26, 26, 46, 0.5);
+    border: 1px solid rgba(139, 139, 163, 0.08);
+    border-radius: 12px;
+  }
+  .info-item__label {
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    color: #8B8BA3;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .info-item__value {
+    font-size: 20px;
+    font-weight: 600;
+    color: #F0F0F0;
+  }
+  .info-item__value--accent {
+    color: #FF2D9B;
+  }
+  .info-item__value--large {
+    font-family: 'Fira Code', monospace;
+    font-size: 36px;
+    font-weight: 700;
+    color: #FF2D9B;
+  }
+
+  /* 하단 */
+  .cover-footer {
+    position: relative; z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid rgba(139, 139, 163, 0.1);
+  }
+  .cover-footer__left {
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    color: #8B8BA3;
+    letter-spacing: 1px;
+    line-height: 1.8;
+  }
+  .cover-footer__right {
+    text-align: right;
+  }
+  .cover-footer__logo {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #F0F0F0;
+    margin-bottom: 2px;
+  }
+  .cover-footer__collab {
+    font-family: 'Fira Code', monospace;
+    font-size: 10px;
+    color: #8B8BA3;
+    letter-spacing: 2px;
+  }
+</style>
+</head>
+<body style="background:#000;display:flex;justify-content:center;padding:40px;">
+
+<div class="page">
+  <div class="bg-glow bg-glow--1"></div>
+  <div class="bg-glow bg-glow--2"></div>
+
+  <!-- 상단 바 -->
+  <div class="top-bar">
+    <span class="top-bar__brand">K-Mirror Archive</span>
+    <span class="top-bar__classified">Classified : Personal</span>
+  </div>
+
+  <!-- 타이틀 -->
+  <div class="title-section">
+    <div class="title-section__the">The</div>
+    <div class="title-section__main"><span>Sherlock<br>Archive</span></div>
+    <div class="title-section__sub">Case No. #{{analysis_id}}</div>
+  </div>
+
+  <!-- Before / After + 레이더 차트 -->
+  <div class="image-area">
+    <div class="image-frame image-frame--before">
+      <span class="image-frame__label">Before</span>
+      <!-- {{before_image}} -->
+      <div style="width:100%;height:100%;background:linear-gradient(135deg,#1A1A2E,#252540);display:flex;align-items:center;justify-content:center;color:#8B8BA3;font-family:'Fira Code',monospace;font-size:12px;">BEFORE</div>
+    </div>
+
+    <div class="radar-area">
+      <div class="radar-area__placeholder">RADAR<br>CHART<br>{{match_rate}}%</div>
+      <!-- {{radar_chart_svg}} -->
+    </div>
+
+    <div class="image-frame image-frame--after">
+      <span class="image-frame__label">After</span>
+      <!-- {{after_image}} -->
+      <div style="width:100%;height:100%;background:linear-gradient(135deg,#1A1A2E,#3A1A3E);display:flex;align-items:center;justify-content:center;color:#FF2D9B;font-family:'Fira Code',monospace;font-size:12px;">AFTER</div>
+    </div>
+  </div>
+
+  <!-- 정보 그리드 -->
+  <div class="info-grid">
+    <div class="info-item">
+      <div class="info-item__label">Subject</div>
+      <div class="info-item__value">{{user_name}}</div>
+    </div>
+    <div class="info-item">
+      <div class="info-item__label">Target Vibe</div>
+      <div class="info-item__value info-item__value--accent">{{celeb_name}}</div>
+    </div>
+    <div class="info-item">
+      <div class="info-item__label">Date</div>
+      <div class="info-item__value">{{date}}</div>
+    </div>
+    <div class="info-item">
+      <div class="info-item__label">Overall Match</div>
+      <div class="info-item__value--large">{{match_rate}}%</div>
+    </div>
+  </div>
+
+  <!-- 하단 -->
+  <div class="cover-footer">
+    <div class="cover-footer__left">
+      Skin Type: {{skin_type}}<br>
+      Melanin: {{melanin_level}}<br>
+      Undertone: {{undertone}}
+    </div>
+    <div class="cover-footer__right">
+      <div class="cover-footer__logo">K-MIRROR</div>
+      <div class="cover-footer__collab">× PONY SYNDROME</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

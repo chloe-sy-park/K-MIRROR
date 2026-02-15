@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SHERLOCK ARCHIVE — 5 Metrics Deep Dive</title>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  .page {
+    width: 794px;
+    height: 1123px;
+    background: #0A0A1A;
+    color: #F0F0F0;
+    font-family: 'Inter', sans-serif;
+    position: relative;
+    overflow: hidden;
+    padding: 48px 56px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .bg-glow {
+    position: absolute; border-radius: 50%;
+    filter: blur(160px); pointer-events: none; z-index: 0;
+  }
+  .bg-glow--1 { width:350px;height:350px;background:#FF2D9B;top:300px;right:-80px;opacity:0.08; }
+
+  .page-header {
+    position: relative; z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(139, 139, 163, 0.1);
+    margin-bottom: 32px;
+  }
+  .page-header__section {
+    font-family: 'Fira Code', monospace;
+    font-size: 11px; color: #FF2D9B;
+    letter-spacing: 3px; text-transform: uppercase;
+  }
+  .page-header__case {
+    font-family: 'Fira Code', monospace;
+    font-size: 11px; color: #8B8BA3; letter-spacing: 2px;
+  }
+
+  .section-title {
+    position: relative; z-index: 1;
+    margin-bottom: 28px;
+  }
+  .section-title__number {
+    font-family: 'Fira Code', monospace;
+    font-size: 12px; color: #FF2D9B;
+    letter-spacing: 4px; margin-bottom: 8px;
+  }
+  .section-title__text {
+    font-size: 28px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+  }
+
+  /* 레이더 차트 영역 */
+  .radar-section {
+    position: relative; z-index: 1;
+    display: flex;
+    gap: 28px;
+    margin-bottom: 28px;
+    align-items: center;
+  }
+  .radar-chart-container {
+    width: 280px;
+    height: 280px;
+    background: rgba(26, 26, 46, 0.4);
+    border: 1px solid rgba(139, 139, 163, 0.06);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .radar-chart-container__placeholder {
+    font-family: 'Fira Code', monospace;
+    font-size: 11px; color: #8B8BA3;
+    text-align: center; line-height: 1.6;
+  }
+
+  .radar-legend {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .legend-dot--user { background: #FF2D9B; }
+  .legend-dot--celeb { background: #FFD700; }
+  .legend-label {
+    font-size: 14px; color: #8B8BA3;
+  }
+  .legend-label strong { color: #F0F0F0; font-weight: 600; }
+
+  /* 5 Metrics 상세 카드들 */
+  .metrics-grid {
+    position: relative; z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    flex: 1;
+  }
+
+  .metric-card {
+    display: flex;
+    align-items: stretch;
+    background: rgba(26, 26, 46, 0.5);
+    border: 1px solid rgba(139, 139, 163, 0.06);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .metric-card__icon {
+    width: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .metric-card__icon--vw { background: rgba(255, 45, 155, 0.08); }
+  .metric-card__icon--ct { background: rgba(0, 212, 255, 0.08); }
+  .metric-card__icon--mf { background: rgba(255, 215, 0, 0.08); }
+  .metric-card__icon--ls { background: rgba(150, 255, 150, 0.08); }
+  .metric-card__icon--hi { background: rgba(180, 130, 255, 0.08); }
+
+  .metric-card__body {
+    flex: 1;
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .metric-card__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .metric-card__name {
+    font-family: 'Fira Code', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: #F0F0F0;
+    letter-spacing: 1px;
+  }
+  .metric-card__scores {
+    font-family: 'Fira Code', monospace;
+    font-size: 13px;
+    color: #8B8BA3;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .metric-card__user-score { color: #FF2D9B; font-weight: 600; }
+  .metric-card__celeb-score { color: #FFD700; font-weight: 600; }
+  .metric-card__arrow { color: #8B8BA3; font-size: 11px; }
+
+  /* Gap 바 */
+  .gap-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .gap-bar__track {
+    flex: 1;
+    height: 4px;
+    background: #1A1A2E;
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+  }
+  .gap-bar__fill-user {
+    position: absolute;
+    left: 0; top: 0; height: 100%;
+    background: #FF2D9B;
+    border-radius: 2px;
+    /* width: 동적 */
+  }
+  .gap-bar__fill-celeb {
+    position: absolute;
+    left: 0; top: 0; height: 100%;
+    background: rgba(255, 215, 0, 0.3);
+    border-radius: 2px;
+    /* width: 동적 */
+  }
+  .gap-bar__delta {
+    font-family: 'Fira Code', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: #00D4FF;
+    white-space: nowrap;
+    min-width: 48px;
+    text-align: right;
+  }
+
+  .metric-card__difficulty {
+    font-family: 'Fira Code', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    width: fit-content;
+  }
+  .metric-card__difficulty--easy {
+    color: #4ADE80; background: rgba(74, 222, 128, 0.08);
+  }
+  .metric-card__difficulty--moderate {
+    color: #FFD700; background: rgba(255, 215, 0, 0.08);
+  }
+  .metric-card__difficulty--hard {
+    color: #FF6B6B; background: rgba(255, 107, 107, 0.08);
+  }
+
+  /* 하단 요약 */
+  .metrics-summary {
+    position: relative; z-index: 1;
+    display: flex;
+    gap: 16px;
+    margin-top: auto;
+    padding-top: 20px;
+  }
+  .summary-box {
+    flex: 1;
+    background: rgba(26, 26, 46, 0.5);
+    border: 1px solid rgba(139, 139, 163, 0.06);
+    border-radius: 10px;
+    padding: 16px 20px;
+    text-align: center;
+  }
+  .summary-box__label {
+    font-family: 'Fira Code', monospace;
+    font-size: 10px; color: #8B8BA3;
+    letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .summary-box__value {
+    font-family: 'Fira Code', monospace;
+    font-size: 24px; font-weight: 700;
+  }
+  .summary-box__value--pink { color: #FF2D9B; }
+  .summary-box__value--blue { color: #00D4FF; }
+  .summary-box__value--gold { color: #FFD700; }
+
+  .page-number {
+    position: absolute;
+    bottom: 28px; right: 56px;
+    font-family: 'Fira Code', monospace;
+    font-size: 11px; color: #8B8BA3; z-index: 1;
+  }
+</style>
+</head>
+<body style="background:#000;display:flex;justify-content:center;padding:40px;">
+
+<div class="page">
+  <div class="bg-glow bg-glow--1"></div>
+
+  <div class="page-header">
+    <span class="page-header__section">03 — 5 Metrics Deep Dive</span>
+    <span class="page-header__case">Case #{{analysis_id}}</span>
+  </div>
+
+  <div class="section-title">
+    <div class="section-title__number">SECTION 03</div>
+    <div class="section-title__text">5 Metrics Deep Dive</div>
+  </div>
+
+  <!-- 레이더 차트 + 범례 -->
+  <div class="radar-section">
+    <div class="radar-chart-container">
+      <!-- {{radar_chart_svg}} — Chart.js/D3로 생성 후 삽입 -->
+      <div class="radar-chart-container__placeholder">
+        RADAR CHART<br><br>
+        <span style="color:#FF2D9B;">■</span> You<br>
+        <span style="color:#FFD700;">■</span> {{celeb_name}}
+      </div>
+    </div>
+    <div class="radar-legend">
+      <div class="legend-item">
+        <div class="legend-dot legend-dot--user"></div>
+        <span class="legend-label"><strong>You</strong> — Current state</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot legend-dot--celeb"></div>
+        <span class="legend-label"><strong>{{celeb_name}}</strong> — Target vibe</span>
+      </div>
+      <div style="margin-top:8px;font-size:13px;color:#8B8BA3;line-height:1.6;">
+        The gap between the two shapes represents your transformation potential.
+        Larger gaps = more dramatic change possible.
+      </div>
+    </div>
+  </div>
+
+  <!-- 5 Metric 카드 -->
+  <div class="metrics-grid">
+
+    <!-- Visual Weight -->
+    <div class="metric-card">
+      <div class="metric-card__icon metric-card__icon--vw">⚖️</div>
+      <div class="metric-card__body">
+        <div class="metric-card__top">
+          <span class="metric-card__name">VISUAL WEIGHT</span>
+          <span class="metric-card__scores">
+            <span class="metric-card__user-score">{{vw_user}}</span>
+            <span class="metric-card__arrow">→</span>
+            <span class="metric-card__celeb-score">{{vw_celeb}}</span>
+          </span>
+        </div>
+        <div class="gap-bar">
+          <div class="gap-bar__track">
+            <div class="gap-bar__fill-celeb" style="width: {{vw_celeb}}%"></div>
+            <div class="gap-bar__fill-user" style="width: {{vw_user}}%"></div>
+          </div>
+          <span class="gap-bar__delta">+{{vw_gap}}</span>
+        </div>
+        <span class="metric-card__difficulty metric-card__difficulty--easy">Easy</span>
+      </div>
+    </div>
+
+    <!-- Canthal Tilt -->
+    <div class="metric-card">
+      <div class="metric-card__icon metric-card__icon--ct">👁</div>
+      <div class="metric-card__body">
+        <div class="metric-card__top">
+          <span class="metric-card__name">CANTHAL TILT</span>
+          <span class="metric-card__scores">
+            <span class="metric-card__user-score">{{ct_user}}°</span>
+            <span class="metric-card__arrow">→</span>
+            <span class="metric-card__celeb-score">{{ct_celeb}}°</span>
+          </span>
+        </div>
+        <div class="gap-bar">
+          <div class="gap-bar__track">
+            <div class="gap-bar__fill-celeb" style="width: {{ct_celeb_norm}}%"></div>
+            <div class="gap-bar__fill-user" style="width: {{ct_user_norm}}%"></div>
+          </div>
+          <span class="gap-bar__delta">+{{ct_gap}}°</span>
+        </div>
+        <span class="metric-card__difficulty metric-card__difficulty--moderate">Moderate</span>
+      </div>
+    </div>
+
+    <!-- Mid-face Ratio -->
+    <div class="metric-card">
+      <div class="metric-card__icon metric-card__icon--mf">📐</div>
+      <div class="metric-card__body">
+        <div class="metric-card__top">
+          <span class="metric-card__name">MID-FACE RATIO</span>
+          <span class="metric-card__scores">
+            <span class="metric-card__user-score">{{mf_user}}%</span>
+            <span class="metric-card__arrow">→</span>
+            <span class="metric-card__celeb-score">{{mf_celeb}}%</span>
+          </span>
+        </div>
+        <div class="gap-bar">
+          <div class="gap-bar__track">
+            <div class="gap-bar__fill-celeb" style="width: {{mf_celeb}}%"></div>
+            <div class="gap-bar__fill-user" style="width: {{mf_user}}%"></div>
+          </div>
+          <span class="gap-bar__delta">{{mf_gap}}%</span>
+        </div>
+        <span class="metric-card__difficulty metric-card__difficulty--hard">Hard</span>
+      </div>
+    </div>
+
+    <!-- Luminosity Score -->
+    <div class="metric-card">
+      <div class="metric-card__icon metric-card__icon--ls">✨</div>
+      <div class="metric-card__body">
+        <div class="metric-card__top">
+          <span class="metric-card__name">LUMINOSITY</span>
+          <span class="metric-card__scores">
+            <span class="metric-card__user-score">{{ls_user}}</span>
+            <span class="metric-card__arrow">→</span>
+            <span class="metric-card__celeb-score">{{ls_celeb}}</span>
+          </span>
+        </div>
+        <div class="gap-bar">
+          <div class="gap-bar__track">
+            <div class="gap-bar__fill-celeb" style="width: {{ls_celeb}}%"></div>
+            <div class="gap-bar__fill-user" style="width: {{ls_user}}%"></div>
+          </div>
+          <span class="gap-bar__delta">+{{ls_gap}}</span>
+        </div>
+        <span class="metric-card__difficulty metric-card__difficulty--easy">Easy</span>
+      </div>
+    </div>
+
+    <!-- Harmony Index -->
+    <div class="metric-card">
+      <div class="metric-card__icon metric-card__icon--hi">🎯</div>
+      <div class="metric-card__body">
+        <div class="metric-card__top">
+          <span class="metric-card__name">HARMONY INDEX</span>
+          <span class="metric-card__scores">
+            <span class="metric-card__user-score">{{hi_user}}</span>
+            <span class="metric-card__arrow">→</span>
+            <span class="metric-card__celeb-score">{{hi_celeb}}</span>
+          </span>
+        </div>
+        <div class="gap-bar">
+          <div class="gap-bar__track">
+            <div class="gap-bar__fill-celeb" style="width: {{hi_celeb}}%"></div>
+            <div class="gap-bar__fill-user" style="width: {{hi_user}}%"></div>
+          </div>
+          <span class="gap-bar__delta">+{{hi_gap}}</span>
+        </div>
+        <span class="metric-card__difficulty metric-card__difficulty--moderate">Moderate</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 하단 요약 -->
+  <div class="metrics-summary">
+    <div class="summary-box">
+      <div class="summary-box__label">Current Match</div>
+      <div class="summary-box__value summary-box__value--pink">{{match_rate}}%</div>
+    </div>
+    <div class="summary-box">
+      <div class="summary-box__label">After K-Glow</div>
+      <div class="summary-box__value summary-box__value--blue">{{estimated_post}}%</div>
+    </div>
+    <div class="summary-box">
+      <div class="summary-box__label">Top Priority</div>
+      <div class="summary-box__value summary-box__value--gold" style="font-size:16px;">{{top_priority}}</div>
+    </div>
+  </div>
+
+  <div class="page-number">03</div>
+</div>
+
+</body>
+</html>

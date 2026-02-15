@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SHERLOCK ARCHIVE — K-Translation</title>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  .page {
+    width: 794px; height: 1123px;
+    background: #0A0A1A; color: #F0F0F0;
+    font-family: 'Inter', sans-serif;
+    position: relative; overflow: hidden;
+    padding: 48px 56px;
+    display: flex; flex-direction: column;
+  }
+  .bg-glow { position:absolute;border-radius:50%;filter:blur(160px);pointer-events:none;z-index:0; }
+  .bg-glow--1 { width:400px;height:400px;background:#00D4FF;top:50%;left:-120px;opacity:0.05; }
+  .page-header { position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;padding-bottom:16px;border-bottom:1px solid rgba(139,139,163,0.1);margin-bottom:32px; }
+  .page-header__section { font-family:'Fira Code',monospace;font-size:11px;color:#FF2D9B;letter-spacing:3px;text-transform:uppercase; }
+  .page-header__case { font-family:'Fira Code',monospace;font-size:11px;color:#8B8BA3;letter-spacing:2px; }
+  .section-title { position:relative;z-index:1;margin-bottom:28px; }
+  .section-title__number { font-family:'Fira Code',monospace;font-size:12px;color:#FF2D9B;letter-spacing:4px;margin-bottom:8px; }
+  .section-title__text { font-size:28px;font-weight:700;letter-spacing:2px;text-transform:uppercase; }
+  .section-title__desc { font-size:14px;color:#8B8BA3;margin-top:8px;line-height:1.5; }
+
+  /* 비교 테이블 */
+  .comparison-table {
+    position: relative; z-index: 1;
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 28px;
+  }
+  .comparison-table th {
+    font-family: 'Fira Code', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 14px 20px;
+    text-align: left;
+  }
+  .comparison-table th:first-child {
+    color: #8B8BA3;
+    width: 160px;
+  }
+  .comparison-table th:nth-child(2) {
+    color: #8B8BA3;
+    background: rgba(139, 139, 163, 0.05);
+    border-radius: 8px 0 0 0;
+  }
+  .comparison-table th:nth-child(3) {
+    color: #FF2D9B;
+    background: rgba(255, 45, 155, 0.05);
+    border-radius: 0 8px 0 0;
+  }
+  .comparison-table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(139, 139, 163, 0.06);
+    vertical-align: top;
+  }
+  .comparison-table td:first-child {
+    font-family: 'Fira Code', monospace;
+    font-size: 12px;
+    color: #8B8BA3;
+    letter-spacing: 1px;
+    font-weight: 500;
+  }
+  .comparison-table td:nth-child(2) {
+    background: rgba(139, 139, 163, 0.03);
+    font-size: 14px;
+    color: #D0D0E0;
+    line-height: 1.5;
+  }
+  .comparison-table td:nth-child(3) {
+    background: rgba(255, 45, 155, 0.02);
+    font-size: 14px;
+    color: #F0F0F0;
+    line-height: 1.5;
+  }
+  .comparison-table tr:last-child td { border-bottom: none; }
+
+  .k-tag {
+    display: inline-block;
+    font-family: 'Fira Code', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-top: 6px;
+  }
+  .k-tag--western { color: #8B8BA3; background: rgba(139,139,163,0.1); }
+  .k-tag--kbeauty { color: #FF2D9B; background: rgba(255,45,155,0.1); }
+
+  /* 당신의 위치 */
+  .position-section {
+    position: relative; z-index: 1;
+    background: rgba(26, 26, 46, 0.5);
+    border: 1px solid rgba(139, 139, 163, 0.06);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+  }
+  .position-section__title {
+    font-family: 'Fira Code', monospace;
+    font-size: 12px; color: #FF2D9B;
+    letter-spacing: 3px; text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  /* 스펙트럼 바 */
+  .spectrum {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+  .spectrum__label {
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    color: #8B8BA3;
+    width: 80px;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+  .spectrum__bar {
+    flex: 1;
+    height: 8px;
+    background: linear-gradient(90deg, #8B8BA3, #FF2D9B);
+    border-radius: 4px;
+    position: relative;
+  }
+  .spectrum__marker {
+    position: absolute;
+    top: -6px;
+    width: 20px; height: 20px;
+    background: #F0F0F0;
+    border: 3px solid #FF2D9B;
+    border-radius: 50%;
+    transform: translateX(-50%);
+    /* left: 동적으로 설정 */
+  }
+  .spectrum__text {
+    font-size: 14px;
+    color: #D0D0E0;
+    line-height: 1.6;
+    margin-top: 8px;
+  }
+
+  /* 변환 필요 사항 */
+  .translation-needs {
+    position: relative; z-index: 1;
+    display: flex;
+    gap: 16px;
+    margin-top: auto;
+  }
+  .need-card {
+    flex: 1;
+    background: rgba(26, 26, 46, 0.5);
+    border: 1px solid rgba(139, 139, 163, 0.06);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .need-card__number {
+    font-family: 'Fira Code', monospace;
+    font-size: 24px; font-weight: 700;
+    color: #FF2D9B;
+    margin-bottom: 6px;
+  }
+  .need-card__title {
+    font-family: 'Fira Code', monospace;
+    font-size: 11px; color: #8B8BA3;
+    letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .need-card__text {
+    font-size: 13px;
+    color: #D0D0E0;
+    line-height: 1.5;
+  }
+
+  .page-number { position:absolute;bottom:28px;right:56px;font-family:'Fira Code',monospace;font-size:11px;color:#8B8BA3;z-index:1; }
+</style>
+</head>
+<body style="background:#000;display:flex;justify-content:center;padding:40px;">
+
+<div class="page">
+  <div class="bg-glow bg-glow--1"></div>
+
+  <div class="page-header">
+    <span class="page-header__section">04 — K-Translation</span>
+    <span class="page-header__case">Case #{{analysis_id}}</span>
+  </div>
+
+  <div class="section-title">
+    <div class="section-title__number">SECTION 04</div>
+    <div class="section-title__text">K-Translation</div>
+    <div class="section-title__desc">How K-beauty techniques translate to your features — the bridge between Western beauty norms and Korean makeup philosophy.</div>
+  </div>
+
+  <!-- 비교 테이블 -->
+  <table class="comparison-table">
+    <thead>
+      <tr>
+        <th>Area</th>
+        <th>Western Approach</th>
+        <th>K-Beauty Approach</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>BASE</td>
+        <td>Sculpt & contour<br>Matte finish, full coverage<br><span class="k-tag k-tag--western">SUBTRACT</span></td>
+        <td>Light & luminous<br>Dewy finish, buildable<br><span class="k-tag k-tag--kbeauty">ADD LIGHT</span></td>
+      </tr>
+      <tr>
+        <td>EYES</td>
+        <td>Bold shadow, sharp edges<br>Heavy liner, defined crease<br><span class="k-tag k-tag--western">DEFINE</span></td>
+        <td>Gradient blur, soft edges<br>Smudged liner, blended crease<br><span class="k-tag k-tag--kbeauty">DIFFUSE</span></td>
+      </tr>
+      <tr>
+        <td>LIPS</td>
+        <td>Full coverage, lip liner<br>Matte, overlined<br><span class="k-tag k-tag--western">FILL</span></td>
+        <td>Gradient from center<br>Blurred edge, tinted<br><span class="k-tag k-tag--kbeauty">BLUR</span></td>
+      </tr>
+      <tr>
+        <td>CHEEKS</td>
+        <td>Below cheekbone contour<br>Structured blush placement<br><span class="k-tag k-tag--western">SCULPT</span></td>
+        <td>Apple of cheek, nose bridge<br>Diffused, natural flush<br><span class="k-tag k-tag--kbeauty">FLUSH</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 당신의 위치 -->
+  <div class="position-section">
+    <div class="position-section__title">Your Current Position</div>
+    <div class="spectrum">
+      <span class="spectrum__label">WESTERN</span>
+      <div class="spectrum__bar">
+        <div class="spectrum__marker" style="left: {{k_position}}%"></div>
+      </div>
+      <span class="spectrum__label">K-BEAUTY</span>
+    </div>
+    <p class="spectrum__text">
+      {{k_translation_comment}}
+    </p>
+  </div>
+
+  <!-- K-Translation 필요 사항 -->
+  <div class="translation-needs">
+    <div class="need-card">
+      <div class="need-card__number">01</div>
+      <div class="need-card__title">Base Shift</div>
+      <div class="need-card__text">{{base_shift_text}}</div>
+    </div>
+    <div class="need-card">
+      <div class="need-card__number">02</div>
+      <div class="need-card__title">Eye Shift</div>
+      <div class="need-card__text">{{eye_shift_text}}</div>
+    </div>
+    <div class="need-card">
+      <div class="need-card__number">03</div>
+      <div class="need-card__title">Lip Shift</div>
+      <div class="need-card__text">{{lip_shift_text}}</div>
+    </div>
+  </div>
+
+  <div class="page-number">04</div>
+</div>
+
+</body>
+</html>

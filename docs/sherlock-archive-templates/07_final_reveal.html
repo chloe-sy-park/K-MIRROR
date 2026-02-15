@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SHERLOCK ARCHIVE — Final Reveal</title>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  .page { width:794px;height:1123px;background:#0A0A1A;color:#F0F0F0;font-family:'Inter',sans-serif;position:relative;overflow:hidden;padding:48px 56px;display:flex;flex-direction:column; }
+  .bg-glow { position:absolute;border-radius:50%;filter:blur(160px);pointer-events:none;z-index:0; }
+  .bg-glow--1 { width:500px;height:500px;background:#FF2D9B;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.08; }
+  .bg-glow--2 { width:300px;height:300px;background:#00D4FF;top:-50px;left:-80px;opacity:0.05; }
+  .page-header { position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;padding-bottom:16px;border-bottom:1px solid rgba(139,139,163,0.1);margin-bottom:32px; }
+  .page-header__section { font-family:'Fira Code',monospace;font-size:11px;color:#FF2D9B;letter-spacing:3px;text-transform:uppercase; }
+  .page-header__case { font-family:'Fira Code',monospace;font-size:11px;color:#8B8BA3;letter-spacing:2px; }
+
+  /* 대형 타이틀 */
+  .final-title {
+    position: relative; z-index: 1;
+    text-align: center;
+    margin-bottom: 36px;
+  }
+  .final-title__text {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #F0F0F0, #FF2D9B);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .final-title__sub {
+    font-family: 'Fira Code', monospace;
+    font-size: 13px;
+    color: #8B8BA3;
+    letter-spacing: 2px;
+    margin-top: 8px;
+  }
+
+  /* 대형 Before/After */
+  .final-image {
+    position: relative; z-index: 1;
+    display: flex;
+    gap: 20px;
+    margin-bottom: 28px;
+    height: 360px;
+  }
+  .final-image__frame {
+    flex: 1;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    background: #1A1A2E;
+    border: 1px solid rgba(139,139,163,0.08);
+  }
+  .final-image__frame--after {
+    border-color: rgba(255, 45, 155, 0.25);
+  }
+  .final-image__frame img { width:100%;height:100%;object-fit:cover; }
+  .final-image__label {
+    position: absolute;
+    bottom: 12px; left: 16px;
+    font-family: 'Fira Code', monospace;
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 4px;
+  }
+  .final-image__label--before {
+    color: #8B8BA3;
+    background: rgba(10, 10, 26, 0.7);
+  }
+  .final-image__label--after {
+    color: #FF2D9B;
+    background: rgba(10, 10, 26, 0.7);
+    border: 1px solid rgba(255, 45, 155, 0.3);
+  }
+
+  /* 3 버전 미니 프리뷰 */
+  .versions-row {
+    position: relative; z-index: 1;
+    display: flex;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .version-mini {
+    flex: 1;
+    background: rgba(26, 26, 46, 0.5);
+    border: 1px solid rgba(139, 139, 163, 0.06);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .version-mini__image {
+    height: 100px;
+    background: #1A1A2E;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fira Code', monospace;
+    font-size: 10px;
+    color: #8B8BA3;
+  }
+  .version-mini__info {
+    padding: 12px 14px;
+  }
+  .version-mini__name {
+    font-family: 'Fira Code', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: #F0F0F0;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .version-mini__desc {
+    font-size: 11px;
+    color: #8B8BA3;
+  }
+
+  /* 최종 수치 요약 */
+  .final-stats {
+    position: relative; z-index: 1;
+    display: flex;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .stat-pill {
+    flex: 1;
+    text-align: center;
+    background: rgba(26, 26, 46, 0.5);
+    border: 1px solid rgba(139, 139, 163, 0.06);
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .stat-pill__value {
+    font-family: 'Fira Code', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .stat-pill__value--pink { color: #FF2D9B; }
+  .stat-pill__value--blue { color: #00D4FF; }
+  .stat-pill__value--gold { color: #FFD700; }
+  .stat-pill__value--green { color: #4ADE80; }
+  .stat-pill__label {
+    font-family: 'Fira Code', monospace;
+    font-size: 9px;
+    color: #8B8BA3;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* CTA + QR 푸터 */
+  .final-footer {
+    position: relative; z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding: 24px 28px;
+    background: linear-gradient(135deg, rgba(255, 45, 155, 0.06), rgba(0, 212, 255, 0.04));
+    border: 1px solid rgba(255, 45, 155, 0.15);
+    border-radius: 12px;
+  }
+  .final-footer__qr {
+    width: 80px; height: 80px;
+    background: #F0F0F0;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fira Code', monospace;
+    font-size: 9px;
+    color: #0A0A1A;
+  }
+  .final-footer__text {
+    flex: 1;
+    text-align: center;
+  }
+  .final-footer__cta {
+    font-size: 18px;
+    font-weight: 700;
+    color: #F0F0F0;
+    margin-bottom: 4px;
+  }
+  .final-footer__sub {
+    font-family: 'Fira Code', monospace;
+    font-size: 12px;
+    color: #8B8BA3;
+    letter-spacing: 1px;
+  }
+  .final-footer__brand {
+    text-align: right;
+  }
+  .final-footer__logo {
+    font-size: 16px;
+    font-weight: 700;
+    color: #F0F0F0;
+    letter-spacing: 2px;
+  }
+  .final-footer__case-stamp {
+    font-family: 'Fira Code', monospace;
+    font-size: 10px;
+    color: #FF2D9B;
+    letter-spacing: 2px;
+  }
+
+  .page-number { position:absolute;bottom:28px;right:56px;font-family:'Fira Code',monospace;font-size:11px;color:#8B8BA3;z-index:1; }
+</style>
+</head>
+<body style="background:#000;display:flex;justify-content:center;padding:40px;">
+
+<div class="page">
+  <div class="bg-glow bg-glow--1"></div>
+  <div class="bg-glow bg-glow--2"></div>
+
+  <div class="page-header">
+    <span class="page-header__section">07 — Final Reveal</span>
+    <span class="page-header__case">Case #{{analysis_id}}</span>
+  </div>
+
+  <div class="final-title">
+    <div class="final-title__text">Your K-Glow Transformation</div>
+    <div class="final-title__sub">The complete picture — before, after, and beyond</div>
+  </div>
+
+  <!-- 대형 Before / After -->
+  <div class="final-image">
+    <div class="final-image__frame">
+      <!-- {{before_image}} -->
+      <div style="width:100%;height:100%;background:linear-gradient(135deg,#1A1A2E,#252540);display:flex;align-items:center;justify-content:center;color:#8B8BA3;font-family:'Fira Code',monospace;font-size:12px;">BEFORE</div>
+      <span class="final-image__label final-image__label--before">Before</span>
+    </div>
+    <div class="final-image__frame final-image__frame--after">
+      <!-- {{after_image}} -->
+      <div style="width:100%;height:100%;background:linear-gradient(135deg,#1A1A2E,#3A1A3E);display:flex;align-items:center;justify-content:center;color:#FF2D9B;font-family:'Fira Code',monospace;font-size:12px;">AFTER</div>
+      <span class="final-image__label final-image__label--after">After</span>
+    </div>
+  </div>
+
+  <!-- Daily / Office / Glam -->
+  <div class="versions-row">
+    <div class="version-mini">
+      <div class="version-mini__image">DAILY</div>
+      <div class="version-mini__info">
+        <div class="version-mini__name">Daily</div>
+        <div class="version-mini__desc">Light, 5-minute routine</div>
+      </div>
+    </div>
+    <div class="version-mini">
+      <div class="version-mini__image">OFFICE</div>
+      <div class="version-mini__info">
+        <div class="version-mini__name">Office</div>
+        <div class="version-mini__desc">Polished, professional</div>
+      </div>
+    </div>
+    <div class="version-mini">
+      <div class="version-mini__image">GLAM</div>
+      <div class="version-mini__info">
+        <div class="version-mini__name">Glam</div>
+        <div class="version-mini__desc">Full {{celeb_name}} vibe</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 최종 수치 -->
+  <div class="final-stats">
+    <div class="stat-pill">
+      <div class="stat-pill__value stat-pill__value--pink">{{match_rate}}%</div>
+      <div class="stat-pill__label">Match Rate</div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-pill__value stat-pill__value--blue">{{estimated_post}}%</div>
+      <div class="stat-pill__label">Post-Glow</div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-pill__value stat-pill__value--gold">{{products_count}}</div>
+      <div class="stat-pill__label">Products</div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-pill__value stat-pill__value--green">{{steps_count}}</div>
+      <div class="stat-pill__label">Steps</div>
+    </div>
+  </div>
+
+  <!-- 공유 CTA -->
+  <div class="final-footer">
+    <div class="final-footer__qr">QR</div>
+    <div class="final-footer__text">
+      <div class="final-footer__cta">Share Your K-GLOW Card</div>
+      <div class="final-footer__sub">k-mirror.ai/report/{{analysis_id}}</div>
+    </div>
+    <div class="final-footer__brand">
+      <div class="final-footer__logo">K-MIRROR</div>
+      <div class="final-footer__case-stamp">Case #{{analysis_id}}</div>
+    </div>
+  </div>
+
+  <div class="page-number">07</div>
+</div>
+
+</body>
+</html>
