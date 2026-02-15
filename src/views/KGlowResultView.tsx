@@ -1,4 +1,4 @@
-import { useRef, useMemo } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import * as m from 'framer-motion/m';
@@ -7,6 +7,8 @@ import { containerVariants, itemVariants } from '@/constants/animations';
 import { useScanStore } from '@/store/scanStore';
 import KGlowCard from '@/components/kglow/KGlowCard';
 import SharePanel from '@/components/kglow/SharePanel';
+import RadarMetricsChart from '@/components/charts/RadarMetricsChart';
+import { normalizeMetrics, applyMetricsShift } from '@/components/charts/normalizeMetrics';
 
 const KGlowResultView = () => {
   const { t } = useTranslation();
@@ -19,6 +21,8 @@ const KGlowResultView = () => {
     result?.kMatch?.celebName ?? selectedCelebName ?? 'Unknown';
 
   const fiveMetrics = result?.fiveMetrics ?? null;
+  const styleVersions = result?.styleVersions ?? null;
+  const [activeVersion, setActiveVersion] = useState<'daily' | 'office' | 'glam'>('glam');
 
   const matchRate = useMemo(() => {
     if (!fiveMetrics) return 75;
@@ -88,6 +92,70 @@ const KGlowResultView = () => {
           celebName={celebName}
         />
       </m.div>
+
+      {/* Style Version Tabs */}
+      {styleVersions && (
+        <m.div variants={itemVariants} className="w-full max-w-md mt-8">
+          {/* Pill tabs */}
+          <div className="flex gap-2 mb-6">
+            {(['daily', 'office', 'glam'] as const).map((v) => (
+              <button
+                key={v}
+                onClick={() => setActiveVersion(v)}
+                className={`flex-1 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                  activeVersion === v
+                    ? 'bg-gradient-to-r from-[#FF4D8D] to-[#FF6B9D] text-white'
+                    : 'bg-white/10 text-white/50 hover:text-white/80'
+                }`}
+              >
+                {t(`styleVersions.${v}`)}
+              </button>
+            ))}
+          </div>
+
+          {/* Active version content */}
+          <div className="bg-[#1A1A2E] rounded-3xl border border-white/10 p-6">
+            <p className="text-[#FFD700] font-mono text-xs uppercase tracking-widest mb-4">
+              {t(`styleVersions.${activeVersion}Desc`)}
+            </p>
+
+            {/* Base / Eyes / Lips */}
+            {(['base', 'eyes', 'lips'] as const).map((area) => (
+              <div key={area} className="mb-4">
+                <h4 className="text-white/40 font-mono text-xs uppercase tracking-wider mb-1">
+                  {t(`styleVersions.${area}`)}
+                </h4>
+                <p className="text-white/80 text-sm">
+                  {styleVersions[activeVersion][area]}
+                </p>
+              </div>
+            ))}
+
+            {/* Key Products */}
+            <div className="flex flex-wrap gap-2 mt-4">
+              {styleVersions[activeVersion].keyProducts.map((p, i) => (
+                <span key={i} className="px-3 py-1 bg-[#00D4FF]/10 text-[#00D4FF] text-xs font-mono rounded-full">
+                  {p}
+                </span>
+              ))}
+            </div>
+
+            {/* Mini radar showing metrics shift */}
+            {fiveMetrics && (
+              <div className="mt-6 flex justify-center">
+                <RadarMetricsChart
+                  userMetrics={normalizeMetrics(fiveMetrics)}
+                  celebMetrics={applyMetricsShift(
+                    normalizeMetrics(fiveMetrics),
+                    styleVersions[activeVersion].metricsShift
+                  )}
+                  size={200}
+                />
+              </div>
+            )}
+          </div>
+        </m.div>
+      )}
 
       {/* CTA Buttons */}
       <m.div

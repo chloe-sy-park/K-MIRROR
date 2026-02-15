@@ -36,3 +36,16 @@ export function normalizeMetrics(fm: FiveMetrics): NormalizedMetrics {
 
   return { VW, CT, MF, LS, HI };
 }
+
+export function applyMetricsShift(
+  base: NormalizedMetrics,
+  shift: { VW: number; CT: number; MF: number; LS: number; HI: number },
+): NormalizedMetrics {
+  return {
+    VW: clamp(base.VW + shift.VW),
+    CT: clamp(base.CT + shift.CT),
+    MF: clamp(base.MF + shift.MF),
+    LS: clamp(base.LS + shift.LS),
+    HI: clamp(base.HI + shift.HI),
+  };
+}
