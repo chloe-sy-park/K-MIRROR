@@ -30,6 +30,9 @@ export default defineConfig(() => {
               { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
               { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
             ],
+            categories: ['beauty', 'lifestyle', 'health'],
+            lang: 'en',
+            dir: 'ltr',
           },
           workbox: {
             globPatterns: ['**/*.{js,css,html,svg,woff2}'],
