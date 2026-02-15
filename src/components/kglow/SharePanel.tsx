@@ -4,6 +4,7 @@ import html2canvas from 'html2canvas';
 import { Download, Share2, Link } from 'lucide-react';
 import * as m from 'framer-motion/m';
 import { AnimatePresence } from 'framer-motion';
+import { trackEvent } from '@/lib/analytics';
 
 interface SharePanelProps {
   cardRef: React.RefObject<HTMLDivElement | null>;
@@ -48,6 +49,7 @@ const SharePanel = ({ cardRef, analysisId, celebName }: SharePanelProps) => {
       link.download = `kglow-${celebName.replace(/\s+/g, '-').toLowerCase()}-${analysisId || 'demo'}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
+      trackEvent('card_shared', { platform: 'download', celeb_name: celebName });
     } catch {
       // Silently fail — card might not be rendered yet
     }
@@ -66,6 +68,7 @@ const SharePanel = ({ cardRef, analysisId, celebName }: SharePanelProps) => {
           url: reportUrl,
           files: [file],
         });
+        trackEvent('card_shared', { platform: 'share_api', celeb_name: celebName });
         return;
       }
 
@@ -91,10 +94,11 @@ const SharePanel = ({ cardRef, analysisId, celebName }: SharePanelProps) => {
     try {
       await navigator.clipboard.writeText(reportUrl);
       showToast();
+      trackEvent('card_shared', { platform: 'copy_link', celeb_name: celebName });
     } catch {
       // Clipboard API may not be available in insecure contexts
     }
-  }, [reportUrl, showToast]);
+  }, [reportUrl, showToast, celebName]);
 
   /* ── Button base styles ────────────────────────── */
   const btnClass =

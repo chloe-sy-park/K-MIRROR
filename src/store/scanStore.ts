@@ -8,6 +8,7 @@ import { saveAnalysis, extractProductIds } from '@/services/analysisService';
 import { DEMO_RESULT } from '@/data/demoResult';
 import { hashInputs, getCachedResult, setCachedResult } from '@/services/cacheService';
 import type { CelebProfile } from '@/data/celebGallery';
+import { trackEvent } from '@/lib/analytics';
 import i18n from '@/i18n';
 
 export type ScanPhase = 'idle' | 'analyzing' | 'result';
@@ -91,6 +92,10 @@ export const useScanStore = create<ScanState>((set, get) => ({
     const cached = getCachedResult<AnalysisResult>(cacheKey);
     if (cached) {
       set({ result: cached, phase: 'result', error: null });
+      trackEvent('analysis_completed', {
+        celeb_name: get().selectedCelebName ?? 'unknown',
+        locale,
+      });
       return;
     }
 
@@ -140,6 +145,10 @@ export const useScanStore = create<ScanState>((set, get) => ({
 
       if (!controller.signal.aborted) {
         set({ result: res, matchedProducts: products, phase: 'result' });
+        trackEvent('analysis_completed', {
+          celeb_name: get().selectedCelebName ?? 'unknown',
+          locale,
+        });
 
         // Cache the result for identical future inputs
         setCachedResult(cacheKey, res);

@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CELEB_GALLERY, type CelebProfile } from '@/data/celebGallery';
 import { useScanStore } from '@/store/scanStore';
+import { trackEvent } from '@/lib/analytics';
 
 const MOOD_COLORS: Record<CelebProfile['mood'], string> = {
   Natural: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
@@ -64,6 +65,7 @@ const ChooseVibeView = () => {
   const handleContinue = async () => {
     if (!selectedCeleb) return;
     await setCelebFromGallery(selectedCeleb);
+    trackEvent('celeb_selected', { celeb_name: selectedCeleb.name });
     navigate('/scan');
   };
 

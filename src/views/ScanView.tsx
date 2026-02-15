@@ -7,6 +7,7 @@ import { containerVariants, itemVariants } from '@/constants/animations';
 import { useScanStore } from '@/store/scanStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useConsentStore } from '@/store/consentStore';
+import { trackEvent } from '@/lib/analytics';
 import LuxuryFileUpload from '@/components/ui/LuxuryFileUpload';
 import Toggle from '@/components/ui/Toggle';
 import BiometricConsentModal from '@/components/ui/BiometricConsentModal';
@@ -40,12 +41,14 @@ const ScanView = () => {
       setShowConsent(true);
       return;
     }
+    trackEvent('selfie_uploaded', { has_celeb: !!celebImage });
     analyze(isSensitive, prefs);
   };
 
   const handleConsentAccept = () => {
     acceptBiometric();
     setShowConsent(false);
+    trackEvent('selfie_uploaded', { has_celeb: !!celebImage });
     analyze(isSensitive, prefs);
   };
 
