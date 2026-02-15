@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import * as m from 'framer-motion/m';
-import { ArrowLeft, ShoppingBag, Sparkles, Check, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, ShoppingBag, Sparkles, Check, ShieldCheck, ExternalLink } from 'lucide-react';
 import { containerVariants, itemVariants } from '@/constants/animations';
 import { useCartStore } from '@/store/cartStore';
 import { useScanStore } from '@/store/scanStore';
@@ -10,6 +11,7 @@ import { fetchProductById } from '@/services/productService';
 import type { Product } from '@/types';
 
 const ProductDetailView = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const addItem = useCartStore((s) => s.addItem);
@@ -133,6 +135,17 @@ const ProductDetailView = () => {
             </div>
           )}
 
+          {product.affiliate_url && (
+            <a
+              href={product.affiliate_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full flex items-center justify-center gap-3 py-4 px-6 bg-gradient-to-r from-[#FF4D8D] to-[#FF6B9D] text-white rounded-2xl font-black text-sm uppercase tracking-[0.2em]"
+            >
+              {t('affiliate.buyNow')}
+              <ExternalLink size={16} />
+            </a>
+          )}
           <m.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}

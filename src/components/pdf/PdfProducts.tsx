@@ -1,8 +1,11 @@
+import { QRCodeSVG } from 'qrcode.react';
+
 interface ProductItem {
   name: string;
   brand: string;
   matchScore: number;
   price?: string;
+  affiliateUrl?: string | null;
 }
 
 interface PdfProductsProps {
@@ -10,7 +13,7 @@ interface PdfProductsProps {
 }
 
 /** 개별 제품 카드 */
-const ProductCard = ({ name, brand, matchScore, price }: ProductItem) => (
+const ProductCard = ({ name, brand, matchScore, price, affiliateUrl }: ProductItem) => (
   <div
     style={{
       background: '#1A1A2E',
@@ -85,6 +88,13 @@ const ProductCard = ({ name, brand, matchScore, price }: ProductItem) => (
       >
         {price}
       </p>
+    )}
+
+    {/* QR Code for affiliate link */}
+    {affiliateUrl && (
+      <div style={{ marginTop: 8 }}>
+        <QRCodeSVG value={affiliateUrl} size={60} bgColor="transparent" fgColor="#ffffff" />
+      </div>
     )}
   </div>
 );

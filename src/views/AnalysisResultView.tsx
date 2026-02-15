@@ -7,7 +7,7 @@ import {
   RotateCcw, Cpu, Palette, Droplets, Eye, Activity,
   Check, Sparkles, Plus, Play, Lightbulb,
   Bookmark, X, Target, Youtube, Wand2,
-  ThumbsUp, ThumbsDown,
+  ThumbsUp, ThumbsDown, ExternalLink,
 } from 'lucide-react';
 import { containerVariants, itemVariants } from '@/constants/animations';
 import { useScanStore } from '@/store/scanStore';
@@ -72,6 +72,7 @@ const AnalysisResultView = () => {
         shadeHex: p.shade_hex,
         category: p.category,
         dbId: p.id,
+        affiliate_url: p.affiliate_url,
       }));
     }
     return result.recommendations.products.map(p => ({
@@ -85,6 +86,7 @@ const AnalysisResultView = () => {
       shadeHex: null as string | null,
       category: null as string | null,
       dbId: null as string | null,
+      affiliate_url: null as string | null,
     }));
   }, [dbProducts, result, i18n.language]);
 
@@ -345,14 +347,26 @@ const AnalysisResultView = () => {
                 <p className="text-[10px] text-gray-400 font-medium mb-6 line-clamp-2 text-balance">{product.desc}</p>
                 <div className="flex justify-between items-end mt-auto pt-6 border-t border-gray-50">
                   <p className="text-sm font-black">{product.price}</p>
-                  <m.button
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => handleAddToCart(idx)}
-                    className="p-3 bg-black text-white rounded-full hover:bg-[#FF4D8D] transition-colors"
-                    title="Add to cart"
-                  >
-                    <Plus size={16} />
-                  </m.button>
+                  <div className="flex items-center gap-2">
+                    {product.affiliate_url && (
+                      <a
+                        href={product.affiliate_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-[#FF2D9B] text-xs font-bold uppercase tracking-wider hover:opacity-70 transition-opacity"
+                      >
+                        {t('affiliate.buyNow')} <ExternalLink size={12} />
+                      </a>
+                    )}
+                    <m.button
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => handleAddToCart(idx)}
+                      className="p-3 bg-black text-white rounded-full hover:bg-[#FF4D8D] transition-colors"
+                      title="Add to cart"
+                    >
+                      <Plus size={16} />
+                    </m.button>
+                  </div>
                 </div>
                 {product.dbId && (
                   <div className="flex items-center gap-3 mt-4 pt-4 border-t border-gray-50">

@@ -448,6 +448,7 @@ export async function generateSherlockArchive(
             brand: p.brand,
             matchScore: p.matchScore,
             price: `$${p.price_usd.toFixed(2)}`,
+            affiliateUrl: p.affiliate_url,
           }))}
         />
       </PdfPageShell>,

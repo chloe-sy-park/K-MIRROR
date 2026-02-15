@@ -28,6 +28,7 @@ export async function fetchProducts(): Promise<Product[]> {
     category: r.category,
     imageUrl: r.image_url ?? undefined,
     melaninRange: [r.melanin_min ?? 1, r.melanin_max ?? 6] as [number, number],
+    affiliate_url: r.affiliate_url ?? null,
   }));
 }
 
@@ -60,6 +61,7 @@ export async function fetchProductById(id: string): Promise<Product | null> {
     category: data.category,
     imageUrl: data.image_url ?? undefined,
     melaninRange: [data.melanin_min ?? 1, data.melanin_max ?? 6] as [number, number],
+    affiliate_url: data.affiliate_url ?? null,
   };
 }
 

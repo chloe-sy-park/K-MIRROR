@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import * as m from 'framer-motion/m';
-import { Sparkles, ShoppingBag, Filter } from 'lucide-react';
+import { Sparkles, ShoppingBag, Filter, ExternalLink } from 'lucide-react';
 import { containerVariants, itemVariants } from '@/constants/animations';
 import { useCartStore } from '@/store/cartStore';
 import { fetchProducts } from '@/services/productService';
@@ -125,13 +125,26 @@ const ShopView = () => {
 
                 <div className="flex justify-between items-center mt-auto pt-4 border-t border-gray-50">
                   <span className="text-lg font-black">{product.priceDisplay}</span>
-                  <m.button
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => addItem(product)}
-                    className="p-3 bg-black text-white rounded-full hover:bg-[#FF4D8D] transition-colors"
-                  >
-                    <ShoppingBag size={14} />
-                  </m.button>
+                  <div className="flex items-center gap-2">
+                    {product.affiliate_url && (
+                      <a
+                        href={product.affiliate_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 px-3 py-2 bg-gradient-to-r from-[#FF4D8D] to-[#FF6B9D] text-white rounded-full text-[8px] font-black uppercase tracking-wider hover:shadow-lg transition-all"
+                      >
+                        <ExternalLink size={10} />
+                        {t('affiliate.buyNow')}
+                      </a>
+                    )}
+                    <m.button
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => addItem(product)}
+                      className="p-3 bg-black text-white rounded-full hover:bg-[#FF4D8D] transition-colors"
+                    >
+                      <ShoppingBag size={14} />
+                    </m.button>
+                  </div>
                 </div>
               </div>
             </m.div>
