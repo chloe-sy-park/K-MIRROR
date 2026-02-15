@@ -1,10 +1,11 @@
-import { saveAnalysis, extractProductIds } from './analysisService';
-import type { AnalysisResult } from '@/types';
+import { saveAnalysis, fetchAnalysis, extractProductIds } from './analysisService';
+import type { AnalysisResult, StyleVersions } from '@/types';
 import type { MatchedProduct } from '@/services/geminiService';
 
 const mockInsert = vi.fn();
 const mockSelect = vi.fn();
 const mockSingle = vi.fn();
+const mockEq = vi.fn();
 const mockGetUser = vi.fn();
 
 vi.mock('@/lib/supabase', () => ({
@@ -12,13 +13,54 @@ vi.mock('@/lib/supabase', () => ({
     from: () => ({
       insert: (...args: unknown[]) => {
         mockInsert(...args);
-        return { select: (...sArgs: unknown[]) => { mockSelect(...sArgs); return { single: () => mockSingle() }; } };
+        return {
+          select: (...sArgs: unknown[]) => {
+            mockSelect(...sArgs);
+            return { single: () => mockSingle() };
+          },
+        };
+      },
+      select: (...args: unknown[]) => {
+        mockSelect(...args);
+        return {
+          eq: (...eqArgs: unknown[]) => {
+            mockEq(...eqArgs);
+            return { single: () => mockSingle() };
+          },
+        };
       },
     }),
     auth: { getUser: () => mockGetUser() },
   },
   isSupabaseConfigured: true,
 }));
+
+const MOCK_STYLE_VERSIONS: StyleVersions = {
+  daily: {
+    intensity: 'light',
+    base: 'Light BB cream',
+    eyes: 'Soft brown shadow',
+    lips: 'Tinted lip balm',
+    keyProducts: ['BB Cream'],
+    metricsShift: { VW: -5, CT: 0, MF: 2, LS: 3, HI: 1 },
+  },
+  office: {
+    intensity: 'medium',
+    base: 'Cushion foundation',
+    eyes: 'Neutral matte palette',
+    lips: 'Velvet tint',
+    keyProducts: ['Cushion'],
+    metricsShift: { VW: 0, CT: 3, MF: 0, LS: 5, HI: 3 },
+  },
+  glam: {
+    intensity: 'full',
+    base: 'Full coverage foundation',
+    eyes: 'Shimmer shadow',
+    lips: 'Bold red lip',
+    keyProducts: ['Foundation'],
+    metricsShift: { VW: 10, CT: 5, MF: -3, LS: 8, HI: 5 },
+  },
+};
 
 const MOCK_RESULT: AnalysisResult = {
   tone: {
@@ -69,6 +111,87 @@ describe('analysisService', () => {
       const id = await saveAnalysis(MOCK_RESULT, []);
 
       expect(id).toBeNull();
+    });
+
+    it('includes style_versions in insert payload when present', async () => {
+      mockSingle.mockResolvedValue({ data: { id: 'analysis-456' }, error: null });
+
+      const resultWithVersions: AnalysisResult = {
+        ...MOCK_RESULT,
+        styleVersions: MOCK_STYLE_VERSIONS,
+      };
+
+      await saveAnalysis(resultWithVersions, []);
+
+      expect(mockInsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          style_versions: MOCK_STYLE_VERSIONS,
+        }),
+      );
+    });
+
+    it('includes style_versions as null when not present', async () => {
+      mockSingle.mockResolvedValue({ data: { id: 'analysis-789' }, error: null });
+
+      await saveAnalysis(MOCK_RESULT, []);
+
+      expect(mockInsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          style_versions: null,
+        }),
+      );
+    });
+  });
+
+  describe('fetchAnalysis', () => {
+    it('returns styleVersions when present in DB row', async () => {
+      mockSingle.mockResolvedValue({
+        data: {
+          tone_analysis: MOCK_RESULT.tone,
+          sherlock_analysis: MOCK_RESULT.sherlock,
+          k_match: MOCK_RESULT.kMatch,
+          five_metrics: null,
+          style_versions: MOCK_STYLE_VERSIONS,
+          recommendations: MOCK_RESULT.recommendations,
+          celeb_id: null,
+          recommended_product_ids: [],
+        },
+        error: null,
+      });
+
+      const result = await fetchAnalysis('analysis-123');
+
+      expect(result).not.toBeNull();
+      expect(result!.styleVersions).toEqual(MOCK_STYLE_VERSIONS);
+    });
+
+    it('returns undefined styleVersions when not in DB row', async () => {
+      mockSingle.mockResolvedValue({
+        data: {
+          tone_analysis: MOCK_RESULT.tone,
+          sherlock_analysis: MOCK_RESULT.sherlock,
+          k_match: MOCK_RESULT.kMatch,
+          five_metrics: null,
+          style_versions: null,
+          recommendations: MOCK_RESULT.recommendations,
+          celeb_id: null,
+          recommended_product_ids: [],
+        },
+        error: null,
+      });
+
+      const result = await fetchAnalysis('analysis-456');
+
+      expect(result).not.toBeNull();
+      expect(result!.styleVersions).toBeUndefined();
+    });
+
+    it('returns null on DB error', async () => {
+      mockSingle.mockResolvedValue({ data: null, error: { message: 'Not found' } });
+
+      const result = await fetchAnalysis('nonexistent');
+
+      expect(result).toBeNull();
     });
   });
 
