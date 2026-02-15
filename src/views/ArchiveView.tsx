@@ -19,6 +19,7 @@ import {
   sendReportEmail,
 } from '@/services/reportService';
 import type { PremiumReport } from '@/services/reportService';
+import { trackEvent } from '@/lib/analytics';
 import { containerVariants, itemVariants } from '@/constants/animations';
 
 /* ─── 상수 ─────────────────────────────────────────────────────── */
@@ -182,7 +183,10 @@ const ArchiveView = () => {
           if (mountedRef.current) setEmailSent(sent);
         }
 
-        if (mountedRef.current) setStep('done');
+        if (mountedRef.current) {
+          trackEvent('payment_completed', { analysis_id: rpt.analysis_id });
+          setStep('done');
+        }
       } catch (err) {
         if (import.meta.env.DEV) {
           console.error('[ArchiveView] Generation failed:', err);

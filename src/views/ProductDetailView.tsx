@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import * as m from 'framer-motion/m';
 import { ArrowLeft, ShoppingBag, Sparkles, Check, ShieldCheck, ExternalLink } from 'lucide-react';
+import { trackEvent } from '@/lib/analytics';
 import { containerVariants, itemVariants } from '@/constants/animations';
 import { useCartStore } from '@/store/cartStore';
 import { useScanStore } from '@/store/scanStore';
@@ -140,6 +141,7 @@ const ProductDetailView = () => {
               href={product.affiliate_url}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => trackEvent('affiliate_clicked', { product_name: product.name, source: 'product_detail' })}
               className="w-full flex items-center justify-center gap-3 py-4 px-6 bg-gradient-to-r from-[#FF4D8D] to-[#FF6B9D] text-white rounded-2xl font-black text-sm uppercase tracking-[0.2em]"
             >
               {t('affiliate.buyNow')}

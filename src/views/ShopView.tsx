@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import * as m from 'framer-motion/m';
 import { Sparkles, ShoppingBag, Filter, ExternalLink } from 'lucide-react';
+import { trackEvent } from '@/lib/analytics';
 import { containerVariants, itemVariants } from '@/constants/animations';
 import { useCartStore } from '@/store/cartStore';
 import { fetchProducts } from '@/services/productService';
@@ -131,6 +132,7 @@ const ShopView = () => {
                         href={product.affiliate_url}
                         target="_blank"
                         rel="noopener noreferrer"
+                        onClick={() => trackEvent('affiliate_clicked', { product_name: product.name, source: 'shop' })}
                         className="flex items-center gap-1 px-3 py-2 bg-gradient-to-r from-[#FF4D8D] to-[#FF6B9D] text-white rounded-full text-[8px] font-black uppercase tracking-wider hover:shadow-lg transition-all"
                       >
                         <ExternalLink size={10} />

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import * as m from 'framer-motion/m';
 import { Lock, Eye, RotateCcw } from 'lucide-react';
 import { containerVariants, itemVariants } from '@/constants/animations';
+import { trackEvent } from '@/lib/analytics';
 import { useScanStore } from '@/store/scanStore';
 import KGlowCard from '@/components/kglow/KGlowCard';
 import SharePanel from '@/components/kglow/SharePanel';
@@ -45,6 +46,7 @@ const KGlowResultView = () => {
   if (!result) return null;
 
   const handleUnlock = () => {
+    trackEvent('premium_clicked', { analysis_id: analysisId });
     navigate('/premium-checkout');
   };
 
