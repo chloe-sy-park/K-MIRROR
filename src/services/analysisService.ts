@@ -36,6 +36,7 @@ export async function saveAnalysis(
       k_match: result.kMatch,
       recommended_product_ids: matchedProductIds,
       five_metrics: result.fiveMetrics ?? null,
+      style_versions: result.styleVersions ?? null,
       celeb_id: celebId ?? null,
       recommendations: result.recommendations ?? null,
     })
@@ -59,7 +60,7 @@ export async function fetchAnalysis(id: string): Promise<AnalysisResult | null> 
 
   const { data, error } = await supabase
     .from('analyses')
-    .select('tone_analysis, sherlock_analysis, k_match, five_metrics, recommendations, celeb_id, recommended_product_ids')
+    .select('tone_analysis, sherlock_analysis, k_match, five_metrics, style_versions, recommendations, celeb_id, recommended_product_ids')
     .eq('id', id)
     .single();
 
@@ -71,6 +72,7 @@ export async function fetchAnalysis(id: string): Promise<AnalysisResult | null> 
     kMatch: data.k_match,
     recommendations: data.recommendations ?? { ingredients: [], products: [], videos: [], sensitiveSafe: false },
     fiveMetrics: data.five_metrics ?? undefined,
+    styleVersions: data.style_versions ?? undefined,
   };
 }
 

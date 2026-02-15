@@ -8,6 +8,7 @@ import { saveAnalysis, extractProductIds } from '@/services/analysisService';
 import { DEMO_RESULT } from '@/data/demoResult';
 import { hashInputs, getCachedResult, setCachedResult } from '@/services/cacheService';
 import type { CelebProfile } from '@/data/celebGallery';
+import i18n from '@/i18n';
 
 export type ScanPhase = 'idle' | 'analyzing' | 'result';
 
@@ -83,6 +84,8 @@ export const useScanStore = create<ScanState>((set, get) => ({
     const { userImage, userImageMimeType, celebImage, celebImageMimeType, selectedCelebName } = get();
     if (!userImage || !celebImage) return;
 
+    const locale = i18n.language?.startsWith('ko') ? 'ko' : 'en';
+
     // Check cache for identical inputs
     const cacheKey = hashInputs(userImage, celebImage);
     const cached = getCachedResult<AnalysisResult>(cacheKey);
@@ -104,7 +107,7 @@ export const useScanStore = create<ScanState>((set, get) => ({
 
       try {
         // New 2-step pipeline: analyze-skin -> match-products + YouTube in parallel
-        res = await analyzeSkin(userImage, celebImage, isSensitive, prefs, selectedCelebName ?? undefined, controller.signal, userImageMimeType, celebImageMimeType);
+        res = await analyzeSkin(userImage, celebImage, isSensitive, prefs, selectedCelebName ?? undefined, controller.signal, userImageMimeType, celebImageMimeType, locale);
 
         if (!controller.signal.aborted) {
           // Phase 2: products + YouTube in parallel
@@ -125,7 +128,7 @@ export const useScanStore = create<ScanState>((set, get) => ({
         if (skinErr instanceof AnalysisError && skinErr.code === 'ABORTED') throw skinErr;
         if (import.meta.env.DEV) console.warn('analyze-skin failed, falling back to analyze-kbeauty:', skinErr);
 
-        res = await analyzeKBeauty(userImage, celebImage, isSensitive, prefs, selectedCelebName ?? undefined, controller.signal, userImageMimeType, celebImageMimeType);
+        res = await analyzeKBeauty(userImage, celebImage, isSensitive, prefs, selectedCelebName ?? undefined, controller.signal, userImageMimeType, celebImageMimeType, locale);
 
         // Legacy YouTube (non-blocking)
         if (isYouTubeConfigured && res.youtubeSearch?.queries?.length) {
@@ -146,7 +149,7 @@ export const useScanStore = create<ScanState>((set, get) => ({
         saveAnalysis(res, extractProductIds(products), celebId).then((id) => {
           if (id && !controller.signal.aborted) {
             set({ analysisId: id });
-            try { sessionStorage.setItem('k-mirror-analysis-id', id); } catch {}
+            try { sessionStorage.setItem('k-mirror-analysis-id', id); } catch { /* sessionStorage unavailable */ }
           }
         }).catch(() => {});
       }

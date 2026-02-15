@@ -75,6 +75,7 @@ export const analyzeSkin = async (
   signal?: AbortSignal,
   userMimeType = 'image/jpeg',
   celebMimeType = 'image/jpeg',
+  locale?: string,
 ): Promise<AnalysisResult> => {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -109,6 +110,7 @@ export const analyzeSkin = async (
         isSensitive,
         prefs,
         selectedCelebName,
+        locale,
       }),
       signal: timeoutController.signal,
     });
@@ -198,6 +200,7 @@ export const analyzeKBeauty = async (
   signal?: AbortSignal,
   userMimeType = 'image/jpeg',
   celebMimeType = 'image/jpeg',
+  locale?: string,
 ): Promise<AnalysisResult> => {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -233,6 +236,7 @@ export const analyzeKBeauty = async (
           isSensitive,
           prefs,
           selectedCelebName,
+          locale,
         }),
         signal: timeoutController.signal,
       });

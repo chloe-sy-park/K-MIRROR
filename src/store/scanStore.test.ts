@@ -212,6 +212,7 @@ describe('scanStore', () => {
         expect.any(Object), // AbortSignal
         'image/jpeg', // userMimeType
         'image/jpeg', // celebMimeType
+        'en', // locale
       );
     });
 
