@@ -23,6 +23,32 @@ function stripBase64Prefix(b64: string): string {
   return b64;
 }
 
+/** Build a single style version schema (daily / office / glam). */
+function buildStyleVersionSchema() {
+  return {
+    type: 'OBJECT',
+    properties: {
+      intensity: { type: 'STRING', description: 'light | medium | full' },
+      base: { type: 'STRING' },
+      eyes: { type: 'STRING' },
+      lips: { type: 'STRING' },
+      keyProducts: { type: 'ARRAY', items: { type: 'STRING' } },
+      metricsShift: {
+        type: 'OBJECT',
+        properties: {
+          VW: { type: 'NUMBER' },
+          CT: { type: 'NUMBER' },
+          MF: { type: 'NUMBER' },
+          LS: { type: 'NUMBER' },
+          HI: { type: 'NUMBER' },
+        },
+        required: ['VW', 'CT', 'MF', 'LS', 'HI'],
+      },
+    },
+    required: ['intensity', 'base', 'eyes', 'lips', 'keyProducts', 'metricsShift'],
+  };
+}
+
 /** Build the full Gemini response schema (Type.X -> "X" strings). */
 function buildResponseSchema() {
   return {
@@ -196,8 +222,17 @@ function buildResponseSchema() {
         },
         required: ['queries', 'focusPoints', 'channelSuggestions'],
       },
+      styleVersions: {
+        type: 'OBJECT',
+        properties: {
+          daily: buildStyleVersionSchema(),
+          office: buildStyleVersionSchema(),
+          glam: buildStyleVersionSchema(),
+        },
+        required: ['daily', 'office', 'glam'],
+      },
     },
-    required: ['tone', 'sherlock', 'kMatch', 'recommendations', 'fiveMetrics', 'autoTags', 'youtubeSearch'],
+    required: ['tone', 'sherlock', 'kMatch', 'recommendations', 'fiveMetrics', 'autoTags', 'youtubeSearch', 'styleVersions'],
   };
 }
 
@@ -225,6 +260,7 @@ serve(async (req) => {
       isSensitive,
       prefs,
       selectedCelebName,
+      locale,
     } = body as {
       userImageBase64: string;
       celebImageBase64: string;
@@ -233,7 +269,10 @@ serve(async (req) => {
       isSensitive: boolean;
       prefs: { environment: string; skill: string; mood: string };
       selectedCelebName?: string;
+      locale?: string;
     };
+
+    const outputLocale = locale === 'ko' ? 'Korean' : 'English';
 
     // Build the celeb context string
     const celebContext = selectedCelebName
@@ -302,6 +341,26 @@ serve(async (req) => {
           Estimate potential score achievable with a K-beauty glass skin routine. Grade texture: A+ (flawless) to C (needs work).
        e) Harmony Index: Overall facial proportion harmony (0-100). Measure left-right symmetry (0-100).
           Identify which single area, if enhanced, would most improve overall harmony.
+
+    ═══ LANGUAGE DIRECTIVE ═══
+    Generate ALL text fields (descriptions, interpretations, solutions, coaching,
+    style explanations, adaptation logic) in ${outputLocale}.
+    Only metric labels (VW, CT, MF, LS, HI), brand names, and product names
+    stay in English regardless of locale.
+
+    ═══ STYLE VERSIONS (3 LOOKS) ═══
+    Generate three makeup versions adapted to the user's face and the chosen celeb style:
+    - daily: Light everyday look. Minimal products, natural finish.
+    - office: Professional polish. Medium coverage, refined eye definition.
+    - glam: Full transformation toward the celeb reference. Maximum impact.
+
+    For each version provide:
+    - base: Detailed base/skin solution text
+    - eyes: Eye and brow solution text
+    - lips: Lip and cheek solution text
+    - keyProducts: 2-3 product type suggestions (e.g., "tinted moisturizer", "BB cream")
+    - metricsShift: Expected change in each of the 5 Metrics when this version is applied
+      (positive = increase, negative = decrease, relative to user's current metrics)
 
     Output MUST be in valid JSON format only.
   `;
