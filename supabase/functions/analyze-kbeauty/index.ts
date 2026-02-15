@@ -116,6 +116,60 @@ function buildResponseSchema() {
         },
         required: ['ingredients', 'products', 'videos', 'sensitiveSafe'],
       },
+      fiveMetrics: {
+        type: 'OBJECT',
+        description: 'K-MIRROR 5 Metrics facial analysis system',
+        properties: {
+          visualWeight: {
+            type: 'OBJECT',
+            properties: {
+              score: { type: 'NUMBER', description: 'Visual weight score 0-100' },
+              eyeWeight: { type: 'NUMBER', description: 'Eye prominence contribution 0-100' },
+              lipWeight: { type: 'NUMBER', description: 'Lip prominence contribution 0-100' },
+              noseWeight: { type: 'NUMBER', description: 'Nose prominence contribution 0-100' },
+              interpretation: { type: 'STRING', description: 'Light (0-40) / Balanced (41-70) / Strong (71-100)' },
+            },
+            required: ['score', 'eyeWeight', 'lipWeight', 'noseWeight', 'interpretation'],
+          },
+          canthalTilt: {
+            type: 'OBJECT',
+            properties: {
+              angleDegrees: { type: 'NUMBER', description: 'Eye tilt angle from -10 to +15 degrees' },
+              classification: { type: 'STRING', description: 'Negative / Neutral / Positive' },
+              symmetry: { type: 'STRING', description: 'Symmetric / Slight asymmetry / Noticeable asymmetry' },
+            },
+            required: ['angleDegrees', 'classification', 'symmetry'],
+          },
+          midfaceRatio: {
+            type: 'OBJECT',
+            properties: {
+              ratioPercent: { type: 'NUMBER', description: 'Mid-face ratio as percentage (ideal ~33%)' },
+              philtrumRelative: { type: 'STRING', description: 'Short / Average / Long' },
+              youthScore: { type: 'NUMBER', description: 'Youth impression score 0-100' },
+            },
+            required: ['ratioPercent', 'philtrumRelative', 'youthScore'],
+          },
+          luminosity: {
+            type: 'OBJECT',
+            properties: {
+              current: { type: 'NUMBER', description: 'Current skin luminosity 0-100' },
+              potential: { type: 'NUMBER', description: 'Achievable luminosity with K-beauty routine 0-100' },
+              textureGrade: { type: 'STRING', description: 'A+ / A / B+ / B / C (glass skin readiness)' },
+            },
+            required: ['current', 'potential', 'textureGrade'],
+          },
+          harmonyIndex: {
+            type: 'OBJECT',
+            properties: {
+              overall: { type: 'NUMBER', description: 'Overall facial harmony 0-100' },
+              symmetryScore: { type: 'NUMBER', description: 'Left-right symmetry 0-100' },
+              optimalBalance: { type: 'STRING', description: 'Which area to enhance for maximum harmony improvement' },
+            },
+            required: ['overall', 'symmetryScore', 'optimalBalance'],
+          },
+        },
+        required: ['visualWeight', 'canthalTilt', 'midfaceRatio', 'luminosity', 'harmonyIndex'],
+      },
       autoTags: {
         type: 'ARRAY',
         items: { type: 'STRING' },
@@ -143,7 +197,7 @@ function buildResponseSchema() {
         required: ['queries', 'focusPoints', 'channelSuggestions'],
       },
     },
-    required: ['tone', 'sherlock', 'kMatch', 'recommendations', 'autoTags', 'youtubeSearch'],
+    required: ['tone', 'sherlock', 'kMatch', 'recommendations', 'fiveMetrics', 'autoTags', 'youtubeSearch'],
   };
 }
 
@@ -188,7 +242,7 @@ serve(async (req) => {
 
     // Full system prompt (copied exactly from geminiService.ts lines 72-123)
     const systemInstruction = `
-    You are a Global K-Beauty Stylist and Face Analysis Expert (Neural Stylist v5.1).
+    You are a Global K-Beauty Stylist and Face Analysis Expert (Neural Stylist v6.0).
     Analyze the two images provided:
     1. The user's bare face.
     2. ${celebContext}
@@ -236,6 +290,18 @@ serve(async (req) => {
        - queries: 2-3 Korean-language YouTube search queries to find the best matching tutorials (e.g., "한소희 메이크업 튜토리얼", "쿨톤 데일리 메이크업 브이로그")
        - focusPoints: 3-5 specific technique tips the user should watch for in these tutorials (in Korean, e.g., "눈꼬리 라인 올리는 각도", "쿠션 반만 묻혀 얇게 레이어링")
        - channelSuggestions: 2-3 real popular Korean beauty YouTube channel names (e.g., "이사배", "PONY Syndrome", "회사원A")
+    8. Five Metrics Analysis (CRITICAL — these metrics power the K-GLOW CARD and SHERLOCK ARCHIVE):
+       a) Visual Weight Score (0-100): Measure how much visual presence the eyes, nose, and lips carry on the face.
+          Score each feature's contribution (eyeWeight, lipWeight, noseWeight) and compute an overall score.
+          Classify: Light (0-40), Balanced (41-70), Strong (71-100).
+       b) Canthal Tilt (-10° to +15°): Measure the eye tilt angle. Classify as Negative (<-2°), Neutral (-2° to +5°), Positive (>+5°).
+          Note any asymmetry between left and right eyes.
+       c) Mid-face Ratio: Calculate the distance from eyes to mouth as a percentage of total face length.
+          Ideal K-beauty ratio is ~33%. Assess philtrum length (Short/Average/Long) and overall youth impression (0-100).
+       d) Luminosity Score: Rate current skin luminosity (0-100) based on skin clarity, glow, and texture.
+          Estimate potential score achievable with a K-beauty glass skin routine. Grade texture: A+ (flawless) to C (needs work).
+       e) Harmony Index: Overall facial proportion harmony (0-100). Measure left-right symmetry (0-100).
+          Identify which single area, if enhanced, would most improve overall harmony.
 
     Output MUST be in valid JSON format only.
   `;
