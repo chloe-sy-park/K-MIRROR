@@ -27,6 +27,23 @@ const youtubeSearchSchema = z.object({
   channelSuggestions: z.array(z.string()),
 });
 
+const metricsShiftSchema = z.object({
+  VW: z.number(),
+  CT: z.number(),
+  MF: z.number(),
+  LS: z.number(),
+  HI: z.number(),
+});
+
+const styleVersionSchema = z.object({
+  intensity: z.enum(['light', 'medium', 'full']),
+  base: z.string(),
+  eyes: z.string(),
+  lips: z.string(),
+  keyProducts: z.array(z.string()),
+  metricsShift: metricsShiftSchema,
+});
+
 export const analysisResultSchema = z.object({
   tone: z.object({
     melaninIndex: z.number().min(1).max(6),
@@ -98,4 +115,11 @@ export const analysisResultSchema = z.object({
   }).optional(),
   autoTags: z.array(z.string()).optional().default([]),
   youtubeSearch: youtubeSearchSchema.optional(),
+  styleVersions: z
+    .object({
+      daily: styleVersionSchema,
+      office: styleVersionSchema,
+      glam: styleVersionSchema,
+    })
+    .optional(),
 });

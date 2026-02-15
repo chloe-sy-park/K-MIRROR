@@ -12,6 +12,7 @@ export interface Product {
   category: 'base' | 'lip' | 'eye' | 'skincare' | 'tool';
   imageUrl?: string;
   melaninRange: [number, number]; // min-max melanin index this product works for
+  affiliate_url?: string | null;
 }
 
 /** Lightweight product reference used in AI recommendations */
@@ -52,6 +53,29 @@ export interface YouTubeVideo {
   publishedAt: string;
   viewCount?: string;
   duration?: string;
+}
+
+export interface MetricsShift {
+  VW: number;
+  CT: number;
+  MF: number;
+  LS: number;
+  HI: number;
+}
+
+export interface StyleVersion {
+  intensity: 'light' | 'medium' | 'full';
+  base: string;
+  eyes: string;
+  lips: string;
+  keyProducts: string[];
+  metricsShift: MetricsShift;
+}
+
+export interface StyleVersions {
+  daily: StyleVersion;
+  office: StyleVersion;
+  glam: StyleVersion;
 }
 
 export interface UserPreferences {
@@ -108,6 +132,8 @@ export interface AnalysisResult {
   autoTags?: string[];
   /** YouTube search hints for hybrid curation */
   youtubeSearch?: YouTubeSearchHints;
+  /** Daily/Office/Glam style versions */
+  styleVersions?: StyleVersions;
 }
 
 export interface FiveMetrics {

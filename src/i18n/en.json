@@ -62,6 +62,27 @@
     "feedbackYes": "Yes",
     "feedbackNo": "No"
   },
+  "styleVersions": {
+    "title": "Style Versions",
+    "daily": "Daily",
+    "office": "Office",
+    "glam": "Glam",
+    "dailyDesc": "Light, everyday look",
+    "officeDesc": "Professional polish",
+    "glamDesc": "Full glam transformation",
+    "base": "Base & Skin",
+    "eyes": "Eyes & Brows",
+    "lips": "Lips & Cheeks",
+    "keyProducts": "Key Products",
+    "metricsShift": "Expected Metrics Change",
+    "notAvailable": "Style versions not available for this analysis"
+  },
+  "affiliate": {
+    "buyNow": "Buy Now",
+    "buyOn": "Buy on",
+    "externalLink": "Opens in new tab",
+    "noLink": "Coming soon"
+  },
   "muse": {
     "title": "MUSE BOARD",
     "subtitle": "Your Saved Neural Analyses",
@@ -572,6 +593,10 @@
     "userLabel": "You",
     "celebLabel": "Celebrity",
     "gapLabel": "Gap",
-    "solutionLabel": "Solution"
+    "solutionLabel": "Solution",
+    "styleVariationsTitle": "Style Variations",
+    "styleVariationsSubtitle": "Three looks tailored to your lifestyle",
+    "detailedSolutionsTitle": "Detailed Solutions by Scene",
+    "detailedSolutionsSubtitle": "Step-by-step guides for each look"
   }
 }

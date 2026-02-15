@@ -62,6 +62,27 @@
     "feedbackYes": "네",
     "feedbackNo": "아니오"
   },
+  "styleVersions": {
+    "title": "스타일 버전",
+    "daily": "데일리",
+    "office": "오피스",
+    "glam": "글램",
+    "dailyDesc": "가벼운 데일리 룩",
+    "officeDesc": "프로페셔널 폴리시",
+    "glamDesc": "풀 글램 변신",
+    "base": "베이스 & 스킨",
+    "eyes": "아이 & 브로우",
+    "lips": "립 & 치크",
+    "keyProducts": "핵심 제품",
+    "metricsShift": "예상 메트릭 변화",
+    "notAvailable": "이 분석에는 스타일 버전을 사용할 수 없습니다"
+  },
+  "affiliate": {
+    "buyNow": "지금 구매",
+    "buyOn": "에서 구매",
+    "externalLink": "새 탭에서 열기",
+    "noLink": "곧 출시"
+  },
   "muse": {
     "title": "뮤즈 보드",
     "subtitle": "저장된 뉴럴 분석",
@@ -572,6 +593,10 @@
     "userLabel": "나",
     "celebLabel": "셀럽",
     "gapLabel": "갭",
-    "solutionLabel": "솔루션"
+    "solutionLabel": "솔루션",
+    "styleVariationsTitle": "스타일 변형",
+    "styleVariationsSubtitle": "라이프스타일에 맞춘 세 가지 룩",
+    "detailedSolutionsTitle": "씬별 상세 솔루션",
+    "detailedSolutionsSubtitle": "각 룩을 위한 단계별 가이드"
   }
 }
