@@ -12,18 +12,20 @@ vi.mock('react-router-dom', () => ({
 
 describe('AnalyzingView', () => {
   beforeEach(() => {
-    useScanStore.setState({ userImage: null });
+    useScanStore.setState({ userImage: null, selectedCelebName: null });
   });
 
-  it('renders the "Decoding DNA..." heading', () => {
+  it('renders the "Decoding DNA..." heading (i18n key)', () => {
     render(<AnalyzingView />);
-    expect(screen.getByText('Decoding DNA...')).toBeInTheDocument();
+    expect(screen.getByText('analyzing.decodingDna')).toBeInTheDocument();
   });
 
-  it('shows analysis progress indicator texts', () => {
+  it('shows 5-step progress checklist (i18n keys)', () => {
     render(<AnalyzingView />);
-    expect(screen.getByText(/Synchronizing Melanin Guard/)).toBeInTheDocument();
-    expect(screen.getByText(/Mapping Sherlock Facial Proportions/)).toBeInTheDocument();
+    expect(screen.getByText('analyzing.step1')).toBeInTheDocument();
+    expect(screen.getByText('analyzing.step2')).toBeInTheDocument();
+    expect(screen.getByText('analyzing.step3')).toBeInTheDocument();
+    expect(screen.getByText('analyzing.step5')).toBeInTheDocument();
   });
 
   it('renders the user image when provided', () => {

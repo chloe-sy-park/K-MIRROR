@@ -102,10 +102,42 @@ export interface AnalysisResult {
     videos: VideoRecommendation[];
     sensitiveSafe: boolean;
   };
+  /** 5 Metrics facial analysis system */
+  fiveMetrics?: FiveMetrics;
   /** AI-generated tags for auto-categorization */
   autoTags?: string[];
   /** YouTube search hints for hybrid curation */
   youtubeSearch?: YouTubeSearchHints;
+}
+
+export interface FiveMetrics {
+  visualWeight: {
+    score: number;
+    eyeWeight: number;
+    lipWeight: number;
+    noseWeight: number;
+    interpretation: string;
+  };
+  canthalTilt: {
+    angleDegrees: number;
+    classification: string;
+    symmetry: string;
+  };
+  midfaceRatio: {
+    ratioPercent: number;
+    philtrumRelative: string;
+    youthScore: number;
+  };
+  luminosity: {
+    current: number;
+    potential: number;
+    textureGrade: string;
+  };
+  harmonyIndex: {
+    overall: number;
+    symmetryScore: number;
+    optimalBalance: string;
+  };
 }
 
 

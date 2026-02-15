@@ -42,7 +42,7 @@ vi.mock('@supabase/supabase-js', () => ({
 
 // Creates a passthrough component for a given HTML tag, filtering framer-motion props
 const MOTION_PROPS = ['initial', 'animate', 'exit', 'variants', 'transition', 'whileHover', 'whileTap', 'whileInView', 'layout'];
-const MOTION_TAGS = ['div', 'section', 'button', 'p', 'span', 'header', 'img', 'a', 'nav', 'input', 'label', 'h1', 'h2', 'h3', 'li', 'ul'];
+const MOTION_TAGS = ['div', 'section', 'button', 'p', 'span', 'header', 'img', 'a', 'nav', 'input', 'label', 'h1', 'h2', 'h3', 'li', 'ul', 'line', 'circle', 'svg', 'path', 'g', 'rect', 'ellipse'];
 
 function buildMotionElements(React: typeof import('react')) {
   const elements: Record<string, unknown> = {};

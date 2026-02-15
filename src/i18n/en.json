@@ -472,5 +472,40 @@
       "tryFree": "Try Free Analysis",
       "startNow": "Start Now"
     }
+  },
+  "chooseVibe": {
+    "title": "CHOOSE YOUR VIBE",
+    "subtitle": "Which K-Beauty icon inspires you?",
+    "continue": "Continue",
+    "selectPrompt": "Select a celeb to continue"
+  },
+  "analyzing": {
+    "step1": "Skin Tone Detected",
+    "step2": "Facial Landmarks Mapped",
+    "step3": "Calculating 5 Metrics...",
+    "step4": "Matching with {{celebName}}...",
+    "step5": "Generating K-GLOW Card",
+    "decodingDna": "Decoding DNA..."
+  },
+  "kglow": {
+    "archiveLabel": "K-MIRROR Archive : Analysis",
+    "targetVibe": "TARGET VIBE",
+    "matchRate": "Match Rate",
+    "note": "KENI's NOTE",
+    "getReport": "GET YOUR FULL REPORT",
+    "sherlockArchive": "THE SHERLOCK ARCHIVE",
+    "price": "29,000원 / $24.99"
+  },
+  "kglowResult": {
+    "ready": "Your K-GLOW Card is Ready!",
+    "unlock": "Unlock Full Sherlock Archive",
+    "viewDetail": "View Detailed Analysis",
+    "tryAnother": "Try Another Style"
+  },
+  "share": {
+    "download": "Download Card",
+    "share": "Share",
+    "copyLink": "Copy Link",
+    "copied": "Link copied!"
   }
 }

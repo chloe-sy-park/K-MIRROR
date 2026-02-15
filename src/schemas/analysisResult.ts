@@ -67,6 +67,35 @@ export const analysisResultSchema = z.object({
     videos: z.array(videoSchema),
     sensitiveSafe: z.boolean(),
   }),
+  fiveMetrics: z.object({
+    visualWeight: z.object({
+      score: z.number().min(0).max(100),
+      eyeWeight: z.number().min(0).max(100),
+      lipWeight: z.number().min(0).max(100),
+      noseWeight: z.number().min(0).max(100),
+      interpretation: z.string(),
+    }),
+    canthalTilt: z.object({
+      angleDegrees: z.number(),
+      classification: z.string(),
+      symmetry: z.string(),
+    }),
+    midfaceRatio: z.object({
+      ratioPercent: z.number(),
+      philtrumRelative: z.string(),
+      youthScore: z.number().min(0).max(100),
+    }),
+    luminosity: z.object({
+      current: z.number().min(0).max(100),
+      potential: z.number().min(0).max(100),
+      textureGrade: z.string(),
+    }),
+    harmonyIndex: z.object({
+      overall: z.number().min(0).max(100),
+      symmetryScore: z.number().min(0).max(100),
+      optimalBalance: z.string(),
+    }),
+  }).optional(),
   autoTags: z.array(z.string()).optional().default([]),
   youtubeSearch: youtubeSearchSchema.optional(),
 });
