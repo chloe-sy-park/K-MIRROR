@@ -233,6 +233,7 @@ const ChooseVibeView = () => {
                       src={selectedCeleb.imageUrl}
                       alt={selectedCeleb.name}
                       className="w-full h-full object-cover"
+                      loading="lazy"
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-[#FF4D8D] to-purple-500 flex items-center justify-center">

@@ -59,6 +59,7 @@ export default defineConfig(() => {
               'vendor-i18n': ['i18next', 'react-i18next'],
               'vendor-stripe': ['@stripe/stripe-js'],
               'vendor-sentry': ['@sentry/react'],
+              'vendor-recharts': ['recharts'],
             },
           },
         },

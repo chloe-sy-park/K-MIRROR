@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import * as m from 'framer-motion/m';
@@ -7,8 +7,9 @@ import { containerVariants, itemVariants } from '@/constants/animations';
 import { useScanStore } from '@/store/scanStore';
 import KGlowCard from '@/components/kglow/KGlowCard';
 import SharePanel from '@/components/kglow/SharePanel';
-import RadarMetricsChart from '@/components/charts/RadarMetricsChart';
 import { normalizeMetrics, applyMetricsShift } from '@/components/charts/normalizeMetrics';
+
+const RadarMetricsChart = lazy(() => import('@/components/charts/RadarMetricsChart'));
 
 const KGlowResultView = () => {
   const { t } = useTranslation();
@@ -143,14 +144,16 @@ const KGlowResultView = () => {
             {/* Mini radar showing metrics shift */}
             {fiveMetrics && (
               <div className="mt-6 flex justify-center">
-                <RadarMetricsChart
-                  userMetrics={normalizeMetrics(fiveMetrics)}
-                  celebMetrics={applyMetricsShift(
-                    normalizeMetrics(fiveMetrics),
-                    styleVersions[activeVersion].metricsShift
-                  )}
-                  size={200}
-                />
+                <Suspense fallback={<div className="w-[200px] h-[200px]" />}>
+                  <RadarMetricsChart
+                    userMetrics={normalizeMetrics(fiveMetrics)}
+                    celebMetrics={applyMetricsShift(
+                      normalizeMetrics(fiveMetrics),
+                      styleVersions[activeVersion].metricsShift
+                    )}
+                    size={200}
+                  />
+                </Suspense>
               </div>
             )}
           </div>
