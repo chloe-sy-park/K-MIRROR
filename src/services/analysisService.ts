@@ -9,6 +9,7 @@ import type { MatchedProduct } from '@/services/geminiService';
 export async function saveAnalysis(
   result: AnalysisResult,
   matchedProductIds: string[],
+  celebId?: string | null,
 ): Promise<string | null> {
   if (!isSupabaseConfigured) return null;
 
@@ -34,6 +35,9 @@ export async function saveAnalysis(
       sherlock_analysis: result.sherlock,
       k_match: result.kMatch,
       recommended_product_ids: matchedProductIds,
+      five_metrics: result.fiveMetrics ?? null,
+      celeb_id: celebId ?? null,
+      recommendations: result.recommendations ?? null,
     })
     .select('id')
     .single();
@@ -44,6 +48,30 @@ export async function saveAnalysis(
   }
 
   return data?.id ?? null;
+}
+
+/**
+ * Fetch a full analysis result by ID for premium report generation.
+ * Returns null when Supabase is not configured, or on error / missing row.
+ */
+export async function fetchAnalysis(id: string): Promise<AnalysisResult | null> {
+  if (!isSupabaseConfigured) return null;
+
+  const { data, error } = await supabase
+    .from('analyses')
+    .select('tone_analysis, sherlock_analysis, k_match, five_metrics, recommendations, celeb_id, recommended_product_ids')
+    .eq('id', id)
+    .single();
+
+  if (error || !data) return null;
+
+  return {
+    tone: data.tone_analysis,
+    sherlock: data.sherlock_analysis,
+    kMatch: data.k_match,
+    recommendations: data.recommendations ?? { ingredients: [], products: [], videos: [], sensitiveSafe: false },
+    fiveMetrics: data.five_metrics ?? undefined,
+  };
 }
 
 /**

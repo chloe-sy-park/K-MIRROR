@@ -32,6 +32,15 @@ serve(async (req) => {
         stripe_payment_intent: session.payment_intent,
       })
       .eq('stripe_session_id', session.id);
+
+    // Handle premium report payments (Sherlock Archive)
+    const metadata = session.metadata ?? {};
+    if (metadata.type === 'sherlock_archive') {
+      await supabaseAdmin
+        .from('premium_reports')
+        .update({ status: 'paid' })
+        .eq('stripe_session_id', session.id);
+    }
   }
 
   return new Response(JSON.stringify({ received: true }), {

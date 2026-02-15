@@ -40,7 +40,7 @@ const KGlowResultView = () => {
   if (!result) return null;
 
   const handleUnlock = () => {
-    navigate('/checkout');
+    navigate('/premium-checkout');
   };
 
   const handleViewDetail = () => {

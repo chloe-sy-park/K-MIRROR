@@ -141,9 +141,13 @@ export const useScanStore = create<ScanState>((set, get) => ({
         // Cache the result for identical future inputs
         setCachedResult(cacheKey, res);
 
-        // Save to DB (non-blocking) — analysisId is used for feedback
-        saveAnalysis(res, extractProductIds(products)).then((id) => {
-          if (id && !controller.signal.aborted) set({ analysisId: id });
+        // Save to DB (non-blocking) — analysisId persisted for premium report flow
+        const celebId = get().selectedCelebName?.toLowerCase().replace(/\s+/g, '-') ?? null;
+        saveAnalysis(res, extractProductIds(products), celebId).then((id) => {
+          if (id && !controller.signal.aborted) {
+            set({ analysisId: id });
+            try { sessionStorage.setItem('k-mirror-analysis-id', id); } catch {}
+          }
         }).catch(() => {});
       }
     } catch (err) {

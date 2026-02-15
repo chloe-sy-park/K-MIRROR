@@ -44,3 +44,20 @@ export async function redirectToCheckout(sessionId: string): Promise<void> {
   }).redirectToCheckout({ sessionId });
   if (error) throw new Error(error.message);
 }
+
+/**
+ * Creates a Stripe Checkout Session for the premium Sherlock Archive PDF report.
+ * Returns the checkout URL for redirect, or null if payments are not configured.
+ */
+export async function createPremiumCheckout(analysisId: string): Promise<string | null> {
+  if (!isPaymentEnabled) return null;
+
+  const { data, error } = await supabase.functions.invoke('create-premium-checkout', {
+    body: { analysisId },
+  });
+
+  if (error) throw new Error(error.message || 'Failed to create premium checkout');
+  if (!data?.url) throw new Error('No checkout URL returned');
+
+  return data.url;
+}

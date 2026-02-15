@@ -30,6 +30,8 @@ const CelebGalleryView = lazy(() => import('@/views/CelebGalleryView'));
 const CheckoutSuccessView = lazy(() => import('@/views/CheckoutSuccessView'));
 const ChooseVibeView = lazy(() => import('@/views/ChooseVibeView'));
 const KGlowResultView = lazy(() => import('@/views/KGlowResultView'));
+const PremiumCheckoutView = lazy(() => import('@/views/PremiumCheckoutView'));
+const ArchiveView = lazy(() => import('@/views/ArchiveView'));
 const PrivacyPolicyView = lazy(() => import('@/views/PrivacyPolicyView'));
 const TermsView = lazy(() => import('@/views/TermsView'));
 
@@ -70,6 +72,8 @@ const ROUTE_TITLES: Record<string, string> = {
   '/celebs': 'K-Celeb Gallery',
   '/choose-vibe': 'Choose Your Vibe',
   '/kglow': 'K-GLOW Card',
+  '/premium-checkout': 'Premium Checkout',
+  '/archive': 'Sherlock Archive',
   '/privacy': 'Privacy Policy',
   '/terms': 'Terms of Service',
 };
@@ -110,10 +114,10 @@ const App = () => {
         )}
       </AnimatePresence>
 
-      {!['/', '/choose-vibe', '/kglow'].includes(location.pathname) && <Navbar />}
+      {!['/', '/choose-vibe', '/kglow', '/premium-checkout', '/archive'].includes(location.pathname) && <Navbar />}
 
       <main id="main-content" tabIndex={-1} className={
-        ['/', '/choose-vibe', '/kglow'].includes(location.pathname)
+        ['/', '/choose-vibe', '/kglow', '/premium-checkout', '/archive'].includes(location.pathname)
           ? 'outline-none'
           : 'flex-1 pt-32 pb-24 px-6 lg:px-12 max-w-7xl mx-auto w-full min-h-screen outline-none'
       }>
@@ -124,6 +128,8 @@ const App = () => {
             <Route path="/choose-vibe" element={<ChooseVibeView />} />
             <Route path="/scan" element={<ScanRoute />} />
             <Route path="/kglow" element={<KGlowResultView />} />
+            <Route path="/premium-checkout" element={<PremiumCheckoutView />} />
+            <Route path="/archive" element={<ArchiveView />} />
             <Route path="/onboarding" element={
               isOnboarded ? <Navigate to="/scan" replace /> : <OnboardingView />
             } />
@@ -145,7 +151,7 @@ const App = () => {
         </ErrorBoundary>
       </main>
 
-      {!['/', '/choose-vibe', '/kglow'].includes(location.pathname) && <Footer />}
+      {!['/', '/choose-vibe', '/kglow', '/premium-checkout', '/archive'].includes(location.pathname) && <Footer />}
       <ErrorToast message={error} onDismiss={clearError} />
       <AuthModal />
       <CookieConsentBanner />
