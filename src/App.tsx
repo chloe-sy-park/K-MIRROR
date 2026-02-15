@@ -1,6 +1,7 @@
 import { useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { LazyMotion, domAnimation, AnimatePresence } from 'framer-motion';
+import { trackPageView } from '@/lib/analytics';
 import { useScanStore } from '@/store/scanStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useAuthStore } from '@/store/authStore';
@@ -94,9 +95,11 @@ const App = () => {
     const path = location.pathname;
     const pageTitle = ROUTE_TITLES[path]
       ?? (path.startsWith('/shop/') ? 'Product Details' : null);
-    document.title = pageTitle
+    const fullTitle = pageTitle
       ? `${pageTitle} | K-MIRROR AI`
       : 'K-MIRROR AI | Global K-Beauty Stylist';
+    document.title = fullTitle;
+    trackPageView(path, fullTitle);
   }, [location.pathname]);
 
   return (

@@ -22,6 +22,15 @@ export function trackEvent(name: string, params?: Record<string, unknown>) {
   if (window.gtag) window.gtag('event', name, params);
 }
 
+export function trackPageView(path: string, title?: string) {
+  if (window.gtag) {
+    window.gtag('event', 'page_view', {
+      page_path: path,
+      page_title: title,
+    });
+  }
+}
+
 declare global {
   interface Window {
     dataLayer: unknown[];
