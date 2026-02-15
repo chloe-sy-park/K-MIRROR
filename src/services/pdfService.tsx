@@ -3,7 +3,7 @@ import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { createRoot } from 'react-dom/client';
 import { flushSync } from 'react-dom';
-import type { AnalysisResult, FiveMetrics } from '@/types';
+import type { AnalysisResult, FiveMetrics, StyleVersions } from '@/types';
 import type { MatchedProduct } from '@/services/geminiService';
 import type { NormalizedMetrics } from '@/components/charts/normalizeMetrics';
 import { normalizeMetrics } from '@/components/charts/normalizeMetrics';
@@ -15,6 +15,8 @@ import PdfSkeletal from '@/components/pdf/PdfSkeletal';
 import PdfMetricsOverview from '@/components/pdf/PdfMetricsOverview';
 import PdfMetricsDeep from '@/components/pdf/PdfMetricsDeep';
 import PdfTranslation from '@/components/pdf/PdfTranslation';
+import PdfStyleVariations from '@/components/pdf/PdfStyleVariations';
+import PdfDetailedSolutions from '@/components/pdf/PdfDetailedSolutions';
 import PdfSolution from '@/components/pdf/PdfSolution';
 import PdfProducts from '@/components/pdf/PdfProducts';
 import PdfFinalReveal from '@/components/pdf/PdfFinalReveal';
@@ -26,7 +28,7 @@ const PAGE_W = 794;
 const PAGE_H = 1123;
 
 /** 총 페이지 수 */
-const TOTAL_PAGES = 10;
+const TOTAL_PAGES = 12;
 
 /** 이미지/차트 렌더링 안정화 대기 시간 (ms) */
 const RENDER_SETTLE_MS = 100;
@@ -76,6 +78,35 @@ const DEFAULT_FIVE_METRICS: FiveMetrics = {
     overall: 85,
     symmetryScore: 80,
     optimalBalance: 'Balanced',
+  },
+};
+
+/* ─── 기본 StyleVersions (누락 시 fallback) ──────────────────── */
+
+const DEFAULT_STYLE_VERSIONS: StyleVersions = {
+  daily: {
+    intensity: 'light',
+    base: 'Lightweight tinted moisturizer with SPF for a natural, skin-like finish.',
+    eyes: 'Soft brown pencil liner on upper lash line with one coat of lengthening mascara.',
+    lips: 'Tinted lip balm in a rosy nude shade for effortless color.',
+    keyProducts: ['Tinted Moisturizer', 'Brown Pencil Liner', 'Tinted Lip Balm'],
+    metricsShift: { VW: 2, CT: 1, MF: 0, LS: 3, HI: 1 },
+  },
+  office: {
+    intensity: 'medium',
+    base: 'Medium-coverage foundation with setting powder on the T-zone for a polished matte finish.',
+    eyes: 'Neutral matte eyeshadow palette with defined crease and subtle winged liner.',
+    lips: 'MLBB lipstick with lip liner for a refined, long-lasting look.',
+    keyProducts: ['Foundation', 'Matte Eyeshadow Palette', 'MLBB Lipstick', 'Setting Powder'],
+    metricsShift: { VW: 5, CT: 3, MF: 2, LS: 5, HI: 3 },
+  },
+  glam: {
+    intensity: 'full',
+    base: 'Full-coverage luminous foundation layered with cream contour and highlight for sculpted radiance.',
+    eyes: 'Smoky shimmer eye with dramatic winged liner and volumizing false lashes.',
+    lips: 'Bold lip color with defined lip liner and gloss for maximum impact.',
+    keyProducts: ['Luminous Foundation', 'Cream Contour Kit', 'Shimmer Palette', 'False Lashes', 'Bold Lip'],
+    metricsShift: { VW: 10, CT: 6, MF: 4, LS: 8, HI: 5 },
   },
 };
 
@@ -253,7 +284,7 @@ async function renderAndCaptureMultiPage(
 /**
  * Sherlock Archive PDF를 생성한다.
  *
- * 10페이지 A4 문서를 React 컴포넌트로 렌더링하고
+ * 12페이지 A4 문서를 React 컴포넌트로 렌더링하고
  * html2canvas로 캡처한 후 jsPDF로 조립하여 Blob으로 반환한다.
  *
  * @param analysis - Gemini 분석 결과
@@ -284,6 +315,8 @@ export async function generateSherlockArchive(
 
   const caseNumber = analysisId.slice(0, 8);
   const matchRate = analysis.fiveMetrics?.harmonyIndex.overall ?? 85;
+
+  const styleVersions = analysis.styleVersions ?? DEFAULT_STYLE_VERSIONS;
 
   const gapSummary = buildGapSummary(normalizedUser, normalizedCeleb);
   const metricsDeepDive = buildMetricsDeepDive(analysis.fiveMetrics);
@@ -365,7 +398,28 @@ export async function generateSherlockArchive(
     ),
   );
 
-  /* ── Pages 7-8: Solution (자체 PdfPageShell) ──────────── */
+  /* ── Page 7: Style Variations (NEW) ──────────────────────── */
+  canvases.push(
+    await renderAndCapture(
+      <PdfPageShell pageNumber={7} totalPages={TOTAL_PAGES} caseNumber={caseNumber}>
+        <PdfStyleVariations
+          styleVersions={styleVersions}
+          userMetrics={normalizedUser}
+        />
+      </PdfPageShell>,
+    ),
+  );
+
+  /* ── Page 8: Detailed Solutions (NEW) ──────────────────── */
+  canvases.push(
+    await renderAndCapture(
+      <PdfPageShell pageNumber={8} totalPages={TOTAL_PAGES} caseNumber={caseNumber}>
+        <PdfDetailedSolutions styleVersions={styleVersions} />
+      </PdfPageShell>,
+    ),
+  );
+
+  /* ── Pages 9-10: Solution (자체 PdfPageShell) ─────────── */
   const solutionCanvases = await renderAndCaptureMultiPage(
     <PdfSolution
       adaptationLogic={analysis.kMatch.adaptationLogic}
@@ -377,17 +431,17 @@ export async function generateSherlockArchive(
           matchScore: p.matchScore,
         })),
       }}
-      pageOffset={7}
+      pageOffset={9}
       totalPages={TOTAL_PAGES}
       caseNumber={caseNumber}
     />,
   );
   canvases.push(...solutionCanvases);
 
-  /* ── Page 9: Products ─────────────────────────────────────── */
+  /* ── Page 11: Products ────────────────────────────────────── */
   canvases.push(
     await renderAndCapture(
-      <PdfPageShell pageNumber={9} totalPages={TOTAL_PAGES} caseNumber={caseNumber}>
+      <PdfPageShell pageNumber={11} totalPages={TOTAL_PAGES} caseNumber={caseNumber}>
         <PdfProducts
           products={matchedProducts.map((p) => ({
             name: p.name_en,
@@ -400,7 +454,7 @@ export async function generateSherlockArchive(
     ),
   );
 
-  /* ── Page 10: Final Reveal ────────────────────────────────── */
+  /* ── Page 12: Final Reveal ────────────────────────────────── */
   const reportUrl =
     (typeof window !== 'undefined' ? window.location.origin : 'https://k-mirror.ai') +
     '/archive?id=' +
@@ -408,7 +462,7 @@ export async function generateSherlockArchive(
 
   canvases.push(
     await renderAndCapture(
-      <PdfPageShell pageNumber={10} totalPages={TOTAL_PAGES} caseNumber={caseNumber}>
+      <PdfPageShell pageNumber={12} totalPages={TOTAL_PAGES} caseNumber={caseNumber}>
         <PdfFinalReveal
           userImage={userImage}
           celebName={celebName}
